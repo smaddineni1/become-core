@@ -11,3 +11,4 @@ export * from './constants/exercises.js';
 export * from './constants/routes.js';
 export * from './constants/subscription.js';
 export * from './providers/biometric-scan.js';
+export { SimulationScanProvider } from './providers/simulation-scan-provider.js';
