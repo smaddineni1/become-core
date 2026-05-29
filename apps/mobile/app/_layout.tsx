@@ -1,12 +1,16 @@
 import { Stack } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 import { View, Pressable, Text } from 'react-native';
+import { useState } from 'react';
+import { GenieChatSheet } from '../components/genie/GenieChatSheet';
 
 /**
  * Root Layout — wraps entire app.
- * Renders the Genie FAB overlay globally (above all screens).
+ * Renders the Genie FAB + chat overlay globally (above all screens).
  */
 export default function RootLayout() {
+  const [isGenieOpen, setIsGenieOpen] = useState(false);
+
   return (
     <View className="flex-1 bg-slate-950">
       <StatusBar style="light" />
@@ -24,20 +28,20 @@ export default function RootLayout() {
       </Stack>
 
       {/* Genie FAB — persistent across all screens */}
-      <GenieFAB />
-    </View>
-  );
-}
+      {!isGenieOpen && (
+        <Pressable
+          className="absolute bottom-28 right-6 w-14 h-14 rounded-full bg-indigo-600 items-center justify-center shadow-lg shadow-indigo-600/30 active:bg-indigo-700"
+          onPress={() => setIsGenieOpen(true)}
+        >
+          <Text className="text-2xl">🧞</Text>
+        </Pressable>
+      )}
 
-function GenieFAB() {
-  return (
-    <Pressable
-      className="absolute bottom-28 right-6 w-14 h-14 rounded-full bg-indigo-600 items-center justify-center shadow-lg shadow-indigo-600/30 active:bg-indigo-700"
-      onPress={() => {
-        // Opens Genie bottom sheet — implemented in Phase 6
-      }}
-    >
-      <Text className="text-2xl">🧞</Text>
-    </Pressable>
+      {/* Genie Chat Bottom Sheet */}
+      <GenieChatSheet
+        isOpen={isGenieOpen}
+        onClose={() => setIsGenieOpen(false)}
+      />
+    </View>
   );
 }
