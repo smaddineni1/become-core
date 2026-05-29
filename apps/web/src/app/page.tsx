@@ -1,5 +1,5 @@
 import Link from 'next/link';
-import { SUBSCRIPTION_CONFIG } from '@become/shared';
+import { SUBSCRIPTION_CONFIG } from '../lib/shared-constants';
 
 export default function LandingPage() {
   return (

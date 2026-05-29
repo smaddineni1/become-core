@@ -1,6 +1,4 @@
 /** @type {import('next').NextConfig} */
-const nextConfig = {
-  transpilePackages: ['@become/shared'],
-};
+const nextConfig = {};
 
 export default nextConfig;

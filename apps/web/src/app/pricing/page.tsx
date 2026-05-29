@@ -1,5 +1,5 @@
 import Link from 'next/link';
-import { SUBSCRIPTION_CONFIG, FREE_TIER_LIMITS } from '@become/shared';
+import { SUBSCRIPTION_CONFIG, FREE_TIER_LIMITS } from '../../lib/shared-constants';
 
 export default function PricingPage() {
   return (
