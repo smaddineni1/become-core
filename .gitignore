@@ -1,0 +1,41 @@
+# Dependencies
+node_modules/
+.pnpm-store/
+
+# Build outputs
+dist/
+.next/
+.expo/
+*.tsbuildinfo
+
+# Environment
+.env
+.env.local
+.env.*.local
+
+# OS
+.DS_Store
+Thumbs.db
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# Turbo
+.turbo/
+
+# Testing
+coverage/
+
+# Supabase
+supabase/.temp/
+
+# Expo
+*.jks
+*.p8
+*.p12
+*.key
+*.mobileprovision
+*.orig.*

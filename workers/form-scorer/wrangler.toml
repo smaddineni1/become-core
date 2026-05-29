@@ -1,0 +1,10 @@
+name = "become-form-scorer"
+main = "src/index.ts"
+compatibility_date = "2024-12-01"
+
+[vars]
+ENVIRONMENT = "development"
+
+# Secrets managed via Doppler → wrangler secret
+# SUPABASE_URL = "..." (set via `wrangler secret put`)
+# SUPABASE_SERVICE_KEY = "..." (set via `wrangler secret put`)
