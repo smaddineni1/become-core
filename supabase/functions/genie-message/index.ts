@@ -17,6 +17,7 @@
 
 import { serve } from 'https://deno.land/std@0.208.0/http/server.ts';
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.45.0';
+import { verifyPremiumAccess, premiumRequiredResponse } from '../_shared/premium-gate.ts';
 
 const OPENAI_API_URL = 'https://api.openai.com/v1/chat/completions';
 
@@ -102,22 +103,27 @@ serve(async (req: Request) => {
   }
 
   try {
-    // 1. Auth
+    // 1. Auth + Premium gate
     const authHeader = req.headers.get('Authorization');
-    if (!authHeader?.startsWith('Bearer ')) {
-      return jsonResponse({ error: 'Unauthorized' }, 401, corsHeaders);
+    const gateResult = await verifyPremiumAccess(authHeader, 'genie_message');
+
+    if (!gateResult.allowed) {
+      if (!gateResult.userId) {
+        return jsonResponse({ error: 'Unauthorized' }, 401, corsHeaders);
+      }
+      return premiumRequiredResponse(
+        gateResult.reason ?? 'Daily Genie message limit reached. Upgrade to Premium for unlimited coaching.',
+        corsHeaders,
+      );
     }
 
     const supabase = createClient(
       Deno.env.get('SUPABASE_URL') ?? '',
       Deno.env.get('SUPABASE_ANON_KEY') ?? '',
-      { global: { headers: { Authorization: authHeader } } },
+      { global: { headers: { Authorization: authHeader! } } },
     );
 
-    const { data: { user }, error: authError } = await supabase.auth.getUser();
-    if (authError || !user) {
-      return jsonResponse({ error: 'Invalid token' }, 401, corsHeaders);
-    }
+    const user = { id: gateResult.userId! };
 
     const { message, conversationId } = await req.json();
     if (!message || typeof message !== 'string') {

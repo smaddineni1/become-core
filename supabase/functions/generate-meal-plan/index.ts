@@ -17,6 +17,7 @@
 
 import { serve } from 'https://deno.land/std@0.208.0/http/server.ts';
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.45.0';
+import { verifyPremiumAccess, premiumRequiredResponse } from '../_shared/premium-gate.ts';
 
 const OPENAI_API_URL = 'https://api.openai.com/v1/chat/completions';
 const MAX_RETRIES = 3;
@@ -87,7 +88,7 @@ serve(async (req: Request) => {
   }
 
   try {
-    // 1. Auth
+    // 1. Auth + Premium gate for regeneration
     const authHeader = req.headers.get('Authorization');
     if (!authHeader?.startsWith('Bearer ')) {
       return jsonResponse({ error: 'Unauthorized' }, 401, corsHeaders);
@@ -104,6 +105,20 @@ serve(async (req: Request) => {
       return jsonResponse({ error: 'Invalid token' }, 401, corsHeaders);
     }
 
+    // 1b. Check premium gate for regeneration requests
+    const body = await req.json().catch(() => ({}));
+    const isRegeneration = body.regenerate === true;
+
+    if (isRegeneration) {
+      const gateResult = await verifyPremiumAccess(authHeader, 'nutrition_regenerate');
+      if (!gateResult.allowed) {
+        return premiumRequiredResponse(
+          gateResult.reason ?? 'Daily regeneration limit reached. Upgrade to Premium for unlimited meal plans.',
+          corsHeaders,
+        );
+      }
+    }
+
     // 2. Fetch user profile
     const { data: profile, error: profileError } = await supabase
       .from('user_profiles')
@@ -113,28 +128,6 @@ serve(async (req: Request) => {
 
     if (profileError || !profile) {
       return jsonResponse({ error: 'Profile not found' }, 404, corsHeaders);
-    }
-
-    // 3. Check regeneration limit for free users
-    const body = await req.json().catch(() => ({}));
-    const isRegeneration = body.regenerate === true;
-
-    if (profile.subscription_tier === 'free' && isRegeneration) {
-      const today = new Date().toISOString().split('T')[0];
-      const { data: existingPlan } = await supabase
-        .from('nutrition_plans')
-        .select('regeneration_count')
-        .eq('user_id', user.id)
-        .eq('plan_date', today)
-        .single();
-
-      if (existingPlan && existingPlan.regeneration_count >= 1) {
-        return jsonResponse(
-          { error: 'Free tier limited to 1 regeneration per day. Upgrade to Premium for unlimited.' },
-          429,
-          corsHeaders,
-        );
-      }
     }
 
     // 4. Build user context prompt
