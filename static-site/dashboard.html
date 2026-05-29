@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dashboard — Become</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>tailwind.config = { darkMode: 'class' }</script>
+  <style>body{font-family:system-ui,-apple-system,sans-serif}</style>
+</head>
+<body class="bg-slate-950 text-white antialiased">
+<nav class="fixed top-0 left-0 right-0 z-50 bg-slate-950/80 backdrop-blur-md border-b border-slate-800">
+  <div class="max-w-6xl mx-auto px-6 py-4 flex items-center justify-between">
+    <a href="/" class="text-xl font-bold text-indigo-400">Become</a>
+    <div class="hidden md:flex items-center gap-8">
+      <a href="/features.html" class="text-slate-300 hover:text-white">Features</a>
+      <a href="/pricing.html" class="text-slate-300 hover:text-white">Pricing</a>
+      <a href="/dashboard.html" class="text-white font-medium">Dashboard</a>
+    </div>
+  </div>
+</nav>
+
+<div class="pt-24 px-6 max-w-6xl mx-auto">
+  <!-- Header -->
+  <div class="flex items-center justify-between">
+    <div>
+      <h1 class="text-3xl font-bold">Good morning, Athlete</h1>
+      <p class="text-slate-400 mt-1">Here's your daily wellness snapshot</p>
+    </div>
+    <div class="flex items-center gap-3">
+
+      <span class="bg-emerald-600/20 border border-emerald-500/30 text-emerald-400 text-xs font-semibold px-3 py-1 rounded-full">Premium Active</span>
+      <div class="w-10 h-10 rounded-full bg-indigo-600 flex items-center justify-center font-bold">B</div>
+    </div>
+  </div>
+
+  <!-- Row 1: 3 Cards -->
+  <div class="grid lg:grid-cols-3 gap-6 mt-8">
+    <!-- Readiness -->
+    <div class="bg-slate-900 border border-slate-800 rounded-2xl p-6">
+      <div class="flex items-center justify-between mb-4"><h3 class="text-slate-400 text-sm font-medium uppercase tracking-wider">Readiness</h3><span class="text-emerald-400 text-xs font-semibold bg-emerald-950/50 px-2 py-0.5 rounded-full">Recovered</span></div>
+      <div class="text-center"><div class="text-6xl font-bold text-emerald-400">86</div><div class="text-slate-500 text-sm mt-1">/100</div></div>
+      <div class="grid grid-cols-3 gap-2 mt-6">
+        <div class="bg-slate-800/50 rounded-lg p-2 text-center"><div class="text-slate-500 text-xs">HRV</div><div class="font-bold text-indigo-400">92</div></div>
+        <div class="bg-slate-800/50 rounded-lg p-2 text-center"><div class="text-slate-500 text-xs">HR</div><div class="font-bold text-amber-400">78</div></div>
+        <div class="bg-slate-800/50 rounded-lg p-2 text-center"><div class="text-slate-500 text-xs">Sleep</div><div class="font-bold text-emerald-400">85</div></div>
+      </div>
+      <div class="mt-4 bg-indigo-950/30 border border-indigo-800/20 rounded-lg p-3"><p class="text-indigo-300 text-xs">Your body is recovered — great day for a challenge!</p></div>
+    </div>
+
+    <!-- Nutrition -->
+    <div class="bg-slate-900 border border-slate-800 rounded-2xl p-6">
+      <div class="flex items-center justify-between mb-4"><h3 class="text-slate-400 text-sm font-medium uppercase tracking-wider">Today's Nutrition</h3><span class="text-white text-sm font-bold">1,800 kcal</span></div>
+      <div class="space-y-3">
+        <div class="flex items-center justify-between bg-slate-800/50 rounded-lg px-3 py-2"><div><div class="text-slate-500 text-xs">Breakfast</div><div class="text-white text-sm font-medium">Spinach & Feta Omelette</div></div><span class="text-slate-400 text-xs">420 cal</span></div>
+        <div class="flex items-center justify-between bg-slate-800/50 rounded-lg px-3 py-2"><div><div class="text-slate-500 text-xs">Lunch</div><div class="text-white text-sm font-medium">Grilled Salmon Bowl</div></div><span class="text-slate-400 text-xs">580 cal</span></div>
+        <div class="flex items-center justify-between bg-slate-800/50 rounded-lg px-3 py-2"><div><div class="text-slate-500 text-xs">Dinner</div><div class="text-white text-sm font-medium">Herb Chicken & Quinoa</div></div><span class="text-slate-400 text-xs">620 cal</span></div>
+        <div class="flex items-center justify-between bg-slate-800/50 rounded-lg px-3 py-2"><div><div class="text-slate-500 text-xs">Snack</div><div class="text-white text-sm font-medium">Greek Yogurt & Berries</div></div><span class="text-slate-400 text-xs">180 cal</span></div>
+      </div>
+      <div class="mt-4 flex gap-4 justify-center text-center">
+        <div><span class="text-indigo-400 font-bold text-sm">142g</span><br/><span class="text-slate-500 text-xs">Protein</span></div>
+        <div><span class="text-amber-400 font-bold text-sm">180g</span><br/><span class="text-slate-500 text-xs">Carbs</span></div>
+        <div><span class="text-rose-400 font-bold text-sm">62g</span><br/><span class="text-slate-500 text-xs">Fat</span></div>
+      </div>
+    </div>
+
+    <!-- Genie -->
+    <div class="bg-slate-900 border border-slate-800 rounded-2xl p-6">
+      <div class="flex items-center justify-between mb-4"><h3 class="text-slate-400 text-sm font-medium uppercase tracking-wider">Genie Coach</h3><span class="text-2xl">🧞</span></div>
+      <div class="space-y-3">
+        <div class="ml-8"><div class="rounded-xl px-3 py-2 text-sm bg-indigo-600 text-white">I feel great today, what should I do?</div></div>
+        <div class="mr-8"><div class="rounded-xl px-3 py-2 text-sm bg-slate-800 border border-slate-700 text-slate-200">Your readiness is 86 — let's push it! How about an Air Squat form check?</div></div>
+        <div class="flex gap-2 mt-2">
+          <span class="bg-indigo-600/20 border border-indigo-500/40 rounded-full px-3 py-1 text-xs text-indigo-300">🏋️ Start Air Squat</span>
+          <span class="bg-indigo-600/20 border border-indigo-500/40 rounded-full px-3 py-1 text-xs text-indigo-300">🥗 View Meal Plan</span>
+        </div>
+      </div>
+      <div class="mt-4 flex items-center gap-2">
+        <input class="flex-1 bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-sm text-white placeholder:text-slate-500" placeholder="Ask Genie anything..." readonly>
+        <button class="bg-indigo-600 rounded-lg px-3 py-2 text-sm font-semibold">↑</button>
+      </div>
+    </div>
+  </div>
+
+
+  <!-- Row 2: Workout History + HRV Trend -->
+  <div class="grid lg:grid-cols-2 gap-6 mt-6 pb-12">
+    <!-- Workout History -->
+    <div class="bg-slate-900 border border-slate-800 rounded-2xl p-6">
+      <h3 class="text-slate-400 text-sm font-medium uppercase tracking-wider mb-4">Recent Sessions</h3>
+      <div class="space-y-3">
+        <div class="flex items-center justify-between bg-slate-800/50 rounded-lg px-4 py-3"><div class="flex items-center gap-3"><span class="text-lg">🏋️</span><div><div class="text-white font-medium text-sm">Air Squat</div><div class="text-slate-500 text-xs">12 reps · Today</div></div></div><div class="text-right"><span class="font-bold text-emerald-400">94</span><span class="text-slate-500 text-xs">/100</span></div></div>
+        <div class="flex items-center justify-between bg-slate-800/50 rounded-lg px-4 py-3"><div class="flex items-center gap-3"><span class="text-lg">🏋️</span><div><div class="text-white font-medium text-sm">Push-Up</div><div class="text-slate-500 text-xs">15 reps · Yesterday</div></div></div><div class="text-right"><span class="font-bold text-amber-400">87</span><span class="text-slate-500 text-xs">/100</span></div></div>
+        <div class="flex items-center justify-between bg-slate-800/50 rounded-lg px-4 py-3"><div class="flex items-center gap-3"><span class="text-lg">🏋️</span><div><div class="text-white font-medium text-sm">KB Swing</div><div class="text-slate-500 text-xs">10 reps · 2 days ago</div></div></div><div class="text-right"><span class="font-bold text-emerald-400">91</span><span class="text-slate-500 text-xs">/100</span></div></div>
+        <div class="flex items-center justify-between bg-slate-800/50 rounded-lg px-4 py-3"><div class="flex items-center gap-3"><span class="text-lg">🏋️</span><div><div class="text-white font-medium text-sm">Sit-Up</div><div class="text-slate-500 text-xs">20 reps · 3 days ago</div></div></div><div class="text-right"><span class="font-bold text-amber-400">82</span><span class="text-slate-500 text-xs">/100</span></div></div>
+      </div>
+    </div>
+
+    <!-- HRV Trend -->
+    <div class="bg-slate-900 border border-slate-800 rounded-2xl p-6">
+      <h3 class="text-slate-400 text-sm font-medium uppercase tracking-wider mb-4">7-Day HRV Trend</h3>
+      <div class="flex items-end justify-between gap-2 h-32">
+        <div class="flex-1 flex flex-col items-center gap-1"><span class="text-slate-400 text-xs">42</span><div class="w-full rounded-t-md bg-indigo-500/80" style="height:65%"></div><span class="text-slate-500 text-xs">Mon</span></div>
+        <div class="flex-1 flex flex-col items-center gap-1"><span class="text-slate-400 text-xs">48</span><div class="w-full rounded-t-md bg-indigo-500/80" style="height:75%"></div><span class="text-slate-500 text-xs">Tue</span></div>
+        <div class="flex-1 flex flex-col items-center gap-1"><span class="text-slate-400 text-xs">38</span><div class="w-full rounded-t-md bg-indigo-500/80" style="height:59%"></div><span class="text-slate-500 text-xs">Wed</span></div>
+        <div class="flex-1 flex flex-col items-center gap-1"><span class="text-slate-400 text-xs">55</span><div class="w-full rounded-t-md bg-indigo-500/80" style="height:86%"></div><span class="text-slate-500 text-xs">Thu</span></div>
+        <div class="flex-1 flex flex-col items-center gap-1"><span class="text-slate-400 text-xs">62</span><div class="w-full rounded-t-md bg-indigo-500/80" style="height:97%"></div><span class="text-slate-500 text-xs">Fri</span></div>
+        <div class="flex-1 flex flex-col items-center gap-1"><span class="text-slate-400 text-xs">58</span><div class="w-full rounded-t-md bg-indigo-500/80" style="height:90%"></div><span class="text-slate-500 text-xs">Sat</span></div>
+        <div class="flex-1 flex flex-col items-center gap-1"><span class="text-slate-400 text-xs">64</span><div class="w-full rounded-t-md bg-indigo-500/80" style="height:100%"></div><span class="text-slate-500 text-xs">Sun</span></div>
+      </div>
+      <div class="mt-4 flex items-center justify-between">
+        <span class="text-slate-400 text-sm">Baseline: <span class="text-white font-semibold">52ms</span></span>
+        <span class="text-emerald-400 text-sm font-medium">↑ 23% above baseline</span>
+      </div>
+    </div>
+  </div>
+</div>
+</body>
+</html>

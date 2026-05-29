@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Features — Become</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>tailwind.config = { darkMode: 'class' }</script>
+  <style>body { font-family: system-ui, -apple-system, sans-serif; }</style>
+</head>
+<body class="bg-slate-950 text-white antialiased">
+
+<nav class="fixed top-0 left-0 right-0 z-50 bg-slate-950/80 backdrop-blur-md border-b border-slate-800">
+  <div class="max-w-6xl mx-auto px-6 py-4 flex items-center justify-between">
+    <a href="/" class="text-xl font-bold text-indigo-400">Become</a>
+    <div class="hidden md:flex items-center gap-8">
+      <a href="/features.html" class="text-white font-medium">Features</a>
+      <a href="/pricing.html" class="text-slate-300 hover:text-white">Pricing</a>
+      <a href="/dashboard.html" class="text-slate-300 hover:text-white">Dashboard</a>
+      <a href="/pricing.html" class="bg-indigo-600 hover:bg-indigo-700 px-5 py-2 rounded-lg font-semibold text-sm">Start Free Trial</a>
+    </div>
+  </div>
+</nav>
+
+<section class="pt-32 pb-16 px-6 text-center">
+  <h1 class="text-5xl font-bold">The Complete AI Wellness Engine</h1>
+  <p class="text-slate-400 text-xl mt-4 max-w-2xl mx-auto">Five integrated systems working together to optimize your body and mind.</p>
+</section>
+
+<!-- 3D AI Form Check -->
+<section class="py-20 px-6 border-t border-slate-800">
+  <div class="max-w-6xl mx-auto grid md:grid-cols-2 gap-12 items-center">
+    <div>
+      <span class="inline-block text-indigo-300 text-xs font-semibold bg-indigo-950/50 border border-indigo-800/30 rounded-full px-3 py-1 mb-4">CORE FEATURE</span>
+      <h2 class="text-4xl font-bold">3D AI Form Check Engine</h2>
+      <p class="text-slate-400 mt-4 text-lg leading-relaxed">Split-screen interface with a premium 3D character demonstrating perfect form on the left, and your live camera with skeletal tracking on the right.</p>
+      <ul class="mt-6 space-y-3">
+        <li class="flex items-start gap-3"><span class="text-indigo-400 font-bold text-sm mt-0.5">✓</span><span class="text-slate-300">33-point skeletal tracking via MediaPipe (100% on-device)</span></li>
+        <li class="flex items-start gap-3"><span class="text-indigo-400 font-bold text-sm mt-0.5">✓</span><span class="text-slate-300">Real-time 0-100 score with color-coded arc gauge</span></li>
+        <li class="flex items-start gap-3"><span class="text-indigo-400 font-bold text-sm mt-0.5">✓</span><span class="text-slate-300">Live corrective cues: Knee Cave, Deficient Depth, Forward Lean</span></li>
+        <li class="flex items-start gap-3"><span class="text-indigo-400 font-bold text-sm mt-0.5">✓</span><span class="text-slate-300">Automatic rep counting (validated quality threshold)</span></li>
+        <li class="flex items-start gap-3"><span class="text-indigo-400 font-bold text-sm mt-0.5">✓</span><span class="text-slate-300">4 launch exercises: Air Squat, Push-Up, Sit-Up, KB Swing</span></li>
+      </ul>
+      <div class="mt-6 bg-slate-900 border border-slate-800 rounded-lg p-3 inline-block">
+        <span class="text-emerald-400 text-sm font-medium">Privacy: Zero video data ever leaves your device</span>
+      </div>
+    </div>
+    <div class="bg-slate-900 border border-slate-800 rounded-2xl p-8">
+      <div class="grid grid-cols-2 gap-4">
+        <div class="bg-slate-800 rounded-xl p-6 text-center border border-slate-700"><div class="text-4xl mb-2">🏋️</div><div class="text-white font-semibold">3D Model</div><div class="text-slate-500 text-xs mt-1">Perfect form reference</div></div>
+        <div class="bg-slate-800 rounded-xl p-6 text-center border border-slate-700"><div class="text-4xl mb-2">📷</div><div class="text-white font-semibold">Live Camera</div><div class="text-slate-500 text-xs mt-1">Skeletal overlay</div></div>
+        <div class="bg-indigo-950/50 border border-indigo-800/30 rounded-xl p-6 text-center col-span-2">
+          <div class="text-5xl font-bold text-indigo-400">92</div>
+          <div class="text-slate-400 text-sm mt-1">Live Form Score</div>
+          <div class="w-full bg-slate-700 h-2 rounded-full mt-3"><div class="bg-emerald-400 h-2 rounded-full" style="width:92%"></div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Guided Breathing -->
+<section class="py-20 px-6 border-t border-slate-800 bg-gradient-to-b from-slate-950 to-indigo-950/10">
+  <div class="max-w-6xl mx-auto grid md:grid-cols-2 gap-12 items-center">
+    <div class="order-2 md:order-1 bg-slate-900 border border-slate-800 rounded-2xl p-8 text-center">
+      <div class="w-40 h-40 mx-auto rounded-full border-4 border-indigo-500/60 flex items-center justify-center mb-6">
+        <div class="w-28 h-28 rounded-full bg-indigo-600/20 flex items-center justify-center"><span class="text-indigo-300 text-lg font-medium">Inhale</span></div>
+      </div>
+      <div class="flex justify-center gap-4 mt-6">
+        <button class="bg-slate-800 border border-slate-700 rounded-full px-6 py-2 text-sm">⟲ Replay</button>
+        <button class="bg-indigo-600 rounded-full px-6 py-2 text-sm font-semibold">▶ Play</button>
+        <button class="bg-slate-800 border border-slate-700 rounded-full px-6 py-2 text-sm">⏹ Stop</button>
+      </div>
+    </div>
+    <div class="order-1 md:order-2">
+      <span class="inline-block text-emerald-300 text-xs font-semibold bg-emerald-950/50 border border-emerald-800/30 rounded-full px-3 py-1 mb-4">MIND & BODY</span>
+      <h2 class="text-4xl font-bold">Guided Breathing Engine</h2>
+      <p class="text-slate-400 mt-4 text-lg leading-relaxed">AI-generated HD video sessions with a premium custom media player. Cached locally for instant, offline-capable playback.</p>
+      <ul class="mt-6 space-y-3">
+        <li class="flex items-start gap-3"><span class="text-indigo-400 font-bold text-sm mt-0.5">✓</span><span class="text-slate-300">HD AI-generated breathing videos (Runway AI)</span></li>
+        <li class="flex items-start gap-3"><span class="text-indigo-400 font-bold text-sm mt-0.5">✓</span><span class="text-slate-300">Custom player: Play, Pause, Replay with auto-hide controls</span></li>
+        <li class="flex items-start gap-3"><span class="text-indigo-400 font-bold text-sm mt-0.5">✓</span><span class="text-slate-300">Prefetched + cached on device (works offline)</span></li>
+        <li class="flex items-start gap-3"><span class="text-indigo-400 font-bold text-sm mt-0.5">✓</span><span class="text-slate-300">Loop mode for continuous guided breathing</span></li>
+        <li class="flex items-start gap-3"><span class="text-indigo-400 font-bold text-sm mt-0.5">✓</span><span class="text-slate-300">HRV-driven: auto-recommended when readiness is low</span></li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<!-- Readiness Score -->
+<section class="py-20 px-6 border-t border-slate-800">
+  <div class="max-w-6xl mx-auto grid md:grid-cols-2 gap-12 items-center">
+    <div>
+      <span class="inline-block text-amber-300 text-xs font-semibold bg-amber-950/50 border border-amber-800/30 rounded-full px-3 py-1 mb-4">BIOMETRIC INTELLIGENCE</span>
+      <h2 class="text-4xl font-bold">Readiness Score</h2>
+      <p class="text-slate-400 mt-4 text-lg leading-relaxed">Pulls HRV, resting heart rate, and sleep data from Apple HealthKit / Google Health Connect. Computes a daily 0-100 score that adapts your entire wellness plan.</p>
+      <ul class="mt-6 space-y-3">
+        <li class="flex items-start gap-3"><span class="text-indigo-400 font-bold text-sm mt-0.5">✓</span><span class="text-slate-300">HRV (40%), Resting HR (25%), Sleep (35%) — weighted model</span></li>
+        <li class="flex items-start gap-3"><span class="text-indigo-400 font-bold text-sm mt-0.5">✓</span><span class="text-slate-300">7-day rolling baselines personalized to your body</span></li>
+        <li class="flex items-start gap-3"><span class="text-indigo-400 font-bold text-sm mt-0.5">✓</span><span class="text-slate-300">Stressed → auto-routes to breathing + recovery nutrition</span></li>
+        <li class="flex items-start gap-3"><span class="text-indigo-400 font-bold text-sm mt-0.5">✓</span><span class="text-slate-300">Recovered → suggests challenging form-check workouts</span></li>
+      </ul>
+    </div>
+    <div class="bg-slate-900 border border-slate-800 rounded-2xl p-8">
+      <div class="text-center mb-6">
+        <div class="text-6xl font-bold text-emerald-400">86</div>
+        <div class="text-slate-400 mt-1">Today's Readiness</div>
+        <div class="text-emerald-400 text-sm font-medium mt-1">Recovered</div>
+      </div>
+      <div class="space-y-3">
+        <div><div class="flex justify-between text-sm mb-1"><span class="text-slate-400">HRV</span><span class="text-white font-semibold">92</span></div><div class="w-full bg-slate-700 h-2 rounded-full"><div class="bg-indigo-500 h-2 rounded-full" style="width:92%"></div></div></div>
+        <div><div class="flex justify-between text-sm mb-1"><span class="text-slate-400">Heart Rate</span><span class="text-white font-semibold">78</span></div><div class="w-full bg-slate-700 h-2 rounded-full"><div class="bg-amber-500 h-2 rounded-full" style="width:78%"></div></div></div>
+        <div><div class="flex justify-between text-sm mb-1"><span class="text-slate-400">Sleep</span><span class="text-white font-semibold">85</span></div><div class="w-full bg-slate-700 h-2 rounded-full"><div class="bg-emerald-500 h-2 rounded-full" style="width:85%"></div></div></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Nutrition + Genie -->
+<section class="py-20 px-6 border-t border-slate-800">
+  <div class="max-w-6xl mx-auto text-center mb-16">
+    <h2 class="text-4xl font-bold">Plus Two More Powerhouses</h2>
+    <p class="text-slate-400 mt-4 text-lg max-w-2xl mx-auto">An AI nutrition engine and a conversational coach that ties everything together.</p>
+  </div>
+  <div class="max-w-6xl mx-auto grid md:grid-cols-2 gap-8">
+    <div class="bg-slate-900 border border-slate-800 rounded-2xl p-8">
+      <div class="text-3xl mb-4">🥗</div>
+      <h3 class="text-2xl font-bold">Whole-Food Nutrition Pipeline</h3>
+      <p class="text-slate-400 mt-3 leading-relaxed">GPT-4o generates daily meal plans from 100% whole, unprocessed ingredients. No protein bars, no powders, no supplements — ever.</p>
+      <div class="mt-4 bg-emerald-950/30 border border-emerald-800/20 rounded-lg p-3"><span class="text-emerald-400 text-sm">Brand guardrail enforced at 3 levels</span></div>
+    </div>
+    <div class="bg-slate-900 border border-slate-800 rounded-2xl p-8">
+      <div class="text-3xl mb-4">🧞</div>
+      <h3 class="text-2xl font-bold">Genie AI Coach</h3>
+      <p class="text-slate-400 mt-3 leading-relaxed">Persistent floating button on every screen. Natural language in, action buttons out. "I'm tired" → routes to meditation. "Show me squats" → opens form check.</p>
+      <div class="mt-4 bg-indigo-950/30 border border-indigo-800/20 rounded-lg p-3"><span class="text-indigo-400 text-sm">Context-aware: knows your HRV, goals & history</span></div>
+    </div>
+  </div>
+</section>
+
+<section class="py-24 px-6 border-t border-slate-800">
+  <div class="max-w-3xl mx-auto text-center">
+    <h2 class="text-4xl font-bold">Experience the full platform</h2>
+    <p class="text-slate-400 mt-4 text-lg">Start your 7-day free trial today.</p>
+    <a href="/pricing.html" class="inline-block mt-8 bg-indigo-600 hover:bg-indigo-700 px-10 py-4 rounded-xl font-semibold text-lg">View Pricing</a>
+  </div>
+</section>
+</body>
+</html>
