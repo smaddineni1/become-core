@@ -32,7 +32,7 @@ export default ({ config }: ConfigContext): ExpoConfig => ({
     supabaseAnonKey: process.env.EXPO_PUBLIC_SUPABASE_ANON_KEY,
     revenuecatIosKey: process.env.EXPO_PUBLIC_RC_IOS_API_KEY,
     revenuecatAndroidKey: process.env.EXPO_PUBLIC_RC_ANDROID_API_KEY,
-    eas: { projectId: process.env.EAS_PROJECT_ID ?? '' },
+    eas: { projectId: 'ceb003ee-2457-40ec-9be9-af32cb4b18e4' },
   },
   updates: { url: `https://u.expo.dev/${process.env.EAS_PROJECT_ID ?? ''}` },
   runtimeVersion: { policy: 'sdkVersion' },

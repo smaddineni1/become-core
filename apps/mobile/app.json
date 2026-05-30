@@ -24,7 +24,9 @@
         "backgroundColor": "#0F172A"
       },
       "package": "com.become.app",
-      "permissions": ["CAMERA"]
+      "permissions": [
+        "CAMERA"
+      ]
     },
     "plugins": [
       "expo-router",

@@ -1,5 +1,5 @@
-import type { ExerciseProfile, RepPhase } from './types.js';
-import { detectCues } from './cue-detection.js';
+import type { ExerciseProfile, RepPhase } from './types';
+import { detectCues } from './cue-detection';
 
 export interface ScoreResult {
   score: number;         // 0-100
