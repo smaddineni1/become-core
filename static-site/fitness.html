@@ -1,0 +1,392 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Form Check — Become</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>tailwind.config={darkMode:'class'}</script>
+  <style>
+    body{font-family:system-ui,-apple-system,sans-serif}
+    @keyframes score-pulse{0%,100%{transform:scale(1)}50%{transform:scale(1.05)}}
+    .score-pulse{animation:score-pulse 1.5s ease-in-out infinite}
+  </style>
+</head>
+<body class="bg-slate-950 text-white antialiased min-h-screen">
+
+<!-- Nav -->
+<nav class="fixed top-0 left-0 right-0 z-50 bg-slate-950/80 backdrop-blur-md border-b border-slate-800">
+  <div class="max-w-6xl mx-auto px-6 py-4 flex items-center justify-between">
+    <a href="/" class="text-xl font-bold text-indigo-400">Become</a>
+    <div class="hidden md:flex items-center gap-6">
+      <a href="/dashboard.html" class="text-slate-300 hover:text-white text-sm">Dashboard</a>
+      <a href="/fitness.html" class="text-white font-medium text-sm">Form Check</a>
+      <a href="/mindbody.html" class="text-slate-300 hover:text-white text-sm">Mind & Body</a>
+      <a href="/nutrition.html" class="text-slate-300 hover:text-white text-sm">Nutrition</a>
+      <a href="/activity.html" class="text-slate-300 hover:text-white text-sm">Activity</a>
+    </div>
+  </div>
+</nav>
+
+<!-- Exercise Selector (default view) -->
+<div id="view-selector" class="pt-24 px-6 max-w-4xl mx-auto">
+  <h1 class="text-3xl font-bold">AI Form Check</h1>
+  <p class="text-slate-400 mt-2">Select an exercise for real-time AI-powered form analysis</p>
+
+  <div class="grid md:grid-cols-2 gap-4 mt-8">
+    <!-- Air Squat -->
+    <div onclick="startSession('Air Squat')" class="bg-slate-900 border border-slate-800 rounded-2xl p-6 hover:border-indigo-500/50 cursor-pointer transition-colors">
+      <div class="flex items-center gap-4">
+        <div class="w-14 h-14 rounded-xl bg-indigo-600/20 border border-indigo-500/30 flex items-center justify-center text-2xl">🏋️</div>
+        <div class="flex-1">
+          <h3 class="text-xl font-semibold">Air Squat</h3>
+          <p class="text-slate-400 text-sm mt-0.5">Bodyweight squat with proper depth</p>
+        </div>
+      </div>
+      <div class="flex gap-2 mt-4 flex-wrap">
+        <span class="bg-indigo-950 px-3 py-1 rounded-full text-indigo-300 text-xs">Quadriceps</span>
+        <span class="bg-indigo-950 px-3 py-1 rounded-full text-indigo-300 text-xs">Glutes</span>
+        <span class="bg-indigo-950 px-3 py-1 rounded-full text-indigo-300 text-xs">Core</span>
+      </div>
+      <div class="mt-4 text-slate-500 text-xs">Difficulty: Beginner</div>
+    </div>
+
+    <!-- Push-Up -->
+    <div onclick="startSession('Push-Up')" class="bg-slate-900 border border-slate-800 rounded-2xl p-6 hover:border-indigo-500/50 cursor-pointer transition-colors">
+      <div class="flex items-center gap-4">
+        <div class="w-14 h-14 rounded-xl bg-indigo-600/20 border border-indigo-500/30 flex items-center justify-center text-2xl">💪</div>
+        <div class="flex-1">
+          <h3 class="text-xl font-semibold">Push-Up</h3>
+          <p class="text-slate-400 text-sm mt-0.5">Full-range with controlled tempo</p>
+        </div>
+      </div>
+      <div class="flex gap-2 mt-4 flex-wrap">
+        <span class="bg-indigo-950 px-3 py-1 rounded-full text-indigo-300 text-xs">Chest</span>
+        <span class="bg-indigo-950 px-3 py-1 rounded-full text-indigo-300 text-xs">Shoulders</span>
+        <span class="bg-indigo-950 px-3 py-1 rounded-full text-indigo-300 text-xs">Triceps</span>
+      </div>
+      <div class="mt-4 text-slate-500 text-xs">Difficulty: Beginner</div>
+    </div>
+
+    <!-- Sit-Up -->
+    <div onclick="startSession('Sit-Up')" class="bg-slate-900 border border-slate-800 rounded-2xl p-6 hover:border-indigo-500/50 cursor-pointer transition-colors">
+      <div class="flex items-center gap-4">
+        <div class="w-14 h-14 rounded-xl bg-indigo-600/20 border border-indigo-500/30 flex items-center justify-center text-2xl">🧘</div>
+        <div class="flex-1">
+          <h3 class="text-xl font-semibold">Sit-Up</h3>
+          <p class="text-slate-400 text-sm mt-0.5">Controlled sit-up, full range</p>
+        </div>
+      </div>
+      <div class="flex gap-2 mt-4 flex-wrap">
+        <span class="bg-indigo-950 px-3 py-1 rounded-full text-indigo-300 text-xs">Abdominals</span>
+        <span class="bg-indigo-950 px-3 py-1 rounded-full text-indigo-300 text-xs">Hip Flexors</span>
+      </div>
+      <div class="mt-4 text-slate-500 text-xs">Difficulty: Beginner</div>
+    </div>
+
+    <!-- Kettlebell Swing -->
+    <div onclick="startSession('Kettlebell Swing')" class="bg-slate-900 border border-slate-800 rounded-2xl p-6 hover:border-indigo-500/50 cursor-pointer transition-colors">
+      <div class="flex items-center gap-4">
+        <div class="w-14 h-14 rounded-xl bg-indigo-600/20 border border-indigo-500/30 flex items-center justify-center text-2xl">🔔</div>
+        <div class="flex-1">
+          <h3 class="text-xl font-semibold">Kettlebell Swing</h3>
+          <p class="text-slate-400 text-sm mt-0.5">Hip-hinge power swing to eye level</p>
+        </div>
+      </div>
+      <div class="flex gap-2 mt-4 flex-wrap">
+        <span class="bg-indigo-950 px-3 py-1 rounded-full text-indigo-300 text-xs">Glutes</span>
+        <span class="bg-indigo-950 px-3 py-1 rounded-full text-indigo-300 text-xs">Hamstrings</span>
+        <span class="bg-indigo-950 px-3 py-1 rounded-full text-indigo-300 text-xs">Shoulders</span>
+      </div>
+      <div class="mt-4 text-slate-500 text-xs">Difficulty: Intermediate</div>
+    </div>
+  </div>
+</div>
+
+<!-- Active Session (hidden initially) -->
+<div id="view-session" class="pt-16 hidden min-h-screen flex flex-col">
+  <!-- Split Screen -->
+  <div class="flex-1 grid md:grid-cols-2 gap-0" style="min-height:calc(100vh - 120px)">
+    <!-- Left: 3D Model with animated skeleton -->
+    <div class="bg-slate-900 border-r border-slate-800 relative overflow-hidden">
+      <div class="absolute top-4 left-4 bg-slate-800/80 rounded-lg px-3 py-1.5 border border-slate-700 z-10">
+        <span class="text-indigo-400 text-xs font-medium">Perfect Form Reference</span>
+      </div>
+      <!-- Animated SVG Skeleton (reference model) -->
+      <svg id="model-svg" viewBox="0 0 200 400" class="w-full h-full" preserveAspectRatio="xMidYMid meet">
+        <!-- Grid floor -->
+        <line x1="20" y1="360" x2="180" y2="360" stroke="#334155" stroke-width="1"/>
+        <line x1="40" y1="360" x2="40" y2="365" stroke="#334155" stroke-width="1"/>
+        <line x1="80" y1="360" x2="80" y2="365" stroke="#334155" stroke-width="1"/>
+        <line x1="120" y1="360" x2="120" y2="365" stroke="#334155" stroke-width="1"/>
+        <line x1="160" y1="360" x2="160" y2="365" stroke="#334155" stroke-width="1"/>
+        <!-- Body segments (animated via JS) -->
+        <line id="m-torso" x1="100" y1="120" x2="100" y2="200" stroke="#818CF8" stroke-width="3" stroke-linecap="round"/>
+        <line id="m-lthigh" x1="100" y1="200" x2="80" y2="280" stroke="#818CF8" stroke-width="3" stroke-linecap="round"/>
+        <line id="m-rthigh" x1="100" y1="200" x2="120" y2="280" stroke="#818CF8" stroke-width="3" stroke-linecap="round"/>
+        <line id="m-lshin" x1="80" y1="280" x2="80" y2="355" stroke="#818CF8" stroke-width="3" stroke-linecap="round"/>
+        <line id="m-rshin" x1="120" y1="280" x2="120" y2="355" stroke="#818CF8" stroke-width="3" stroke-linecap="round"/>
+        <line id="m-larm" x1="100" y1="130" x2="65" y2="180" stroke="#818CF8" stroke-width="2.5" stroke-linecap="round"/>
+        <line id="m-rarm" x1="100" y1="130" x2="135" y2="180" stroke="#818CF8" stroke-width="2.5" stroke-linecap="round"/>
+        <line id="m-lfore" x1="65" y1="180" x2="60" y2="230" stroke="#818CF8" stroke-width="2" stroke-linecap="round"/>
+        <line id="m-rfore" x1="135" y1="180" x2="140" y2="230" stroke="#818CF8" stroke-width="2" stroke-linecap="round"/>
+        <!-- Joints -->
+        <circle id="m-head" cx="100" cy="100" r="16" fill="#312E81" stroke="#818CF8" stroke-width="2"/>
+        <circle cx="100" cy="200" r="5" fill="#6366F1"/>
+        <circle id="m-lknee" cx="80" cy="280" r="4" fill="#6366F1"/>
+        <circle id="m-rknee" cx="120" cy="280" r="4" fill="#6366F1"/>
+        <circle cx="80" cy="355" r="3" fill="#6366F1"/>
+        <circle cx="120" cy="355" r="3" fill="#6366F1"/>
+        <circle cx="100" cy="130" r="4" fill="#6366F1"/>
+        <!-- Label -->
+        <text x="100" y="390" text-anchor="middle" fill="#94A3B8" font-size="10" id="model-label">PERFECT FORM</text>
+      </svg>
+      <div class="absolute bottom-4 left-4 right-4 flex items-center justify-between">
+        <span class="text-slate-500 text-xs">30fps · GLTF 2.0</span>
+        <span class="text-indigo-400 text-xs font-medium" id="session-exercise">Air Squat</span>
+      </div>
+    </div>
+
+    <!-- Right: Simulated Camera with skeleton overlay -->
+    <div class="bg-gradient-to-b from-slate-800 to-slate-900 relative overflow-hidden">
+      <!-- Fake camera noise/grain -->
+      <div class="absolute inset-0 opacity-5" style="background-image:url('data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%224%22 height=%224%22><rect width=%224%22 height=%224%22 fill=%22%23fff%22 fill-opacity=%220.03%22/></svg>');"></div>
+      <!-- Camera indicator -->
+      <div class="absolute top-4 left-4 flex items-center gap-2 bg-slate-900/80 rounded-lg px-3 py-1.5 border border-slate-700 z-10">
+        <span class="w-2 h-2 rounded-full bg-red-500 animate-pulse"></span>
+        <span class="text-red-400 text-xs font-medium">REC</span>
+      </div>
+      <div class="absolute top-4 right-4 bg-slate-900/80 rounded-lg px-3 py-1.5 border border-slate-700 z-10">
+        <span class="text-emerald-400 text-xs font-medium">33 landmarks · on-device</span>
+      </div>
+
+      <!-- User skeleton overlay (slightly different pose, animated) -->
+      <svg id="user-svg" viewBox="0 0 200 400" class="w-full h-full" preserveAspectRatio="xMidYMid meet">
+        <!-- Body segments with green/yellow coloring based on form -->
+        <line id="u-torso" x1="100" y1="125" x2="100" y2="205" stroke="#34D399" stroke-width="3" stroke-linecap="round"/>
+        <line id="u-lthigh" x1="100" y1="205" x2="78" y2="283" stroke="#34D399" stroke-width="3" stroke-linecap="round"/>
+        <line id="u-rthigh" x1="100" y1="205" x2="122" y2="283" stroke="#FBBF24" stroke-width="3" stroke-linecap="round"/>
+        <line id="u-lshin" x1="78" y1="283" x2="78" y2="358" stroke="#34D399" stroke-width="2.5" stroke-linecap="round"/>
+        <line id="u-rshin" x1="122" y1="283" x2="122" y2="358" stroke="#FBBF24" stroke-width="2.5" stroke-linecap="round"/>
+        <line id="u-larm" x1="100" y1="135" x2="62" y2="185" stroke="#34D399" stroke-width="2.5" stroke-linecap="round"/>
+        <line id="u-rarm" x1="100" y1="135" x2="138" y2="185" stroke="#34D399" stroke-width="2.5" stroke-linecap="round"/>
+        <line id="u-lfore" x1="62" y1="185" x2="58" y2="235" stroke="#34D399" stroke-width="2" stroke-linecap="round"/>
+        <line id="u-rfore" x1="138" y1="185" x2="142" y2="235" stroke="#34D399" stroke-width="2" stroke-linecap="round"/>
+        <!-- Joint dots -->
+        <circle cx="100" cy="105" r="14" fill="none" stroke="#34D399" stroke-width="2"/>
+        <circle cx="100" cy="205" r="5" fill="#34D399"/>
+        <circle id="u-lknee" cx="78" cy="283" r="5" fill="#34D399"/>
+        <circle id="u-rknee" cx="122" cy="283" r="5" fill="#FBBF24"/>
+        <circle cx="78" cy="358" r="3" fill="#34D399"/>
+        <circle cx="122" cy="358" r="3" fill="#FBBF24"/>
+        <circle cx="100" cy="135" r="4" fill="#34D399"/>
+        <!-- Angle arc indicator on knee -->
+        <path d="M 78 268 A 15 15 0 0 1 90 280" fill="none" stroke="#34D399" stroke-width="1.5" opacity="0.7"/>
+        <text x="85" y="272" fill="#34D399" font-size="9" font-weight="bold">92°</text>
+        <path d="M 122 268 A 15 15 0 0 0 110 280" fill="none" stroke="#FBBF24" stroke-width="1.5" opacity="0.7"/>
+        <text x="108" y="272" fill="#FBBF24" font-size="9" font-weight="bold">86°</text>
+      </svg>
+
+      <!-- Score Overlay -->
+      <div class="absolute bottom-6 left-1/2 -translate-x-1/2 bg-slate-900/90 rounded-2xl px-8 py-4 border border-slate-700 text-center backdrop-blur-sm">
+        <p class="text-slate-400 text-xs uppercase tracking-wider">Score</p>
+        <p class="text-5xl font-bold text-emerald-400 score-pulse" id="live-score">92</p>
+        <div class="w-32 h-1.5 bg-slate-700 rounded-full mt-2 mx-auto overflow-hidden">
+          <div id="score-bar" class="h-full bg-emerald-400 rounded-full transition-all" style="width:92%"></div>
+        </div>
+        <p class="text-slate-500 text-xs mt-2">Reps: <span id="rep-count">0</span> · Phase: <span id="phase-label">Standing</span></p>
+      </div>
+
+      <!-- Cue Alert -->
+      <div id="cue-alert" class="absolute top-16 left-4 right-4 bg-amber-900/90 rounded-xl px-4 py-3 border border-amber-600 hidden backdrop-blur-sm transition-all">
+        <div class="flex items-center gap-3">
+          <span class="text-xl" id="cue-icon">🦵</span>
+          <p class="text-amber-200 font-semibold text-sm" id="cue-text">Keep knees tracking over toes</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Bottom Controls -->
+  <div class="bg-slate-950 border-t border-slate-800 px-6 py-4 flex items-center justify-between">
+    <div>
+      <p class="text-slate-400 text-sm">Duration: <span class="text-white font-semibold" id="session-timer">0:00</span></p>
+    </div>
+    <button onclick="endSession()" class="bg-red-600/90 hover:bg-red-700 rounded-full px-8 py-2.5 font-semibold transition-colors">End Session</button>
+    <div>
+      <p class="text-slate-400 text-sm">Avg: <span class="text-white font-semibold" id="avg-score">--</span></p>
+    </div>
+  </div>
+</div>
+
+<!-- Post-Session Summary (hidden initially) -->
+<div id="view-summary" class="pt-24 px-6 max-w-2xl mx-auto hidden">
+  <div class="text-center mb-8">
+    <div class="w-28 h-28 rounded-full border-4 border-emerald-400 flex items-center justify-center mx-auto">
+      <span class="text-4xl font-bold text-emerald-400">A</span>
+    </div>
+    <h2 class="text-2xl font-bold mt-6">Session Complete</h2>
+    <p class="text-slate-400 mt-1" id="summary-subtitle">Air Squat · 1:24</p>
+  </div>
+
+  <div class="grid grid-cols-3 gap-3 mb-6">
+    <div class="bg-slate-900 rounded-xl p-4 border border-slate-800 text-center"><p class="text-2xl font-bold text-indigo-400" id="summary-reps">8</p><p class="text-slate-400 text-xs mt-1">Reps</p></div>
+    <div class="bg-slate-900 rounded-xl p-4 border border-slate-800 text-center"><p class="text-2xl font-bold text-emerald-400" id="summary-score">92</p><p class="text-slate-400 text-xs mt-1">Avg Score</p></div>
+    <div class="bg-slate-900 rounded-xl p-4 border border-slate-800 text-center"><p class="text-2xl font-bold text-slate-300" id="summary-duration">1:24</p><p class="text-slate-400 text-xs mt-1">Duration</p></div>
+  </div>
+
+  <!-- Rep Breakdown -->
+  <div class="bg-slate-900 rounded-xl border border-slate-800 overflow-hidden mb-6">
+    <div class="px-4 py-3 border-b border-slate-800"><p class="text-white font-semibold text-sm">Rep Breakdown</p></div>
+    <div id="rep-breakdown"></div>
+  </div>
+
+  <!-- Cues -->
+  <div class="bg-amber-900/30 rounded-xl p-4 border border-amber-800/30 mb-6">
+    <p class="text-amber-200 font-semibold text-sm mb-2">Areas to Improve</p>
+    <div class="flex items-center justify-between"><div class="flex items-center gap-2"><span>🦵</span><span class="text-amber-200 text-sm">Knee Cave</span></div><span class="text-amber-400 font-bold text-sm">2x</span></div>
+  </div>
+
+  <div class="space-y-3 pb-10">
+    <a href="/fitness.html" class="block w-full bg-indigo-600 hover:bg-indigo-700 text-center rounded-xl py-4 font-semibold text-lg transition-colors">Try Again</a>
+    <a href="/activity.html" class="block w-full border border-slate-700 hover:border-slate-500 text-center rounded-xl py-3 font-semibold transition-colors">View All Sessions</a>
+  </div>
+</div>
+
+<script>
+let timer=0, timerInterval, scoreInterval, repInterval, reps=0, scores=[], animFrame;
+const cues=[
+  {icon:'🦵', text:'Keep knees tracking over toes'},
+  {icon:'⬇️', text:'Go deeper — hips below knees'},
+  {icon:'↗️', text:'Keep chest upright'}
+];
+const phases=['Standing','Descent','Bottom','Ascent'];
+let phaseIdx=0, animProgress=0;
+
+function startSession(exercise) {
+  document.getElementById('view-selector').classList.add('hidden');
+  document.getElementById('view-session').classList.remove('hidden');
+  document.getElementById('session-exercise').textContent = exercise;
+  timer=0; reps=0; scores=[]; phaseIdx=0; animProgress=0;
+  document.getElementById('rep-count').textContent='0';
+  document.getElementById('live-score').textContent='--';
+
+  timerInterval = setInterval(()=>{
+    timer++;
+    const m=Math.floor(timer/60), s=timer%60;
+    document.getElementById('session-timer').textContent=m+':'+String(s).padStart(2,'0');
+  },1000);
+
+  // Animate skeletons
+  animateSkeletons();
+
+  // Simulate scoring
+  scoreInterval = setInterval(()=>{
+    const score = Math.floor(Math.random()*18)+80;
+    document.getElementById('live-score').textContent=score;
+    document.getElementById('score-bar').style.width=score+'%';
+    const color = score>=85?'text-emerald-400':'text-amber-400';
+    document.getElementById('live-score').className = 'text-5xl font-bold score-pulse '+color;
+    document.getElementById('score-bar').className = 'h-full rounded-full transition-all '+(score>=85?'bg-emerald-400':'bg-amber-400');
+  },900);
+
+  // Simulate reps
+  repInterval = setInterval(()=>{
+    reps++;
+    const score = Math.floor(Math.random()*15)+82;
+    scores.push(score);
+    document.getElementById('rep-count').textContent=reps;
+    document.getElementById('avg-score').textContent=Math.round(scores.reduce((a,b)=>a+b,0)/scores.length);
+    // Phase cycling
+    phaseIdx=(phaseIdx+1)%phases.length;
+    document.getElementById('phase-label').textContent=phases[phaseIdx];
+    // Flash cue occasionally
+    if(Math.random()>0.55){
+      const cue=cues[Math.floor(Math.random()*cues.length)];
+      document.getElementById('cue-icon').textContent=cue.icon;
+      document.getElementById('cue-text').textContent=cue.text;
+      document.getElementById('cue-alert').classList.remove('hidden');
+      setTimeout(()=>document.getElementById('cue-alert').classList.add('hidden'),2500);
+    }
+  },3500);
+}
+
+function animateSkeletons() {
+  let t=0;
+  function frame() {
+    t+=0.03;
+    // Squat cycle: sin wave controls knee bend
+    const bend = Math.sin(t)*0.5+0.5; // 0 to 1 (standing to bottom)
+    const hipY = 200 + bend*60;
+    const kneeY = 280 + bend*30;
+    const kneeSpread = bend*15;
+
+    // Model skeleton (perfect form)
+    setLine('m-torso',100,120,100,hipY);
+    setLine('m-lthigh',100,hipY,80-kneeSpread,kneeY);
+    setLine('m-rthigh',100,hipY,120+kneeSpread,kneeY);
+    setLine('m-lshin',80-kneeSpread,kneeY,80,355);
+    setLine('m-rshin',120+kneeSpread,kneeY,120,355);
+    setLine('m-larm',100,130,65-bend*10,180+bend*20);
+    setLine('m-rarm',100,130,135+bend*10,180+bend*20);
+    setLine('m-lfore',65-bend*10,180+bend*20,60-bend*5,230+bend*15);
+    setLine('m-rfore',135+bend*10,180+bend*20,140+bend*5,230+bend*15);
+    setAttr('m-lknee','cx',80-kneeSpread);setAttr('m-lknee','cy',kneeY);
+    setAttr('m-rknee','cx',120+kneeSpread);setAttr('m-rknee','cy',kneeY);
+    setAttr('m-head','cy',100+bend*5);
+
+    // User skeleton (slightly imperfect - knee cave on right)
+    const cave = bend*8; // right knee caves inward
+    const uHipY = 205 + bend*58;
+    const uKneeY = 283 + bend*28;
+    setLine('u-torso',100,125,100+bend*3,uHipY); // slight lean
+    setLine('u-lthigh',100+bend*3,uHipY,78-kneeSpread,uKneeY);
+    setLine('u-rthigh',100+bend*3,uHipY,122+kneeSpread-cave,uKneeY);
+    setLine('u-lshin',78-kneeSpread,uKneeY,78,358);
+    setLine('u-rshin',122+kneeSpread-cave,uKneeY,122,358);
+    setLine('u-larm',100,135,62-bend*10,185+bend*20);
+    setLine('u-rarm',100,135,138+bend*10,185+bend*20);
+    setLine('u-lfore',62-bend*10,185+bend*20,58-bend*5,235+bend*15);
+    setLine('u-rfore',138+bend*10,185+bend*20,142+bend*5,235+bend*15);
+    setAttr('u-lknee','cx',78-kneeSpread);setAttr('u-lknee','cy',uKneeY);
+    setAttr('u-rknee','cx',122+kneeSpread-cave);setAttr('u-rknee','cy',uKneeY);
+
+    animFrame = requestAnimationFrame(frame);
+  }
+  frame();
+}
+
+function setLine(id,x1,y1,x2,y2){
+  const el=document.getElementById(id);
+  if(!el)return;
+  el.setAttribute('x1',x1);el.setAttribute('y1',y1);
+  el.setAttribute('x2',x2);el.setAttribute('y2',y2);
+}
+function setAttr(id,attr,val){
+  const el=document.getElementById(id);
+  if(el)el.setAttribute(attr,val);
+}
+
+function endSession() {
+  clearInterval(timerInterval); clearInterval(scoreInterval); clearInterval(repInterval);
+  if(animFrame) cancelAnimationFrame(animFrame);
+  document.getElementById('view-session').classList.add('hidden');
+  document.getElementById('view-summary').classList.remove('hidden');
+  const avg = scores.length?Math.round(scores.reduce((a,b)=>a+b,0)/scores.length):0;
+  const m=Math.floor(timer/60), s=timer%60;
+  document.getElementById('summary-reps').textContent=reps;
+  document.getElementById('summary-score').textContent=avg;
+  document.getElementById('summary-duration').textContent=m+':'+String(s).padStart(2,'0');
+  document.getElementById('summary-subtitle').textContent=document.getElementById('session-exercise').textContent+' · '+m+':'+String(s).padStart(2,'0');
+  // Build rep breakdown
+  let html='';
+  scores.forEach((sc,i)=>{
+    const color=sc>=80?'bg-emerald-400':'bg-amber-400';
+    const textColor=sc>=80?'text-emerald-400':'text-amber-400';
+    html+=`<div class="flex items-center justify-between px-4 py-2.5 ${i<scores.length-1?'border-b border-slate-800':''}"><span class="text-slate-400 text-sm">Rep ${i+1}</span><div class="flex items-center gap-2"><div class="h-1.5 w-16 bg-slate-700 rounded-full overflow-hidden"><div class="${color} h-full rounded-full" style="width:${sc}%"></div></div><span class="${textColor} text-sm font-semibold w-6 text-right">${sc}</span></div></div>`;
+  });
+  document.getElementById('rep-breakdown').innerHTML=html;
+}
+</script>
+</body>
+</html>
