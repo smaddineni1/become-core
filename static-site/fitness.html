@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Form Check — Become</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>tailwind.config={darkMode:'class'}</script>
+  <style>
+    body{font-family:system-ui,-apple-system,sans-serif}
+    @keyframes score-pulse{0%,100%{transform:scale(1)}50%{transform:scale(1.05)}}
+    .score-pulse{animation:score-pulse 1.5s ease-in-out infinite}
+  </style>
+</head>
+<body class="bg-slate-950 text-white antialiased min-h-screen">
+
+<!-- Nav -->
+<nav class="fixed top-0 left-0 right-0 z-50 bg-slate-950/80 backdrop-blur-md border-b border-slate-800">
+  <div class="max-w-6xl mx-auto px-6 py-4 flex items-center justify-between">
+    <a href="/" class="text-xl font-bold text-indigo-400">Become</a>
+    <div class="hidden md:flex items-center gap-6">
+      <a href="/dashboard.html" class="text-slate-300 hover:text-white text-sm">Dashboard</a>
+      <a href="/fitness.html" class="text-white font-medium text-sm">Form Check</a>
+      <a href="/mindbody.html" class="text-slate-300 hover:text-white text-sm">Mind & Body</a>
+      <a href="/nutrition.html" class="text-slate-300 hover:text-white text-sm">Nutrition</a>
+      <a href="/activity.html" class="text-slate-300 hover:text-white text-sm">Activity</a>
+    </div>
+  </div>
+</nav>
+
+<!-- Exercise Selector (default view) -->
+<div id="view-selector" class="pt-24 px-6 max-w-4xl mx-auto">
+  <h1 class="text-3xl font-bold">AI Form Check</h1>
+  <p class="text-slate-400 mt-2">Select an exercise for real-time AI-powered form analysis</p>
+
+  <div class="grid md:grid-cols-2 gap-4 mt-8">
+    <!-- Air Squat -->
+    <div onclick="startSession('Air Squat')" class="bg-slate-900 border border-slate-800 rounded-2xl p-6 hover:border-indigo-500/50 cursor-pointer transition-colors">
+      <div class="flex items-center gap-4">
+        <div class="w-14 h-14 rounded-xl bg-indigo-600/20 border border-indigo-500/30 flex items-center justify-center text-2xl">🏋️</div>
+        <div class="flex-1">
+          <h3 class="text-xl font-semibold">Air Squat</h3>
+          <p class="text-slate-400 text-sm mt-0.5">Bodyweight squat with proper depth</p>
+        </div>
+      </div>
+      <div class="flex gap-2 mt-4 flex-wrap">
+        <span class="bg-indigo-950 px-3 py-1 rounded-full text-indigo-300 text-xs">Quadriceps</span>
+        <span class="bg-indigo-950 px-3 py-1 rounded-full text-indigo-300 text-xs">Glutes</span>
+        <span class="bg-indigo-950 px-3 py-1 rounded-full text-indigo-300 text-xs">Core</span>
+      </div>
+      <div class="mt-4 text-slate-500 text-xs">Difficulty: Beginner</div>
+    </div>
+
+    <!-- Push-Up -->
+    <div onclick="startSession('Push-Up')" class="bg-slate-900 border border-slate-800 rounded-2xl p-6 hover:border-indigo-500/50 cursor-pointer transition-colors">
+      <div class="flex items-center gap-4">
+        <div class="w-14 h-14 rounded-xl bg-indigo-600/20 border border-indigo-500/30 flex items-center justify-center text-2xl">💪</div>
+        <div class="flex-1">
+          <h3 class="text-xl font-semibold">Push-Up</h3>
+          <p class="text-slate-400 text-sm mt-0.5">Full-range with controlled tempo</p>
+        </div>
+      </div>
+      <div class="flex gap-2 mt-4 flex-wrap">
+        <span class="bg-indigo-950 px-3 py-1 rounded-full text-indigo-300 text-xs">Chest</span>
+        <span class="bg-indigo-950 px-3 py-1 rounded-full text-indigo-300 text-xs">Shoulders</span>
+        <span class="bg-indigo-950 px-3 py-1 rounded-full text-indigo-300 text-xs">Triceps</span>
+      </div>
+      <div class="mt-4 text-slate-500 text-xs">Difficulty: Beginner</div>
+    </div>
+
+    <!-- Sit-Up -->
+    <div onclick="startSession('Sit-Up')" class="bg-slate-900 border border-slate-800 rounded-2xl p-6 hover:border-indigo-500/50 cursor-pointer transition-colors">
+      <div class="flex items-center gap-4">
+        <div class="w-14 h-14 rounded-xl bg-indigo-600/20 border border-indigo-500/30 flex items-center justify-center text-2xl">🧘</div>
+        <div class="flex-1">
+          <h3 class="text-xl font-semibold">Sit-Up</h3>
+          <p class="text-slate-400 text-sm mt-0.5">Controlled sit-up, full range</p>
+        </div>
+      </div>
+      <div class="flex gap-2 mt-4 flex-wrap">
+        <span class="bg-indigo-950 px-3 py-1 rounded-full text-indigo-300 text-xs">Abdominals</span>
+        <span class="bg-indigo-950 px-3 py-1 rounded-full text-indigo-300 text-xs">Hip Flexors</span>
+      </div>
+      <div class="mt-4 text-slate-500 text-xs">Difficulty: Beginner</div>
+    </div>
+
+    <!-- Kettlebell Swing -->
+    <div onclick="startSession('Kettlebell Swing')" class="bg-slate-900 border border-slate-800 rounded-2xl p-6 hover:border-indigo-500/50 cursor-pointer transition-colors">
+      <div class="flex items-center gap-4">
+        <div class="w-14 h-14 rounded-xl bg-indigo-600/20 border border-indigo-500/30 flex items-center justify-center text-2xl">🔔</div>
+        <div class="flex-1">
+          <h3 class="text-xl font-semibold">Kettlebell Swing</h3>
+          <p class="text-slate-400 text-sm mt-0.5">Hip-hinge power swing to eye level</p>
+        </div>
+      </div>
+      <div class="flex gap-2 mt-4 flex-wrap">
+        <span class="bg-indigo-950 px-3 py-1 rounded-full text-indigo-300 text-xs">Glutes</span>
+        <span class="bg-indigo-950 px-3 py-1 rounded-full text-indigo-300 text-xs">Hamstrings</span>
+        <span class="bg-indigo-950 px-3 py-1 rounded-full text-indigo-300 text-xs">Shoulders</span>
+      </div>
+      <div class="mt-4 text-slate-500 text-xs">Difficulty: Intermediate</div>
+    </div>
+  </div>
+</div>
+
+<!-- Active Session (hidden initially) -->
+<div id="view-session" class="pt-20 hidden min-h-screen flex flex-col">
+  <!-- Split Screen -->
+  <div class="flex-1 grid md:grid-cols-2 gap-0">
+    <!-- Left: 3D Model -->
+    <div class="bg-slate-900 border-r border-slate-800 flex flex-col items-center justify-center p-8 min-h-[400px]">
+      <div class="w-20 h-20 rounded-full bg-indigo-600/20 border border-indigo-500/30 flex items-center justify-center mb-4">
+        <span class="text-4xl" id="session-icon">🏋️</span>
+      </div>
+      <p class="text-white text-lg font-semibold" id="session-exercise">Air Squat</p>
+      <p class="text-slate-400 text-sm mt-1">3D Reference Model</p>
+      <p class="text-indigo-400 text-xs mt-4">Perfect form · 30fps animation</p>
+      <div class="mt-6 bg-slate-800 rounded-lg px-3 py-1.5 border border-slate-700">
+        <span class="text-slate-400 text-xs">GLTF 2.0 · Draco compressed</span>
+      </div>
+    </div>
+
+    <!-- Right: Camera + Score -->
+    <div class="bg-slate-800 flex flex-col items-center justify-center p-8 min-h-[400px] relative">
+      <!-- Camera placeholder -->
+      <div class="w-16 h-16 rounded-full border-2 border-indigo-500/50 flex items-center justify-center mb-4">
+        <span class="text-2xl">📷</span>
+      </div>
+      <p class="text-white font-semibold">Live Camera</p>
+      <p class="text-slate-400 text-sm mt-1">MediaPipe Pose · 33 landmarks</p>
+      <div class="flex items-center gap-2 mt-3">
+        <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+        <span class="text-emerald-400 text-xs">Tracking active</span>
+      </div>
+
+      <!-- Score Overlay -->
+      <div class="absolute bottom-6 left-1/2 -translate-x-1/2 bg-slate-900/90 rounded-2xl px-8 py-4 border border-slate-700 text-center">
+        <p class="text-slate-400 text-xs uppercase tracking-wider">Score</p>
+        <p class="text-5xl font-bold text-emerald-400 score-pulse" id="live-score">92</p>
+        <p class="text-slate-500 text-xs mt-1">Reps: <span id="rep-count">0</span></p>
+      </div>
+
+      <!-- Cue Alert -->
+      <div id="cue-alert" class="absolute top-6 left-4 right-4 bg-amber-900/90 rounded-xl px-4 py-3 border border-amber-600 hidden">
+        <div class="flex items-center gap-3">
+          <span class="text-xl">🦵</span>
+          <p class="text-amber-200 font-semibold text-sm" id="cue-text">Keep knees tracking over toes</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Bottom Controls -->
+  <div class="bg-slate-950 border-t border-slate-800 px-6 py-4 flex items-center justify-between">
+    <div>
+      <p class="text-slate-400 text-sm">Duration: <span class="text-white font-semibold" id="session-timer">0:00</span></p>
+    </div>
+    <button onclick="endSession()" class="bg-red-600/90 hover:bg-red-700 rounded-full px-8 py-2.5 font-semibold transition-colors">End Session</button>
+    <div>
+      <p class="text-slate-400 text-sm">Avg: <span class="text-white font-semibold" id="avg-score">--</span></p>
+    </div>
+  </div>
+</div>
+
+<!-- Post-Session Summary (hidden initially) -->
+<div id="view-summary" class="pt-24 px-6 max-w-2xl mx-auto hidden">
+  <div class="text-center mb-8">
+    <div class="w-28 h-28 rounded-full border-4 border-emerald-400 flex items-center justify-center mx-auto">
+      <span class="text-4xl font-bold text-emerald-400">A</span>
+    </div>
+    <h2 class="text-2xl font-bold mt-6">Session Complete</h2>
+    <p class="text-slate-400 mt-1" id="summary-subtitle">Air Squat · 1:24</p>
+  </div>
+
+  <div class="grid grid-cols-3 gap-3 mb-6">
+    <div class="bg-slate-900 rounded-xl p-4 border border-slate-800 text-center"><p class="text-2xl font-bold text-indigo-400" id="summary-reps">8</p><p class="text-slate-400 text-xs mt-1">Reps</p></div>
+    <div class="bg-slate-900 rounded-xl p-4 border border-slate-800 text-center"><p class="text-2xl font-bold text-emerald-400" id="summary-score">92</p><p class="text-slate-400 text-xs mt-1">Avg Score</p></div>
+    <div class="bg-slate-900 rounded-xl p-4 border border-slate-800 text-center"><p class="text-2xl font-bold text-slate-300" id="summary-duration">1:24</p><p class="text-slate-400 text-xs mt-1">Duration</p></div>
+  </div>
+
+  <!-- Rep Breakdown -->
+  <div class="bg-slate-900 rounded-xl border border-slate-800 overflow-hidden mb-6">
+    <div class="px-4 py-3 border-b border-slate-800"><p class="text-white font-semibold text-sm">Rep Breakdown</p></div>
+    <div id="rep-breakdown"></div>
+  </div>
+
+  <!-- Cues -->
+  <div class="bg-amber-900/30 rounded-xl p-4 border border-amber-800/30 mb-6">
+    <p class="text-amber-200 font-semibold text-sm mb-2">Areas to Improve</p>
+    <div class="flex items-center justify-between"><div class="flex items-center gap-2"><span>🦵</span><span class="text-amber-200 text-sm">Knee Cave</span></div><span class="text-amber-400 font-bold text-sm">2x</span></div>
+  </div>
+
+  <div class="space-y-3 pb-10">
+    <a href="/fitness.html" class="block w-full bg-indigo-600 hover:bg-indigo-700 text-center rounded-xl py-4 font-semibold text-lg transition-colors">Try Again</a>
+    <a href="/activity.html" class="block w-full border border-slate-700 hover:border-slate-500 text-center rounded-xl py-3 font-semibold transition-colors">View All Sessions</a>
+  </div>
+</div>
+
+<script>
+let timer=0, timerInterval, scoreInterval, repInterval, reps=0, scores=[];
+const cues=['Keep knees tracking over toes','Go deeper — hips below knees','Keep chest upright'];
+
+function startSession(exercise) {
+  document.getElementById('view-selector').classList.add('hidden');
+  document.getElementById('view-session').classList.remove('hidden');
+  document.getElementById('session-exercise').textContent = exercise;
+  timer=0; reps=0; scores=[];
+  document.getElementById('rep-count').textContent='0';
+  document.getElementById('live-score').textContent='--';
+
+  timerInterval = setInterval(()=>{
+    timer++;
+    const m=Math.floor(timer/60), s=timer%60;
+    document.getElementById('session-timer').textContent=m+':'+String(s).padStart(2,'0');
+  },1000);
+
+  // Simulate scoring
+  scoreInterval = setInterval(()=>{
+    const score = Math.floor(Math.random()*20)+80;
+    document.getElementById('live-score').textContent=score;
+    document.getElementById('live-score').className = score>=80?'text-5xl font-bold text-emerald-400 score-pulse':'text-5xl font-bold text-amber-400 score-pulse';
+  },800);
+
+  // Simulate reps
+  repInterval = setInterval(()=>{
+    reps++;
+    const score = Math.floor(Math.random()*15)+82;
+    scores.push(score);
+    document.getElementById('rep-count').textContent=reps;
+    document.getElementById('avg-score').textContent=Math.round(scores.reduce((a,b)=>a+b,0)/scores.length);
+    // Flash cue occasionally
+    if(Math.random()>0.6){
+      const cue=cues[Math.floor(Math.random()*cues.length)];
+      document.getElementById('cue-text').textContent=cue;
+      document.getElementById('cue-alert').classList.remove('hidden');
+      setTimeout(()=>document.getElementById('cue-alert').classList.add('hidden'),2000);
+    }
+  },4000);
+}
+
+function endSession() {
+  clearInterval(timerInterval); clearInterval(scoreInterval); clearInterval(repInterval);
+  document.getElementById('view-session').classList.add('hidden');
+  document.getElementById('view-summary').classList.remove('hidden');
+  const avg = scores.length?Math.round(scores.reduce((a,b)=>a+b,0)/scores.length):0;
+  const m=Math.floor(timer/60), s=timer%60;
+  document.getElementById('summary-reps').textContent=reps;
+  document.getElementById('summary-score').textContent=avg;
+  document.getElementById('summary-duration').textContent=m+':'+String(s).padStart(2,'0');
+  document.getElementById('summary-subtitle').textContent=document.getElementById('session-exercise').textContent+' · '+m+':'+String(s).padStart(2,'0');
+  // Build rep breakdown
+  let html='';
+  scores.forEach((sc,i)=>{
+    const color=sc>=80?'bg-emerald-400':'bg-amber-400';
+    const textColor=sc>=80?'text-emerald-400':'text-amber-400';
+    html+=`<div class="flex items-center justify-between px-4 py-2.5 ${i<scores.length-1?'border-b border-slate-800':''}"><span class="text-slate-400 text-sm">Rep ${i+1}</span><div class="flex items-center gap-2"><div class="h-1.5 w-16 bg-slate-700 rounded-full overflow-hidden"><div class="${color} h-full rounded-full" style="width:${sc}%"></div></div><span class="${textColor} text-sm font-semibold w-6 text-right">${sc}</span></div></div>`;
+  });
+  document.getElementById('rep-breakdown').innerHTML=html;
+}
+</script>
+</body>
+</html>
