@@ -4,7 +4,7 @@
 import type { NutritionPlan } from '@become/shared';
 import { supabase } from '../supabase';
 
-const FUNCTIONS_URL = process.env.EXPO_PUBLIC_SUPABASE_URL ?? '';
+const FUNCTIONS_URL = process.env.EXPO_PUBLIC_SUPABASE_URL ?? 'https://tehezgpzecdblhebddoo.supabase.co';
 
 /**
  * Generate (or regenerate) today's meal plan

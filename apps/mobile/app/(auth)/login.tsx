@@ -1,14 +1,23 @@
-import { View, Text, TextInput, Pressable, KeyboardAvoidingView, Platform } from 'react-native';
+import { View, Text, TextInput, Pressable, KeyboardAvoidingView, Platform, Alert } from 'react-native';
 import { router } from 'expo-router';
 import { useState } from 'react';
+import { supabase } from '../../lib/supabase';
 
 export default function LoginScreen() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [loading, setLoading] = useState(false);
 
   const handleLogin = async () => {
-    // Supabase auth integration — Phase 1.3
-    router.replace('/(tabs)/home');
+    if (!email || !password) return;
+    setLoading(true);
+    const { error } = await supabase.auth.signInWithPassword({ email, password });
+    setLoading(false);
+    if (error) {
+      Alert.alert('Sign In Failed', error.message);
+    } else {
+      router.replace('/(tabs)/home');
+    }
   };
 
   return (
@@ -44,10 +53,13 @@ export default function LoginScreen() {
           />
 
           <Pressable
-            className="bg-indigo-600 rounded-xl py-4 mt-4 active:bg-indigo-700"
+            className={`rounded-xl py-4 mt-4 ${loading ? 'bg-indigo-800' : 'bg-indigo-600 active:bg-indigo-700'}`}
             onPress={handleLogin}
+            disabled={loading}
           >
-            <Text className="text-white text-center font-semibold text-lg">Sign In</Text>
+            <Text className="text-white text-center font-semibold text-lg">
+              {loading ? 'Signing In...' : 'Sign In'}
+            </Text>
           </Pressable>
 
           {/* Social Auth */}

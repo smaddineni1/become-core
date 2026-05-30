@@ -4,7 +4,7 @@
 import type { GenieResponse, GenieMessage } from '@become/shared';
 import { supabase } from '../supabase';
 
-const FUNCTIONS_URL = process.env.EXPO_PUBLIC_SUPABASE_URL ?? '';
+const FUNCTIONS_URL = process.env.EXPO_PUBLIC_SUPABASE_URL ?? 'https://tehezgpzecdblhebddoo.supabase.co';
 
 /**
  * Send a message to Genie and receive a structured response
