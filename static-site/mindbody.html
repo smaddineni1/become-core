@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Mind & Body — Become</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>tailwind.config={darkMode:'class'}</script>
+  <style>
+    body{font-family:system-ui,-apple-system,sans-serif}
+    @keyframes breathe{0%,100%{transform:scale(0.8);opacity:0.6}50%{transform:scale(1.2);opacity:1}}
+    .breathe{animation:breathe 8s ease-in-out infinite}
+  </style>
+</head>
+<body class="bg-slate-950 text-white antialiased min-h-screen">
+
+<!-- Nav -->
+<nav class="fixed top-0 left-0 right-0 z-50 bg-slate-950/80 backdrop-blur-md border-b border-slate-800">
+  <div class="max-w-6xl mx-auto px-6 py-4 flex items-center justify-between">
+    <a href="/" class="text-xl font-bold text-indigo-400">Become</a>
+    <div class="hidden md:flex items-center gap-6">
+      <a href="/dashboard.html" class="text-slate-300 hover:text-white text-sm">Dashboard</a>
+      <a href="/fitness.html" class="text-slate-300 hover:text-white text-sm">Form Check</a>
+      <a href="/mindbody.html" class="text-white font-medium text-sm">Mind & Body</a>
+      <a href="/nutrition.html" class="text-slate-300 hover:text-white text-sm">Nutrition</a>
+      <a href="/activity.html" class="text-slate-300 hover:text-white text-sm">Activity</a>
+    </div>
+  </div>
+</nav>
+
+<div class="pt-24 px-6 max-w-5xl mx-auto pb-12">
+  <h1 class="text-3xl font-bold">Mind & Body</h1>
+
+  <!-- Yoga / Meditation Toggle -->
+  <div class="mt-6 bg-slate-900 rounded-xl p-1 border border-slate-800 inline-flex">
+    <button onclick="switchTab('yoga')" id="tab-yoga" class="px-6 py-2.5 rounded-lg font-semibold text-sm transition-colors bg-indigo-600 text-white">Yoga</button>
+    <button onclick="switchTab('meditation')" id="tab-meditation" class="px-6 py-2.5 rounded-lg font-semibold text-sm transition-colors text-slate-400">Meditation</button>
+  </div>
+
+  <!-- HRV Recommendation Strip -->
+  <div class="mt-6 bg-gradient-to-r from-emerald-900/40 to-indigo-900/40 rounded-2xl p-5 border border-emerald-800/30">
+    <div class="flex items-center justify-between">
+      <div>
+        <p class="text-emerald-400 text-xs font-semibold uppercase tracking-wider">Recommended For You</p>
+        <p class="text-white text-lg font-semibold mt-1">Based on your HRV: <span class="text-emerald-400">Recovery</span></p>
+        <p class="text-slate-400 text-sm mt-1">Your readiness is 42/100 — prioritize gentle restoration today</p>
+      </div>
+      <div class="text-right">
+        <p class="text-3xl font-bold text-emerald-400">42</p>
+        <p class="text-slate-500 text-xs">Readiness</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Session Grid -->
+  <div id="grid-yoga" class="grid md:grid-cols-3 gap-4 mt-6">
+    <div class="bg-slate-900 border border-slate-800 rounded-2xl overflow-hidden hover:border-indigo-500/40 cursor-pointer transition-colors">
+      <div class="h-32 bg-gradient-to-br from-indigo-900/50 to-purple-900/50 flex items-center justify-center"><span class="text-4xl">🧘‍♀️</span></div>
+      <div class="p-4"><p class="text-white font-semibold">Morning Flow</p><div class="flex items-center gap-2 mt-1"><span class="text-slate-400 text-xs">20 min</span><span class="text-slate-600">·</span><span class="text-slate-400 text-xs">Moderate</span></div></div>
+    </div>
+    <div class="bg-slate-900 border border-slate-800 rounded-2xl overflow-hidden hover:border-indigo-500/40 cursor-pointer transition-colors">
+      <div class="h-32 bg-gradient-to-br from-emerald-900/50 to-teal-900/50 flex items-center justify-center"><span class="text-4xl">🌿</span></div>
+      <div class="p-4"><p class="text-white font-semibold">Gentle Stretch</p><div class="flex items-center gap-2 mt-1"><span class="text-slate-400 text-xs">10 min</span><span class="text-slate-600">·</span><span class="text-slate-400 text-xs">Gentle</span></div></div>
+    </div>
+    <div class="bg-slate-900 border border-slate-800 rounded-2xl overflow-hidden hover:border-indigo-500/40 cursor-pointer transition-colors">
+      <div class="h-32 bg-gradient-to-br from-amber-900/50 to-orange-900/50 flex items-center justify-center"><span class="text-4xl">☀️</span></div>
+      <div class="p-4"><p class="text-white font-semibold">Power Vinyasa</p><div class="flex items-center gap-2 mt-1"><span class="text-slate-400 text-xs">20 min</span><span class="text-slate-600">·</span><span class="text-slate-400 text-xs">Energizing</span></div></div>
+    </div>
+  </div>
+
+  <div id="grid-meditation" class="grid md:grid-cols-3 gap-4 mt-6 hidden">
+    <div class="bg-slate-900 border border-slate-800 rounded-2xl overflow-hidden hover:border-indigo-500/40 cursor-pointer transition-colors">
+      <div class="h-32 bg-gradient-to-br from-blue-900/50 to-indigo-900/50 flex items-center justify-center"><span class="text-4xl">🌙</span></div>
+      <div class="p-4"><p class="text-white font-semibold">Sleep Meditation</p><div class="flex items-center gap-2 mt-1"><span class="text-slate-400 text-xs">10 min</span><span class="text-slate-600">·</span><span class="text-slate-400 text-xs">Gentle</span></div></div>
+    </div>
+    <div onclick="openBreathing()" class="bg-slate-900 border border-indigo-500/40 rounded-2xl overflow-hidden hover:border-indigo-500/70 cursor-pointer transition-colors">
+      <div class="h-32 bg-gradient-to-br from-indigo-900/50 to-violet-900/50 flex items-center justify-center"><span class="text-4xl">🌬️</span></div>
+      <div class="p-4"><p class="text-white font-semibold">Guided Breathing <span class="text-indigo-400 text-xs ml-1">RECOMMENDED</span></p><div class="flex items-center gap-2 mt-1"><span class="text-slate-400 text-xs">5 min</span><span class="text-slate-600">·</span><span class="text-slate-400 text-xs">Gentle</span></div></div>
+    </div>
+    <div class="bg-slate-900 border border-slate-800 rounded-2xl overflow-hidden hover:border-indigo-500/40 cursor-pointer transition-colors">
+      <div class="h-32 bg-gradient-to-br from-rose-900/50 to-pink-900/50 flex items-center justify-center"><span class="text-4xl">❤️</span></div>
+      <div class="p-4"><p class="text-white font-semibold">Gratitude Practice</p><div class="flex items-center gap-2 mt-1"><span class="text-slate-400 text-xs">5 min</span><span class="text-slate-600">·</span><span class="text-slate-400 text-xs">Gentle</span></div></div>
+    </div>
+  </div>
+
+  <!-- HRV Module -->
+  <div class="mt-10">
+    <h2 class="text-xl font-bold">HRV & Biometrics</h2>
+    <div class="grid md:grid-cols-2 gap-4 mt-4">
+      <!-- HRV Entry -->
+      <div class="bg-slate-900 border border-slate-800 rounded-2xl p-6">
+        <h3 class="text-slate-400 text-sm font-medium uppercase tracking-wider mb-3">Log HRV Reading</h3>
+        <div class="flex items-center gap-3">
+          <input type="number" placeholder="e.g. 45" class="flex-1 bg-slate-800 border border-slate-700 rounded-xl px-4 py-3 text-white placeholder:text-slate-500 focus:border-indigo-500 focus:outline-none" id="hrv-input">
+          <span class="text-slate-400 text-sm">ms</span>
+          <button onclick="logHRV()" class="bg-indigo-600 hover:bg-indigo-700 rounded-xl px-5 py-3 font-semibold text-sm transition-colors">Log</button>
+        </div>
+        <p class="text-slate-500 text-xs mt-3">Enter your RMSSD value from your wearable device</p>
+        <div id="hrv-result" class="hidden mt-4 bg-slate-800 rounded-lg p-3 border border-slate-700">
+          <div class="flex items-center justify-between">
+            <span class="text-sm" id="hrv-classification"></span>
+            <span class="text-sm font-bold" id="hrv-value"></span>
+          </div>
+        </div>
+      </div>
+
+      <!-- HRV Trend -->
+      <div class="bg-slate-900 border border-slate-800 rounded-2xl p-6">
+        <h3 class="text-slate-400 text-sm font-medium uppercase tracking-wider mb-3">7-Day HRV Trend</h3>
+        <div class="flex items-end justify-between gap-2 h-24">
+          <div class="flex-1 flex flex-col items-center gap-1"><div class="w-full rounded-t bg-indigo-500/80" style="height:55%"></div><span class="text-slate-500 text-xs">M</span></div>
+          <div class="flex-1 flex flex-col items-center gap-1"><div class="w-full rounded-t bg-indigo-500/80" style="height:70%"></div><span class="text-slate-500 text-xs">T</span></div>
+          <div class="flex-1 flex flex-col items-center gap-1"><div class="w-full rounded-t bg-red-500/80" style="height:40%"></div><span class="text-slate-500 text-xs">W</span></div>
+          <div class="flex-1 flex flex-col items-center gap-1"><div class="w-full rounded-t bg-indigo-500/80" style="height:65%"></div><span class="text-slate-500 text-xs">T</span></div>
+          <div class="flex-1 flex flex-col items-center gap-1"><div class="w-full rounded-t bg-emerald-500/80" style="height:85%"></div><span class="text-slate-500 text-xs">F</span></div>
+          <div class="flex-1 flex flex-col items-center gap-1"><div class="w-full rounded-t bg-emerald-500/80" style="height:80%"></div><span class="text-slate-500 text-xs">S</span></div>
+          <div class="flex-1 flex flex-col items-center gap-1"><div class="w-full rounded-t bg-amber-500/80" style="height:50%"></div><span class="text-slate-500 text-xs">S</span></div>
+        </div>
+        <div class="flex justify-between mt-3 text-xs">
+          <span class="text-slate-400">Baseline: <span class="text-white font-semibold">48ms</span></span>
+          <span class="text-slate-400">Today: <span class="text-amber-400 font-semibold">42ms</span></span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Breathing Player (hidden by default) -->
+  <div id="breathing-player" class="fixed inset-0 bg-slate-950 z-50 hidden flex-col items-center justify-center">
+    <!-- Close -->
+    <button onclick="closeBreathing()" class="absolute top-6 left-6 w-10 h-10 rounded-full bg-slate-900/80 border border-slate-700 flex items-center justify-center text-white hover:bg-slate-800 z-10">←</button>
+    <p class="absolute top-7 left-1/2 -translate-x-1/2 text-white font-medium">Guided Breathing</p>
+    <button onclick="toggleLoop()" id="loop-btn" class="absolute top-6 right-6 px-3 py-1.5 rounded-lg bg-slate-900/80 border border-slate-700 text-indigo-400 text-sm font-medium">🔁 Loop</button>
+
+    <!-- Breathing Circle -->
+    <div class="flex-1 flex items-center justify-center">
+      <div class="text-center">
+        <div class="w-48 h-48 rounded-full border-4 border-indigo-400/60 flex items-center justify-center mx-auto breathe" id="breath-circle">
+          <div class="w-36 h-36 rounded-full bg-indigo-600/20 flex items-center justify-center">
+            <span class="text-indigo-300 text-lg font-medium" id="breath-phase">Inhale</span>
+          </div>
+        </div>
+        <p class="text-white text-xl font-semibold mt-8">5-Min Recovery Breathing</p>
+        <p class="text-slate-400 text-sm mt-2">Slow diaphragmatic breathing to activate parasympathetic recovery</p>
+      </div>
+    </div>
+
+    <!-- Controls -->
+    <div class="bg-slate-900/80 border-t border-slate-800 w-full px-6 pb-10 pt-4">
+      <!-- Progress -->
+      <div class="flex items-center gap-3 mb-4">
+        <span class="text-slate-400 text-xs w-10" id="elapsed-time">0:00</span>
+        <div class="flex-1 h-1.5 bg-slate-700 rounded-full overflow-hidden">
+          <div class="h-full bg-indigo-500 rounded-full transition-all" id="progress-bar" style="width:0%"></div>
+        </div>
+        <span class="text-slate-400 text-xs w-10 text-right">5:00</span>
+      </div>
+      <!-- Buttons -->
+      <div class="flex items-center justify-center gap-8">
+        <button onclick="replayBreathing()" class="w-12 h-12 rounded-full bg-slate-800 border border-slate-700 flex items-center justify-center hover:bg-slate-700 text-lg">⟲</button>
+        <button onclick="togglePlay()" id="play-btn" class="w-16 h-16 rounded-full bg-indigo-600 flex items-center justify-center hover:bg-indigo-700 text-2xl">⏸</button>
+        <button onclick="closeBreathing()" class="w-12 h-12 rounded-full bg-slate-800 border border-slate-700 flex items-center justify-center hover:bg-slate-700 text-lg">⏹</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+function switchTab(tab) {
+  document.getElementById('tab-yoga').className = tab==='yoga' ? 'px-6 py-2.5 rounded-lg font-semibold text-sm transition-colors bg-indigo-600 text-white' : 'px-6 py-2.5 rounded-lg font-semibold text-sm transition-colors text-slate-400';
+  document.getElementById('tab-meditation').className = tab==='meditation' ? 'px-6 py-2.5 rounded-lg font-semibold text-sm transition-colors bg-indigo-600 text-white' : 'px-6 py-2.5 rounded-lg font-semibold text-sm transition-colors text-slate-400';
+  document.getElementById('grid-yoga').classList.toggle('hidden', tab!=='yoga');
+  document.getElementById('grid-meditation').classList.toggle('hidden', tab!=='meditation');
+}
+
+function logHRV() {
+  const val = parseInt(document.getElementById('hrv-input').value);
+  if (!val || val < 1) return;
+  let cls, color;
+  if (val >= 60) { cls='Recovery'; color='text-emerald-400'; }
+  else if (val >= 30) { cls='Balanced'; color='text-amber-400'; }
+  else { cls='Stressed'; color='text-red-400'; }
+  document.getElementById('hrv-result').classList.remove('hidden');
+  document.getElementById('hrv-classification').innerHTML=`<span class="${color} font-semibold">${cls}</span>`;
+  document.getElementById('hrv-value').innerHTML=`<span class="${color}">${val}ms RMSSD</span>`;
+}
+
+let playing=true, elapsed=0, breathInterval, progressInterval;
+const phases=['Inhale','Hold','Exhale'];
+let phaseIdx=0;
+
+function openBreathing() {
+  document.getElementById('breathing-player').classList.remove('hidden');
+  document.getElementById('breathing-player').classList.add('flex');
+  playing=true; elapsed=0;
+  startBreathing();
+}
+
+function startBreathing() {
+  breathInterval = setInterval(()=>{
+    phaseIdx=(phaseIdx+1)%phases.length;
+    document.getElementById('breath-phase').textContent=phases[phaseIdx];
+  },2667);
+  progressInterval = setInterval(()=>{
+    if(!playing) return;
+    elapsed++;
+    const pct = Math.min(100, (elapsed/300)*100);
+    document.getElementById('progress-bar').style.width=pct+'%';
+    const m=Math.floor(elapsed/60), s=elapsed%60;
+    document.getElementById('elapsed-time').textContent=m+':'+String(s).padStart(2,'0');
+    if(elapsed>=300){elapsed=0;} // loop
+  },1000);
+}
+
+function closeBreathing() {
+  document.getElementById('breathing-player').classList.add('hidden');
+  document.getElementById('breathing-player').classList.remove('flex');
+  clearInterval(breathInterval); clearInterval(progressInterval);
+}
+
+function togglePlay() {
+  playing=!playing;
+  document.getElementById('play-btn').textContent=playing?'⏸':'▶️';
+  const circle=document.getElementById('breath-circle');
+  circle.style.animationPlayState=playing?'running':'paused';
+}
+
+function replayBreathing() {
+  elapsed=0;
+  document.getElementById('progress-bar').style.width='0%';
+  document.getElementById('elapsed-time').textContent='0:00';
+}
+
+function toggleLoop() {
+  const btn=document.getElementById('loop-btn');
+  if(btn.classList.contains('text-indigo-400')){btn.classList.remove('text-indigo-400');btn.classList.add('text-slate-400');btn.textContent='▶️ Once';}
+  else{btn.classList.remove('text-slate-400');btn.classList.add('text-indigo-400');btn.textContent='🔁 Loop';}
+}
+</script>
+</body>
+</html>
