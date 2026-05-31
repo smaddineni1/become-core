@@ -1,0 +1,13 @@
+{
+  "name": "become",
+  "private": true,
+  "version": "0.1.0",
+  "description": "Become — AI Wellness Platform",
+  "scripts": {
+    "build": "echo build",
+    "dev": "echo dev"
+  },
+  "devDependencies": {
+    "typescript": "^5.6.0"
+  }
+}
