@@ -12,7 +12,7 @@ import type {
   BiometricScanProvider,
   BiometricScanResult,
   BiometricScanStatus,
-} from './biometric-scan.js';
+} from './biometric-scan';
 
 interface SimulationInputs {
   heightCm: number;

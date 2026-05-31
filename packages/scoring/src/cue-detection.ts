@@ -1,5 +1,5 @@
 import type { CueType } from '@become/shared';
-import type { CueRule, ExerciseProfile } from './types.js';
+import type { CueRule, ExerciseProfile } from './types';
 
 export interface DetectedCue {
   cue: CueType;

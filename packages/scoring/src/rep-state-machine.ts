@@ -1,4 +1,4 @@
-import type { ExerciseProfile, RepPhase } from './types.js';
+import type { ExerciseProfile, RepPhase } from './types';
 
 /**
  * Finite State Machine for rep detection.

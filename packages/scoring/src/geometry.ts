@@ -1,4 +1,4 @@
-import type { Landmark } from './types.js';
+import type { Landmark } from './types';
 
 /**
  * Calculate the angle at joint B formed by segments BA and BC

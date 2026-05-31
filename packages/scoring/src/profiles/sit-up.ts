@@ -1,4 +1,4 @@
-import type { ExerciseProfile } from '../types.js';
+import type { ExerciseProfile } from '../types';
 
 export const SIT_UP_PROFILE: ExerciseProfile = {
   exercise: 'sit_up',
