@@ -1,21 +1,18 @@
 {
   "cli": {
-    "version": ">= 20.0.0",
     "appVersionSource": "remote"
   },
   "build": {
-    "development": {
-      "developmentClient": true,
-      "distribution": "internal"
-    },
     "preview": {
-      "distribution": "internal"
-    },
-    "production": {
-      "autoIncrement": true
+      "distribution": "internal",
+      "android": {
+        "buildType": "apk"
+      },
+      "env": {
+        "EXPO_PUBLIC_SUPABASE_URL": "https://tehezgpzecdblhebddoo.supabase.co",
+        "EXPO_PUBLIC_SUPABASE_ANON_KEY": "sb_publishable_8ZGCicXame67Mn1TGcRyng_0jJ3sX-i"
+      },
+      "installCommand": "pnpm install --no-frozen-lockfile"
     }
-  },
-  "submit": {
-    "production": {}
   }
 }
