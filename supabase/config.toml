@@ -1,8 +1,5 @@
-[project]
-id = "become"
-name = "Become"
-
 [api]
+enabled = true
 port = 54321
 schemas = ["public"]
 
@@ -10,12 +7,13 @@ schemas = ["public"]
 port = 54322
 
 [auth]
+enabled = true
 site_url = "http://localhost:3000"
 additional_redirect_urls = ["become://", "http://localhost:8081"]
 jwt_expiry = 3600
 
 [auth.external.apple]
-enabled = true
+enabled = false
 
 [auth.external.google]
-enabled = true
+enabled = false

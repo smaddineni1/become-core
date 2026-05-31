@@ -1,4 +1,4 @@
-import type { ExerciseProfile } from '../types.js';
+import type { ExerciseProfile } from '../types';
 
 export const AIR_SQUAT_PROFILE: ExerciseProfile = {
   exercise: 'air_squat',

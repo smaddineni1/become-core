@@ -1,5 +1,5 @@
-import type { NutritionPromptContext } from '../types.js';
-import { BRAND_GUARDRAIL_BLOCK } from '../guardrails/brand.js';
+import type { NutritionPromptContext } from '../types';
+import { BRAND_GUARDRAIL_BLOCK } from '../guardrails/brand';
 
 /**
  * System prompt for the nutrition pipeline.

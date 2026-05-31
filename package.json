@@ -5,7 +5,7 @@
   "description": "Become — AI Wellness, Fitness & Mindfulness Platform",
   "packageManager": "pnpm@9.15.0",
   "engines": {
-    "node": ">=22.0.0"
+    "node": ">=18.0.0"
   },
   "scripts": {
     "build": "turbo build",

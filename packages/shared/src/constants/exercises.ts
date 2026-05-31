@@ -1,4 +1,4 @@
-import type { ExerciseId } from '../types/workout.js';
+import type { ExerciseId } from '../types/workout';
 
 export interface ExerciseInfo {
   id: ExerciseId;

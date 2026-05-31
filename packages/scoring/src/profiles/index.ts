@@ -1,9 +1,9 @@
 import type { ExerciseId } from '@become/shared';
-import type { ExerciseProfile } from '../types.js';
-import { AIR_SQUAT_PROFILE } from './air-squat.js';
-import { PUSH_UP_PROFILE } from './push-up.js';
-import { SIT_UP_PROFILE } from './sit-up.js';
-import { KETTLEBELL_SWING_PROFILE } from './kettlebell-swing.js';
+import type { ExerciseProfile } from '../types';
+import { AIR_SQUAT_PROFILE } from './air-squat';
+import { PUSH_UP_PROFILE } from './push-up';
+import { SIT_UP_PROFILE } from './sit-up';
+import { KETTLEBELL_SWING_PROFILE } from './kettlebell-swing';
 
 const PROFILES: Record<ExerciseId, ExerciseProfile> = {
   air_squat: AIR_SQUAT_PROFILE,

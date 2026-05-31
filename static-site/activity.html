@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Activity Log — Become</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>tailwind.config={darkMode:'class'}</script>
+  <style>body{font-family:system-ui,-apple-system,sans-serif}</style>
+</head>
+<body class="bg-slate-950 text-white antialiased min-h-screen">
+
+<!-- Nav -->
+<nav class="fixed top-0 left-0 right-0 z-50 bg-slate-950/80 backdrop-blur-md border-b border-slate-800">
+  <div class="max-w-6xl mx-auto px-6 py-4 flex items-center justify-between">
+    <a href="/" class="text-xl font-bold text-indigo-400">Become</a>
+    <div class="hidden md:flex items-center gap-6">
+      <a href="/dashboard.html" class="text-slate-300 hover:text-white text-sm">Dashboard</a>
+      <a href="/fitness.html" class="text-slate-300 hover:text-white text-sm">Form Check</a>
+      <a href="/mindbody.html" class="text-slate-300 hover:text-white text-sm">Mind & Body</a>
+      <a href="/nutrition.html" class="text-slate-300 hover:text-white text-sm">Nutrition</a>
+      <a href="/activity.html" class="text-white font-medium text-sm">Activity</a>
+    </div>
+  </div>
+</nav>
+
+<div class="pt-24 px-6 max-w-4xl mx-auto pb-12">
+  <h1 class="text-3xl font-bold">Activity Log</h1>
+  <p class="text-slate-400 mt-2">Your complete workout and wellness history</p>
+
+  <!-- Weekly Summary Strip -->
+  <div class="grid grid-cols-2 md:grid-cols-4 gap-3 mt-6">
+    <div class="bg-slate-900 border border-slate-800 rounded-xl p-4 text-center">
+      <p class="text-2xl font-bold text-indigo-400">12</p>
+      <p class="text-slate-400 text-xs mt-1">Sessions This Week</p>
+    </div>
+    <div class="bg-slate-900 border border-slate-800 rounded-xl p-4 text-center">
+      <p class="text-2xl font-bold text-emerald-400">89</p>
+      <p class="text-slate-400 text-xs mt-1">Avg Form Score</p>
+    </div>
+    <div class="bg-slate-900 border border-slate-800 rounded-xl p-4 text-center">
+      <p class="text-2xl font-bold text-amber-400">52ms</p>
+      <p class="text-slate-400 text-xs mt-1">Avg HRV</p>
+    </div>
+    <div class="bg-slate-900 border border-slate-800 rounded-xl p-4 text-center">
+      <p class="text-2xl font-bold text-white">7.2h</p>
+      <p class="text-slate-400 text-xs mt-1">Avg Sleep</p>
+    </div>
+  </div>
+
+  <!-- Tab Toggle -->
+  <div class="mt-8 bg-slate-900 rounded-xl p-1 border border-slate-800 inline-flex">
+    <button onclick="showTab('workouts')" id="tab-workouts" class="px-5 py-2 rounded-lg font-semibold text-sm bg-indigo-600 text-white">Workouts</button>
+    <button onclick="showTab('hrv')" id="tab-hrv" class="px-5 py-2 rounded-lg font-semibold text-sm text-slate-400">HRV & Sleep</button>
+    <button onclick="showTab('nutrition')" id="tab-nutrition" class="px-5 py-2 rounded-lg font-semibold text-sm text-slate-400">Nutrition</button>
+  </div>
+
+  <!-- Workouts Tab -->
+  <div id="panel-workouts" class="mt-6 space-y-3">
+    <div class="bg-slate-900 border border-slate-800 rounded-xl p-4">
+      <div class="flex items-center justify-between">
+        <div class="flex items-center gap-3">
+          <div class="w-10 h-10 rounded-lg bg-indigo-600/20 border border-indigo-500/30 flex items-center justify-center">🏋️</div>
+          <div><p class="text-white font-medium">Air Squat</p><p class="text-slate-500 text-xs">Today · 1:24 · 12 reps</p></div>
+        </div>
+        <div class="text-right"><span class="text-emerald-400 font-bold text-lg">94</span><span class="text-slate-500 text-xs">/100</span></div>
+      </div>
+      <div class="flex gap-2 mt-3">
+        <span class="bg-slate-800 rounded-full px-2.5 py-0.5 text-xs text-slate-400">Best rep: 98</span>
+        <span class="bg-amber-900/30 rounded-full px-2.5 py-0.5 text-xs text-amber-300">Knee cave 2x</span>
+      </div>
+    </div>
+
+    <div class="bg-slate-900 border border-slate-800 rounded-xl p-4">
+      <div class="flex items-center justify-between">
+        <div class="flex items-center gap-3">
+          <div class="w-10 h-10 rounded-lg bg-indigo-600/20 border border-indigo-500/30 flex items-center justify-center">💪</div>
+          <div><p class="text-white font-medium">Push-Up</p><p class="text-slate-500 text-xs">Yesterday · 2:10 · 15 reps</p></div>
+        </div>
+        <div class="text-right"><span class="text-amber-400 font-bold text-lg">87</span><span class="text-slate-500 text-xs">/100</span></div>
+      </div>
+      <div class="flex gap-2 mt-3">
+        <span class="bg-slate-800 rounded-full px-2.5 py-0.5 text-xs text-slate-400">Best rep: 95</span>
+        <span class="bg-amber-900/30 rounded-full px-2.5 py-0.5 text-xs text-amber-300">Depth 3x</span>
+      </div>
+    </div>
+
+    <div class="bg-slate-900 border border-slate-800 rounded-xl p-4">
+      <div class="flex items-center justify-between">
+        <div class="flex items-center gap-3">
+          <div class="w-10 h-10 rounded-lg bg-indigo-600/20 border border-indigo-500/30 flex items-center justify-center">🔔</div>
+          <div><p class="text-white font-medium">Kettlebell Swing</p><p class="text-slate-500 text-xs">2 days ago · 1:45 · 10 reps</p></div>
+        </div>
+        <div class="text-right"><span class="text-emerald-400 font-bold text-lg">91</span><span class="text-slate-500 text-xs">/100</span></div>
+      </div>
+      <div class="flex gap-2 mt-3">
+        <span class="bg-slate-800 rounded-full px-2.5 py-0.5 text-xs text-slate-400">Best rep: 97</span>
+      </div>
+    </div>
+
+    <div class="bg-slate-900 border border-slate-800 rounded-xl p-4">
+      <div class="flex items-center justify-between">
+        <div class="flex items-center gap-3">
+          <div class="w-10 h-10 rounded-lg bg-indigo-600/20 border border-indigo-500/30 flex items-center justify-center">🧘</div>
+          <div><p class="text-white font-medium">Sit-Up</p><p class="text-slate-500 text-xs">3 days ago · 1:02 · 20 reps</p></div>
+        </div>
+        <div class="text-right"><span class="text-amber-400 font-bold text-lg">82</span><span class="text-slate-500 text-xs">/100</span></div>
+      </div>
+      <div class="flex gap-2 mt-3">
+        <span class="bg-slate-800 rounded-full px-2.5 py-0.5 text-xs text-slate-400">Best rep: 90</span>
+        <span class="bg-amber-900/30 rounded-full px-2.5 py-0.5 text-xs text-amber-300">Depth 5x</span>
+      </div>
+    </div>
+
+    <div class="bg-slate-900 border border-slate-800 rounded-xl p-4">
+      <div class="flex items-center justify-between">
+        <div class="flex items-center gap-3">
+          <div class="w-10 h-10 rounded-lg bg-emerald-600/20 border border-emerald-500/30 flex items-center justify-center">🧘‍♀️</div>
+          <div><p class="text-white font-medium">Morning Yoga Flow</p><p class="text-slate-500 text-xs">4 days ago · 20 min · Mind & Body</p></div>
+        </div>
+        <div class="text-right"><span class="text-emerald-400 text-sm font-medium">Completed</span></div>
+      </div>
+    </div>
+
+    <div class="bg-slate-900 border border-slate-800 rounded-xl p-4">
+      <div class="flex items-center justify-between">
+        <div class="flex items-center gap-3">
+          <div class="w-10 h-10 rounded-lg bg-emerald-600/20 border border-emerald-500/30 flex items-center justify-center">🌬️</div>
+          <div><p class="text-white font-medium">Guided Breathing</p><p class="text-slate-500 text-xs">5 days ago · 5 min · Recovery</p></div>
+        </div>
+        <div class="text-right"><span class="text-emerald-400 text-sm font-medium">Completed</span></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- HRV & Sleep Tab -->
+  <div id="panel-hrv" class="mt-6 hidden">
+    <!-- HRV Trend Chart -->
+    <div class="bg-slate-900 border border-slate-800 rounded-2xl p-6 mb-4">
+      <h3 class="text-white font-semibold mb-4">HRV Trend (14 days)</h3>
+      <div class="flex items-end justify-between gap-1.5 h-32">
+        <div class="flex-1 flex flex-col items-center gap-1"><div class="w-full rounded-t bg-red-500/70" style="height:35%"></div><span class="text-slate-600 text-[10px]">1</span></div>
+        <div class="flex-1 flex flex-col items-center gap-1"><div class="w-full rounded-t bg-amber-500/70" style="height:50%"></div><span class="text-slate-600 text-[10px]">2</span></div>
+        <div class="flex-1 flex flex-col items-center gap-1"><div class="w-full rounded-t bg-amber-500/70" style="height:55%"></div><span class="text-slate-600 text-[10px]">3</span></div>
+        <div class="flex-1 flex flex-col items-center gap-1"><div class="w-full rounded-t bg-indigo-500/70" style="height:65%"></div><span class="text-slate-600 text-[10px]">4</span></div>
+        <div class="flex-1 flex flex-col items-center gap-1"><div class="w-full rounded-t bg-indigo-500/70" style="height:70%"></div><span class="text-slate-600 text-[10px]">5</span></div>
+        <div class="flex-1 flex flex-col items-center gap-1"><div class="w-full rounded-t bg-emerald-500/70" style="height:85%"></div><span class="text-slate-600 text-[10px]">6</span></div>
+        <div class="flex-1 flex flex-col items-center gap-1"><div class="w-full rounded-t bg-emerald-500/70" style="height:80%"></div><span class="text-slate-600 text-[10px]">7</span></div>
+        <div class="flex-1 flex flex-col items-center gap-1"><div class="w-full rounded-t bg-amber-500/70" style="height:48%"></div><span class="text-slate-600 text-[10px]">8</span></div>
+        <div class="flex-1 flex flex-col items-center gap-1"><div class="w-full rounded-t bg-indigo-500/70" style="height:62%"></div><span class="text-slate-600 text-[10px]">9</span></div>
+        <div class="flex-1 flex flex-col items-center gap-1"><div class="w-full rounded-t bg-indigo-500/70" style="height:68%"></div><span class="text-slate-600 text-[10px]">10</span></div>
+        <div class="flex-1 flex flex-col items-center gap-1"><div class="w-full rounded-t bg-emerald-500/70" style="height:90%"></div><span class="text-slate-600 text-[10px]">11</span></div>
+        <div class="flex-1 flex flex-col items-center gap-1"><div class="w-full rounded-t bg-emerald-500/70" style="height:82%"></div><span class="text-slate-600 text-[10px]">12</span></div>
+        <div class="flex-1 flex flex-col items-center gap-1"><div class="w-full rounded-t bg-indigo-500/70" style="height:72%"></div><span class="text-slate-600 text-[10px]">13</span></div>
+        <div class="flex-1 flex flex-col items-center gap-1"><div class="w-full rounded-t bg-amber-500/70" style="height:50%"></div><span class="text-slate-600 text-[10px]">14</span></div>
+      </div>
+      <div class="flex justify-between mt-3 text-xs"><span class="text-slate-400">Baseline: <span class="text-white font-semibold">48ms</span></span><span class="text-emerald-400 font-medium">Current: 52ms (+8%)</span></div>
+    </div>
+
+    <!-- HRV Readings List -->
+    <div class="bg-slate-900 border border-slate-800 rounded-2xl overflow-hidden mb-4">
+      <div class="px-5 py-3 border-b border-slate-800"><p class="text-white font-semibold text-sm">Recent HRV Readings</p></div>
+      <div class="divide-y divide-slate-800">
+        <div class="px-5 py-3 flex justify-between items-center"><div><p class="text-white text-sm">Today</p><p class="text-slate-500 text-xs">Manual entry</p></div><div class="text-right"><span class="text-amber-400 font-bold">42ms</span><span class="ml-2 text-xs bg-amber-900/30 text-amber-300 px-2 py-0.5 rounded-full">Stressed</span></div></div>
+        <div class="px-5 py-3 flex justify-between items-center"><div><p class="text-white text-sm">Yesterday</p><p class="text-slate-500 text-xs">Apple Watch</p></div><div class="text-right"><span class="text-indigo-400 font-bold">55ms</span><span class="ml-2 text-xs bg-indigo-900/30 text-indigo-300 px-2 py-0.5 rounded-full">Balanced</span></div></div>
+        <div class="px-5 py-3 flex justify-between items-center"><div><p class="text-white text-sm">2 days ago</p><p class="text-slate-500 text-xs">Apple Watch</p></div><div class="text-right"><span class="text-emerald-400 font-bold">64ms</span><span class="ml-2 text-xs bg-emerald-900/30 text-emerald-300 px-2 py-0.5 rounded-full">Recovery</span></div></div>
+        <div class="px-5 py-3 flex justify-between items-center"><div><p class="text-white text-sm">3 days ago</p><p class="text-slate-500 text-xs">Apple Watch</p></div><div class="text-right"><span class="text-emerald-400 font-bold">62ms</span><span class="ml-2 text-xs bg-emerald-900/30 text-emerald-300 px-2 py-0.5 rounded-full">Recovery</span></div></div>
+      </div>
+    </div>
+
+    <!-- Sleep History -->
+    <div class="bg-slate-900 border border-slate-800 rounded-2xl overflow-hidden">
+      <div class="px-5 py-3 border-b border-slate-800"><p class="text-white font-semibold text-sm">Sleep History</p></div>
+      <div class="divide-y divide-slate-800">
+        <div class="px-5 py-3 flex justify-between items-center"><div><p class="text-white text-sm">Last Night</p><p class="text-slate-500 text-xs">11:20 PM - 6:45 AM</p></div><div class="text-right"><span class="text-white font-bold">7h 25m</span><div class="flex gap-1 mt-1 justify-end"><span class="w-3 h-1.5 rounded-full bg-indigo-500"></span><span class="w-4 h-1.5 rounded-full bg-indigo-700"></span><span class="w-6 h-1.5 rounded-full bg-indigo-300"></span><span class="w-2 h-1.5 rounded-full bg-slate-500"></span></div></div></div>
+        <div class="px-5 py-3 flex justify-between items-center"><div><p class="text-white text-sm">2 nights ago</p><p class="text-slate-500 text-xs">10:50 PM - 6:30 AM</p></div><div class="text-right"><span class="text-white font-bold">7h 40m</span></div></div>
+        <div class="px-5 py-3 flex justify-between items-center"><div><p class="text-white text-sm">3 nights ago</p><p class="text-slate-500 text-xs">12:10 AM - 6:50 AM</p></div><div class="text-right"><span class="text-amber-400 font-bold">6h 40m</span></div></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Nutrition Log Tab -->
+  <div id="panel-nutrition" class="mt-6 hidden">
+    <div class="bg-slate-900 border border-slate-800 rounded-2xl overflow-hidden">
+      <div class="px-5 py-3 border-b border-slate-800"><p class="text-white font-semibold text-sm">Meals Logged This Week</p></div>
+      <div class="divide-y divide-slate-800">
+        <div class="px-5 py-3 flex justify-between items-center"><div><p class="text-white text-sm">🍳 Spinach & Feta Omelette</p><p class="text-slate-500 text-xs">Today · Breakfast · 420 cal</p></div><span class="text-emerald-400 text-xs font-medium">✓ Completed</span></div>
+        <div class="px-5 py-3 flex justify-between items-center"><div><p class="text-white text-sm">🥗 Grilled Salmon Bowl</p><p class="text-slate-500 text-xs">Today · Lunch · 580 cal</p></div><span class="text-emerald-400 text-xs font-medium">✓ Completed</span></div>
+        <div class="px-5 py-3 flex justify-between items-center"><div><p class="text-white text-sm">🍲 Herb Chicken & Sweet Potato</p><p class="text-slate-500 text-xs">Yesterday · Dinner · 620 cal</p></div><span class="text-emerald-400 text-xs font-medium">✓ Completed</span></div>
+        <div class="px-5 py-3 flex justify-between items-center"><div><p class="text-white text-sm">🥜 Greek Yogurt & Walnuts</p><p class="text-slate-500 text-xs">Yesterday · Snack · 180 cal</p></div><span class="text-emerald-400 text-xs font-medium">✓ Completed</span></div>
+        <div class="px-5 py-3 flex justify-between items-center"><div><p class="text-white text-sm">🍳 Overnight Oats with Banana</p><p class="text-slate-500 text-xs">2 days ago · Breakfast · 380 cal</p></div><span class="text-emerald-400 text-xs font-medium">✓ Completed</span></div>
+      </div>
+    </div>
+
+    <!-- Weekly Nutrition Stats -->
+    <div class="bg-slate-900 border border-slate-800 rounded-2xl p-6 mt-4">
+      <h3 class="text-white font-semibold text-sm mb-4">Weekly Macro Averages</h3>
+      <div class="grid grid-cols-3 gap-4 text-center">
+        <div><p class="text-indigo-400 text-xl font-bold">138g</p><p class="text-slate-400 text-xs">Avg Protein</p><p class="text-emerald-400 text-xs mt-1">↑ On target</p></div>
+        <div><p class="text-amber-400 text-xl font-bold">175g</p><p class="text-slate-400 text-xs">Avg Carbs</p><p class="text-emerald-400 text-xs mt-1">↑ On target</p></div>
+        <div><p class="text-rose-400 text-xl font-bold">58g</p><p class="text-slate-400 text-xs">Avg Fat</p><p class="text-slate-400 text-xs mt-1">— Neutral</p></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+function showTab(tab) {
+  const tabs = ['workouts','hrv','nutrition'];
+  tabs.forEach(t => {
+    document.getElementById('tab-'+t).className = t===tab ? 'px-5 py-2 rounded-lg font-semibold text-sm bg-indigo-600 text-white' : 'px-5 py-2 rounded-lg font-semibold text-sm text-slate-400';
+    document.getElementById('panel-'+t).classList.toggle('hidden', t!==tab);
+  });
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,12 @@
+{
+  "expo": {
+    "extra": {
+      "eas": {
+        "projectId": "ceb003ee-2457-40ec-9be9-af32cb4b18e4"
+      }
+    },
+    "android": {
+      "package": "com.smaddineni.become"
+    }
+  }
+}

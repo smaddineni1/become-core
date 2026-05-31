@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Nutrition — Become</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>tailwind.config={darkMode:'class'}</script>
+  <style>body{font-family:system-ui,-apple-system,sans-serif}@keyframes shimmer{0%{background-position:-200% 0}100%{background-position:200% 0}}.shimmer{background:linear-gradient(90deg,#1e293b 25%,#334155 50%,#1e293b 75%);background-size:200% 100%;animation:shimmer 1.5s infinite}</style>
+</head>
+<body class="bg-slate-950 text-white antialiased min-h-screen">
+
+<!-- Nav -->
+<nav class="fixed top-0 left-0 right-0 z-50 bg-slate-950/80 backdrop-blur-md border-b border-slate-800">
+  <div class="max-w-6xl mx-auto px-6 py-4 flex items-center justify-between">
+    <a href="/" class="text-xl font-bold text-indigo-400">Become</a>
+    <div class="hidden md:flex items-center gap-6">
+      <a href="/dashboard.html" class="text-slate-300 hover:text-white text-sm">Dashboard</a>
+      <a href="/fitness.html" class="text-slate-300 hover:text-white text-sm">Form Check</a>
+      <a href="/mindbody.html" class="text-slate-300 hover:text-white text-sm">Mind & Body</a>
+      <a href="/nutrition.html" class="text-white font-medium text-sm">Nutrition</a>
+      <a href="/activity.html" class="text-slate-300 hover:text-white text-sm">Activity</a>
+    </div>
+  </div>
+</nav>
+
+<div class="pt-24 px-6 max-w-4xl mx-auto pb-12">
+  <h1 class="text-3xl font-bold">Nutrition</h1>
+  <p class="text-slate-400 mt-2">Your personalized whole-food meal plan</p>
+
+  <!-- Daily Summary -->
+  <div class="bg-slate-900 rounded-2xl p-6 border border-slate-800 mt-6">
+    <div class="flex items-center justify-between">
+      <div>
+        <p class="text-slate-400 text-sm">Today's Targets</p>
+        <p class="text-2xl font-bold mt-1" id="total-cal">1,800 kcal</p>
+      </div>
+      <button onclick="regeneratePlan()" id="gen-btn" class="bg-indigo-600 hover:bg-indigo-700 px-5 py-2.5 rounded-xl font-semibold text-sm transition-colors">Regenerate</button>
+    </div>
+    <!-- Macros -->
+    <div class="flex justify-between mt-5">
+      <div class="text-center"><p class="text-indigo-400 text-lg font-bold">142g</p><p class="text-slate-500 text-xs">Protein</p></div>
+      <div class="text-center"><p class="text-amber-400 text-lg font-bold">180g</p><p class="text-slate-500 text-xs">Carbs</p></div>
+      <div class="text-center"><p class="text-rose-400 text-lg font-bold">62g</p><p class="text-slate-500 text-xs">Fat</p></div>
+    </div>
+    <!-- Macro Bars -->
+    <div class="mt-4 space-y-2">
+      <div class="flex items-center gap-2"><span class="text-xs text-slate-400 w-12">Protein</span><div class="flex-1 h-2 bg-slate-700 rounded-full"><div class="h-2 bg-indigo-500 rounded-full" style="width:79%"></div></div></div>
+      <div class="flex items-center gap-2"><span class="text-xs text-slate-400 w-12">Carbs</span><div class="flex-1 h-2 bg-slate-700 rounded-full"><div class="h-2 bg-amber-500 rounded-full" style="width:72%"></div></div></div>
+      <div class="flex items-center gap-2"><span class="text-xs text-slate-400 w-12">Fat</span><div class="flex-1 h-2 bg-slate-700 rounded-full"><div class="h-2 bg-rose-500 rounded-full" style="width:68%"></div></div></div>
+    </div>
+  </div>
+
+  <!-- Loading State (hidden) -->
+  <div id="loading-state" class="hidden mt-6 text-center py-12">
+    <p class="text-3xl mb-4">🥗</p>
+    <p class="text-white font-semibold text-lg">Crafting your meal plan...</p>
+    <p class="text-slate-400 text-sm mt-2">Our AI chef is selecting whole-food ingredients</p>
+    <div class="mt-6 max-w-sm mx-auto space-y-3">
+      <div class="h-20 rounded-xl shimmer"></div>
+      <div class="h-20 rounded-xl shimmer" style="animation-delay:0.2s"></div>
+      <div class="h-20 rounded-xl shimmer" style="animation-delay:0.4s"></div>
+    </div>
+  </div>
+
+  <!-- Meal Cards -->
+  <div id="meal-cards" class="mt-6 space-y-4">
+    <!-- Breakfast -->
+    <div class="bg-slate-900 border border-slate-800 rounded-2xl overflow-hidden">
+      <div class="p-5 cursor-pointer" onclick="toggleMeal(this)">
+        <div class="flex items-center justify-between">
+          <div class="flex items-center gap-3">
+            <span class="text-xl">🍳</span>
+            <div>
+              <p class="text-slate-500 text-xs uppercase tracking-wider">Breakfast</p>
+              <p class="text-white font-semibold">Spinach & Feta Omelette with Avocado</p>
+            </div>
+          </div>
+          <div class="text-right">
+            <p class="text-indigo-400 font-bold">420 cal</p>
+            <p class="text-slate-500 text-xs">15 min</p>
+          </div>
+        </div>
+        <div class="flex gap-4 mt-3"><span class="text-slate-400 text-xs">P: 32g</span><span class="text-slate-400 text-xs">C: 18g</span><span class="text-slate-400 text-xs">F: 28g</span></div>
+      </div>
+      <div class="hidden px-5 pb-5 border-t border-slate-800 pt-4">
+        <p class="text-slate-300 text-sm font-medium mb-2">Ingredients</p>
+        <ul class="text-slate-400 text-sm space-y-1">
+          <li>• 3 eggs (whole)</li><li>• 1 cup fresh spinach</li><li>• 30g feta cheese</li><li>• 1/2 avocado, sliced</li><li>• 1 tsp olive oil</li><li>• Salt, pepper, herbs</li>
+        </ul>
+        <p class="text-slate-300 text-sm font-medium mt-4 mb-2">Method</p>
+        <p class="text-slate-400 text-sm leading-5">Whisk eggs, pour into heated olive oil pan. Add spinach and crumbled feta. Fold when edges set. Serve with sliced avocado on the side.</p>
+        <button onclick="logMeal(this, 'Breakfast')" class="mt-4 bg-emerald-600/20 border border-emerald-500/30 text-emerald-400 rounded-lg px-4 py-2 text-sm font-medium hover:bg-emerald-600/30 transition-colors">✓ Mark Complete</button>
+      </div>
+    </div>
+
+    <!-- Lunch -->
+    <div class="bg-slate-900 border border-slate-800 rounded-2xl overflow-hidden">
+      <div class="p-5 cursor-pointer" onclick="toggleMeal(this)">
+        <div class="flex items-center justify-between">
+          <div class="flex items-center gap-3">
+            <span class="text-xl">🥗</span>
+            <div>
+              <p class="text-slate-500 text-xs uppercase tracking-wider">Lunch</p>
+              <p class="text-white font-semibold">Grilled Salmon Bowl with Quinoa & Greens</p>
+            </div>
+          </div>
+          <div class="text-right">
+            <p class="text-indigo-400 font-bold">580 cal</p>
+            <p class="text-slate-500 text-xs">20 min</p>
+          </div>
+        </div>
+        <div class="flex gap-4 mt-3"><span class="text-slate-400 text-xs">P: 42g</span><span class="text-slate-400 text-xs">C: 48g</span><span class="text-slate-400 text-xs">F: 22g</span></div>
+      </div>
+      <div class="hidden px-5 pb-5 border-t border-slate-800 pt-4">
+        <p class="text-slate-300 text-sm font-medium mb-2">Ingredients</p>
+        <ul class="text-slate-400 text-sm space-y-1">
+          <li>• 150g salmon fillet</li><li>• 100g quinoa (dry)</li><li>• 2 cups mixed greens</li><li>• 1/2 cucumber, diced</li><li>• 1 tbsp tahini dressing</li><li>• Lemon, salt, pepper</li>
+        </ul>
+        <p class="text-slate-300 text-sm font-medium mt-4 mb-2">Method</p>
+        <p class="text-slate-400 text-sm leading-5">Cook quinoa per package instructions. Season salmon with lemon and herbs, grill 4 min each side. Assemble bowl with greens, quinoa, salmon, cucumber. Drizzle tahini.</p>
+        <button onclick="logMeal(this, 'Lunch')" class="mt-4 bg-emerald-600/20 border border-emerald-500/30 text-emerald-400 rounded-lg px-4 py-2 text-sm font-medium hover:bg-emerald-600/30 transition-colors">✓ Mark Complete</button>
+      </div>
+    </div>
+
+    <!-- Dinner -->
+    <div class="bg-slate-900 border border-slate-800 rounded-2xl overflow-hidden">
+      <div class="p-5 cursor-pointer" onclick="toggleMeal(this)">
+        <div class="flex items-center justify-between">
+          <div class="flex items-center gap-3">
+            <span class="text-xl">🍲</span>
+            <div>
+              <p class="text-slate-500 text-xs uppercase tracking-wider">Dinner</p>
+              <p class="text-white font-semibold">Herb Roasted Chicken with Sweet Potato</p>
+            </div>
+          </div>
+          <div class="text-right">
+            <p class="text-indigo-400 font-bold">620 cal</p>
+            <p class="text-slate-500 text-xs">35 min</p>
+          </div>
+        </div>
+        <div class="flex gap-4 mt-3"><span class="text-slate-400 text-xs">P: 48g</span><span class="text-slate-400 text-xs">C: 52g</span><span class="text-slate-400 text-xs">F: 18g</span></div>
+      </div>
+      <div class="hidden px-5 pb-5 border-t border-slate-800 pt-4">
+        <p class="text-slate-300 text-sm font-medium mb-2">Ingredients</p>
+        <ul class="text-slate-400 text-sm space-y-1">
+          <li>• 180g chicken breast</li><li>• 1 medium sweet potato</li><li>• 1 cup broccoli florets</li><li>• 1 tbsp olive oil</li><li>• Rosemary, thyme, garlic</li>
+        </ul>
+        <p class="text-slate-300 text-sm font-medium mt-4 mb-2">Method</p>
+        <p class="text-slate-400 text-sm leading-5">Cube sweet potato and toss with olive oil and herbs. Roast at 200C for 20 min. Season chicken, pan-sear 6 min each side. Steam broccoli. Plate together.</p>
+        <button onclick="logMeal(this, 'Dinner')" class="mt-4 bg-emerald-600/20 border border-emerald-500/30 text-emerald-400 rounded-lg px-4 py-2 text-sm font-medium hover:bg-emerald-600/30 transition-colors">✓ Mark Complete</button>
+      </div>
+    </div>
+
+    <!-- Snack -->
+    <div class="bg-slate-900 border border-slate-800 rounded-2xl overflow-hidden">
+      <div class="p-5 cursor-pointer" onclick="toggleMeal(this)">
+        <div class="flex items-center justify-between">
+          <div class="flex items-center gap-3">
+            <span class="text-xl">🥜</span>
+            <div>
+              <p class="text-slate-500 text-xs uppercase tracking-wider">Snack</p>
+              <p class="text-white font-semibold">Greek Yogurt with Berries & Walnuts</p>
+            </div>
+          </div>
+          <div class="text-right">
+            <p class="text-indigo-400 font-bold">180 cal</p>
+            <p class="text-slate-500 text-xs">2 min</p>
+          </div>
+        </div>
+        <div class="flex gap-4 mt-3"><span class="text-slate-400 text-xs">P: 20g</span><span class="text-slate-400 text-xs">C: 14g</span><span class="text-slate-400 text-xs">F: 6g</span></div>
+      </div>
+      <div class="hidden px-5 pb-5 border-t border-slate-800 pt-4">
+        <p class="text-slate-300 text-sm font-medium mb-2">Ingredients</p>
+        <ul class="text-slate-400 text-sm space-y-1">
+          <li>• 200g Greek yogurt (full fat)</li><li>• 1/2 cup mixed berries</li><li>• 15g walnuts, crushed</li><li>• 1 tsp honey (optional)</li>
+        </ul>
+        <p class="text-slate-300 text-sm font-medium mt-4 mb-2">Method</p>
+        <p class="text-slate-400 text-sm leading-5">Spoon yogurt into bowl. Top with berries and crushed walnuts. Drizzle honey if desired.</p>
+        <button onclick="logMeal(this, 'Snack')" class="mt-4 bg-emerald-600/20 border border-emerald-500/30 text-emerald-400 rounded-lg px-4 py-2 text-sm font-medium hover:bg-emerald-600/30 transition-colors">✓ Mark Complete</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Brand Notice -->
+  <div class="mt-6 bg-emerald-900/20 rounded-xl p-4 border border-emerald-800/20">
+    <p class="text-emerald-400 text-xs font-semibold uppercase tracking-wider mb-1">Whole-Food Promise</p>
+    <p class="text-slate-400 text-xs leading-4">Every meal uses only whole, minimally processed ingredients. No protein bars, powders, or packaged supplements — ever.</p>
+  </div>
+</div>
+
+<script>
+function toggleMeal(el) {
+  const details = el.nextElementSibling;
+  details.classList.toggle('hidden');
+}
+
+function logMeal(btn, meal) {
+  btn.textContent = '✓ Completed';
+  btn.classList.remove('bg-emerald-600/20','border-emerald-500/30','text-emerald-400');
+  btn.classList.add('bg-emerald-600','text-white','border-emerald-600');
+  btn.disabled = true;
+}
+
+function regeneratePlan() {
+  const btn = document.getElementById('gen-btn');
+  const cards = document.getElementById('meal-cards');
+  const loading = document.getElementById('loading-state');
+  btn.textContent = 'Generating...';
+  btn.classList.add('opacity-50','pointer-events-none');
+  cards.classList.add('hidden');
+  loading.classList.remove('hidden');
+  setTimeout(()=>{
+    btn.textContent = 'Regenerate';
+    btn.classList.remove('opacity-50','pointer-events-none');
+    cards.classList.remove('hidden');
+    loading.classList.add('hidden');
+  }, 3000);
+}
+</script>
+</body>
+</html>
