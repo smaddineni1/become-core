@@ -1,7 +1,7 @@
 /**
  * Genie API — Client-side functions for the AI coach
  */
-import type { GenieResponse, GenieMessage } from '@become/shared';
+import type { GenieResponse, GenieMessage } from '../../src/packages/shared';
 import { supabase } from '../supabase';
 
 const FUNCTIONS_URL = process.env.EXPO_PUBLIC_SUPABASE_URL ?? '';

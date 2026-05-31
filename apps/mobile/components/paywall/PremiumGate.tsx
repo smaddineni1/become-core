@@ -15,7 +15,7 @@
 import { View, Text, Pressable } from 'react-native';
 import { useState } from 'react';
 import type { ReactNode } from 'react';
-import { PREMIUM_GATES } from '@become/shared';
+import { PREMIUM_GATES } from '../../src/packages/shared';
 import { useSubscription } from '../../lib/purchases/use-subscription';
 import { PaywallScreen } from './PaywallScreen';
 

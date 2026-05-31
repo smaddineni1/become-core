@@ -7,8 +7,8 @@
 
 import { View, Text, Pressable, ScrollView } from 'react-native';
 import { router } from 'expo-router';
-import type { ExerciseId } from '@become/shared';
-import { EXERCISES } from '@become/shared';
+import type { ExerciseId } from '../../src/packages/shared';
+import { EXERCISES } from '../../src/packages/shared';
 
 interface SessionResult {
   exerciseId: ExerciseId;

@@ -9,7 +9,7 @@
 
 import { View, Text, Pressable, ScrollView } from 'react-native';
 import { useState, useEffect, useCallback } from 'react';
-import type { NutritionPlan, Meal } from '@become/shared';
+import type { NutritionPlan, Meal } from '../../../../src/packages/shared';
 import { generateMealPlan, getTodaysMealPlan } from '../../../lib/api/nutrition';
 
 type LoadState = 'idle' | 'loading' | 'success' | 'error';

@@ -1,14 +1,8 @@
 {
-  "extends": "../../tsconfig.base.json",
+  "extends": "expo/tsconfig.base",
   "compilerOptions": {
-    "jsx": "react-jsx",
-    "lib": ["ES2022", "DOM"],
-    "moduleResolution": "bundler",
-    "paths": {
-      "@become/shared": ["../../packages/shared/src"],
-      "@become/scoring": ["../../packages/scoring/src"],
-      "@become/ai": ["../../packages/ai/src"]
-    }
+    "strict": true,
+    "jsx": "react-jsx"
   },
   "include": ["**/*.ts", "**/*.tsx", "app/**/*.ts", "app/**/*.tsx"],
   "exclude": ["node_modules"]

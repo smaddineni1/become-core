@@ -12,7 +12,7 @@
  */
 
 import { View, Text, Pressable, ScrollView } from 'react-native';
-import { SUBSCRIPTION_CONFIG } from '@become/shared';
+import { SUBSCRIPTION_CONFIG } from '../../src/packages/shared';
 import { useSubscription } from '../../lib/purchases/use-subscription';
 
 interface PaywallScreenProps {

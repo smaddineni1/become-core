@@ -6,7 +6,7 @@ import { useCallback, useState } from 'react';
 import { getHealthProvider } from './health-provider';
 import type { DailyHealthSnapshot } from './health-provider';
 import { supabase } from '../supabase';
-import { classifyHRV } from '@become/shared';
+import { classifyHRV } from '../../src/packages/shared';
 
 export function useHealthSync() {
   const [isSyncing, setIsSyncing] = useState(false);

@@ -1,6 +1,6 @@
 import { View, Text, Pressable, ScrollView } from 'react-native';
 import { router } from 'expo-router';
-import { EXERCISES, LAUNCH_EXERCISES } from '@become/shared';
+import { EXERCISES, LAUNCH_EXERCISES } from '../../../../src/packages/shared';
 
 export default function FormCheckScreen() {
   return (

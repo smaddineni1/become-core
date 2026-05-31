@@ -12,7 +12,7 @@
  */
 
 import type { ReadinessScore } from './readiness-engine';
-import type { MindfulnessSession } from '@become/shared';
+import type { MindfulnessSession } from '../../src/packages/shared';
 
 export interface DailyRecommendation {
   readiness: ReadinessScore;

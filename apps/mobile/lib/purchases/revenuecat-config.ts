@@ -10,7 +10,7 @@
  */
 
 import { Platform } from 'react-native';
-import { REVENUECAT_CONFIG } from '@become/shared';
+import { REVENUECAT_CONFIG } from '../../src/packages/shared';
 
 // RevenueCat API Keys — loaded from environment
 const RC_IOS_API_KEY = process.env.EXPO_PUBLIC_RC_IOS_API_KEY ?? '';

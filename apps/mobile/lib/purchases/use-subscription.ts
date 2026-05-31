@@ -6,8 +6,8 @@
  */
 
 import { useCallback, useEffect, useState } from 'react';
-import type { SubscriptionInfo } from '@become/shared';
-import { PREMIUM_GATES, FREE_TIER_LIMITS } from '@become/shared';
+import type { SubscriptionInfo } from '../../src/packages/shared';
+import { PREMIUM_GATES, FREE_TIER_LIMITS } from '../../src/packages/shared';
 import { supabase } from '../supabase';
 
 export interface UseSubscriptionReturn {

@@ -8,7 +8,7 @@
  * in meters for the z-axis (depth).
  */
 
-import type { Landmark } from '@become/scoring';
+import type { Landmark } from '../../src/packages/scoring';
 
 /**
  * MediaPipe's 33 pose landmark indices

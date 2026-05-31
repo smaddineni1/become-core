@@ -1,7 +1,7 @@
 /**
  * Nutrition API — Client-side functions for meal plan operations
  */
-import type { NutritionPlan } from '@become/shared';
+import type { NutritionPlan } from '../../src/packages/shared';
 import { supabase } from '../supabase';
 
 const FUNCTIONS_URL = process.env.EXPO_PUBLIC_SUPABASE_URL ?? '';
