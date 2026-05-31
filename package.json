@@ -2,10 +2,10 @@
   "name": "become",
   "private": true,
   "version": "0.1.0",
-  "description": "Become — AI Wellness, Fitness & Mindfulness Platform",
   "packageManager": "pnpm@9.15.0",
-  "engines": {
-    "node": ">=18.0.0"
+  "description": "Become — AI Wellness, Fitness & Mindfulness Platform",
+   "engines": {
+   "node": ">=18.0.0"
   },
   "scripts": {
     "build": "turbo build",
