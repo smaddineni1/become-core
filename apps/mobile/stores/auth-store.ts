@@ -3,7 +3,7 @@
  *
  * Manages user session, profile, and subscription state.
  */
-import type { UserProfile } from '../../src/packages/shared';
+import type { UserProfile } from '@app/packages/shared';
 
 // Zustand store interface — actual create() call requires the package installed
 export interface AuthStore {

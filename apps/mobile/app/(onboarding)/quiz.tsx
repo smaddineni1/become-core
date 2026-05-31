@@ -6,7 +6,7 @@ import type {
   ActivityLevel,
   DietaryPreference,
   OnboardingQuizInput,
-} from '../../../src/packages/shared';
+} from '@app/packages/shared';
 
 type QuizStep = 1 | 2 | 3 | 4 | 5 | 6;
 

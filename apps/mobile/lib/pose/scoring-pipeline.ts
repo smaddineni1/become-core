@@ -10,7 +10,7 @@
  * 6. Outputs live UI updates
  */
 
-import type { ExerciseId } from '../../src/packages/shared';
+import type { ExerciseId } from '@app/packages/shared';
 import {
   type Landmark,
   type ExerciseProfile,
@@ -20,7 +20,7 @@ import {
   RepStateMachine,
   scoreRep,
   detectCues,
-} from '../../src/packages/scoring';
+} from '@app/packages/scoring';
 import {
   type ProcessedPoseFrame,
   type MediaPipePoseResult,

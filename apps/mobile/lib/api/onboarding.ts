@@ -1,7 +1,7 @@
 /**
  * Onboarding API — Quiz & Scan persistence
  */
-import type { OnboardingQuizInput } from '../../src/packages/shared';
+import type { OnboardingQuizInput } from '@app/packages/shared';
 import { supabase } from '../supabase';
 
 /**

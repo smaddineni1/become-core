@@ -13,8 +13,8 @@
  */
 
 import { View, Text } from 'react-native';
-import type { ExerciseId } from '../../src/packages/shared';
-import { EXERCISES } from '../../src/packages/shared';
+import type { ExerciseId } from '@app/packages/shared';
+import { EXERCISES } from '@app/packages/shared';
 
 /**
  * Camera positions per exercise for optimal viewing angle

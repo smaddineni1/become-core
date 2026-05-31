@@ -10,8 +10,8 @@
 import { View, Text, Pressable } from 'react-native';
 import { useLocalSearchParams, router } from 'expo-router';
 import { useState, useCallback, useRef } from 'react';
-import { EXERCISES } from '../../../../src/packages/shared';
-import type { ExerciseId } from '../../../../src/packages/shared';
+import { EXERCISES } from '@app/packages/shared';
+import type { ExerciseId } from '@app/packages/shared';
 import { ThreeDModelViewer } from '../../../components/form-check/ThreeDModelViewer';
 import { CameraWithPose } from '../../../components/form-check/CameraWithPose';
 import { ScoreOverlay } from '../../../components/form-check/ScoreOverlay';

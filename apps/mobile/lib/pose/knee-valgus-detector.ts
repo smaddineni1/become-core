@@ -12,7 +12,7 @@
  * valgus is present.
  */
 
-import type { Landmark } from '../../src/packages/scoring';
+import type { Landmark } from '@app/packages/scoring';
 
 export interface KneeValgusResult {
   leftValgusAngle: number;    // Degrees of inward collapse (0 = neutral, >0 = valgus)

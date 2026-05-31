@@ -1,2 +1,11 @@
 const { getDefaultConfig } = require('expo/metro-config');
-module.exports = getDefaultConfig(__dirname);
+const path = require('path');
+
+const config = getDefaultConfig(__dirname);
+
+// Support @app/packages/* path alias
+config.resolver.extraNodeModules = {
+  '@app/packages': path.resolve(__dirname, 'src/packages'),
+};
+
+module.exports = config;

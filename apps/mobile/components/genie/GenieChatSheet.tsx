@@ -12,7 +12,7 @@
 import { View, Text, TextInput, Pressable, ScrollView, KeyboardAvoidingView, Platform } from 'react-native';
 import { router } from 'expo-router';
 import { useState, useRef, useCallback } from 'react';
-import type { ActionButton, GenieMessage } from '../../src/packages/shared';
+import type { ActionButton, GenieMessage } from '@app/packages/shared';
 import { sendGenieMessage } from '../../lib/api/genie';
 
 interface GenieChatSheetProps {
