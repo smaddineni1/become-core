@@ -10,7 +10,7 @@ const supabase = createClient(
 
 const BREATHING_VIDEO_URL = 'https://tehezgpzecdblhebddoo.supabase.co/storage/v1/object/public/videos/runway-agent-exhale-20260528-152325.mp4';
 
-type Screen = 'login' | 'register' | 'quiz' | 'scan' | 'home' | 'nutrition' | 'formcheck' | 'mindbody' | 'breathing';
+type Screen = 'login' | 'register' | 'quiz' | 'scan' | 'home' | 'nutrition' | 'formcheck' | 'mindbody' | 'breathing' | 'activity';
 
 export default function App() {
   const [screen, setScreen] = useState<Screen>('login');
@@ -37,10 +37,14 @@ export default function App() {
   const [mealPlan, setMealPlan] = useState<any>(null);
   const [nutritionLoading, setNutritionLoading] = useState(false);
 
+  // Points/Gamification state
+  const [points, setPoints] = useState({ total: 0, level: 1, streak: 0 });
+  const [activityLog, setActivityLog] = useState<any[]>([]);
+
   // Check session on mount
   useEffect(() => {
     supabase.auth.getSession().then(({ data }) => {
-      if (data.session) { setUser(data.session.user); setScreen('home'); }
+      if (data.session) { setUser(data.session.user); setScreen('home'); loadPoints(); loadActivityLog(); }
     });
   }, []);
 
@@ -138,6 +142,58 @@ export default function App() {
       else Alert.alert('Error', data.error || 'Could not generate plan');
     } catch (e) { Alert.alert('Error', 'Connection failed'); }
     setNutritionLoading(false);
+  };
+
+  // === GAMIFICATION ===
+  const POINTS_MAP: Record<string,number> = { meal_logged: 10, workout_completed: 25, water_logged: 5, breathing_completed: 15, hrv_logged: 10, streak_bonus: 50 };
+
+  const loadPoints = async () => {
+    if (!user) return;
+    const { data } = await supabase.from('user_points').select('*').eq('user_id', user.id).single();
+    if (data) setPoints({ total: data.total_points, level: data.level, streak: data.current_streak_days });
+  };
+
+  const loadActivityLog = async () => {
+    if (!user) return;
+    const { data } = await supabase.from('activity_log').select('*').eq('user_id', user.id).order('logged_at', { ascending: false }).limit(20);
+    if (data) setActivityLog(data);
+  };
+
+  const logActivity = async (type: string, description: string) => {
+    if (!user) return;
+    const pts = POINTS_MAP[type] || 10;
+    await supabase.from('activity_log').insert({ user_id: user.id, activity_type: type, description, points_earned: pts });
+
+    // Update user points
+    const { data: existing } = await supabase.from('user_points').select('*').eq('user_id', user.id).single();
+    const today = new Date().toISOString().split('T')[0];
+
+    if (existing) {
+      const isConsecutive = existing.last_activity_date === new Date(Date.now() - 86400000).toISOString().split('T')[0];
+      const isSameDay = existing.last_activity_date === today;
+      const newStreak = isSameDay ? existing.current_streak_days : isConsecutive ? existing.current_streak_days + 1 : 1;
+      const newTotal = existing.total_points + pts + (newStreak > existing.current_streak_days && newStreak % 7 === 0 ? 50 : 0);
+      const newLevel = Math.floor(newTotal / 100) + 1;
+      await supabase.from('user_points').update({
+        total_points: newTotal, level: newLevel, current_streak_days: newStreak,
+        longest_streak_days: Math.max(newStreak, existing.longest_streak_days), last_activity_date: today, updated_at: new Date().toISOString(),
+      }).eq('user_id', user.id);
+      setPoints({ total: newTotal, level: newLevel, streak: newStreak });
+    } else {
+      await supabase.from('user_points').insert({ user_id: user.id, total_points: pts, level: 1, current_streak_days: 1, last_activity_date: today });
+      setPoints({ total: pts, level: 1, streak: 1 });
+    }
+
+    // Update daily points
+    const { data: dailyExisting } = await supabase.from('daily_points').select('*').eq('user_id', user.id).eq('points_date', today).single();
+    if (dailyExisting) {
+      await supabase.from('daily_points').update({ points_earned: dailyExisting.points_earned + pts, activities_count: dailyExisting.activities_count + 1 }).eq('id', dailyExisting.id);
+    } else {
+      await supabase.from('daily_points').insert({ user_id: user.id, points_date: today, points_earned: pts, activities_count: 1 });
+    }
+
+    await loadActivityLog();
+    Alert.alert('Points Earned!', `+${pts} XP for ${description}`);
   };
 
   // ===================== SCREENS =====================
@@ -407,12 +463,106 @@ export default function App() {
     </View>
   );
 
+  // --- ACTIVITY LOG ---
+  if (screen === 'activity') return (
+    <ScrollView style={{flex:1,backgroundColor:'#0F172A'}} contentContainerStyle={{padding:24,paddingTop:60}}>
+      <Pressable onPress={()=>setScreen('home')}><Text style={{color:'#6366F1',marginBottom:16}}>← Back</Text></Pressable>
+      <Text style={{color:'#fff',fontSize:28,fontWeight:'bold'}}>Activity & Points</Text>
+
+      {/* Points Summary */}
+      <View style={{flexDirection:'row',gap:12,marginTop:20}}>
+        <View style={[S.card,{flex:1,alignItems:'center'}]}>
+          <Text style={{color:'#6366F1',fontSize:28,fontWeight:'bold'}}>{points.total}</Text>
+          <Text style={{color:'#94A3B8',fontSize:11}}>Total XP</Text>
+        </View>
+        <View style={[S.card,{flex:1,alignItems:'center'}]}>
+          <Text style={{color:'#FBBF24',fontSize:28,fontWeight:'bold'}}>Lv.{points.level}</Text>
+          <Text style={{color:'#94A3B8',fontSize:11}}>Level</Text>
+        </View>
+        <View style={[S.card,{flex:1,alignItems:'center'}]}>
+          <Text style={{color:'#34D399',fontSize:28,fontWeight:'bold'}}>{points.streak}</Text>
+          <Text style={{color:'#94A3B8',fontSize:11}}>Day Streak</Text>
+        </View>
+      </View>
+
+      {/* Quick Log Buttons */}
+      <Text style={{color:'#fff',fontSize:18,fontWeight:'600',marginTop:28}}>Log Activity</Text>
+      <View style={{flexDirection:'row',flexWrap:'wrap',gap:10,marginTop:12}}>
+        <Pressable onPress={()=>logActivity('meal_logged','Healthy meal')} style={{backgroundColor:'#1E293B',borderRadius:12,padding:14,borderWidth:1,borderColor:'#334155',alignItems:'center',width:'47%'}}>
+          <Text style={{fontSize:20}}>🥗</Text>
+          <Text style={{color:'#fff',fontWeight:'600',marginTop:4,fontSize:13}}>Log Meal</Text>
+          <Text style={{color:'#6366F1',fontSize:11,marginTop:2}}>+10 XP</Text>
+        </Pressable>
+        <Pressable onPress={()=>logActivity('workout_completed','Workout session')} style={{backgroundColor:'#1E293B',borderRadius:12,padding:14,borderWidth:1,borderColor:'#334155',alignItems:'center',width:'47%'}}>
+          <Text style={{fontSize:20}}>🏋️</Text>
+          <Text style={{color:'#fff',fontWeight:'600',marginTop:4,fontSize:13}}>Log Workout</Text>
+          <Text style={{color:'#6366F1',fontSize:11,marginTop:2}}>+25 XP</Text>
+        </Pressable>
+        <Pressable onPress={()=>logActivity('water_logged','Drank water')} style={{backgroundColor:'#1E293B',borderRadius:12,padding:14,borderWidth:1,borderColor:'#334155',alignItems:'center',width:'47%'}}>
+          <Text style={{fontSize:20}}>💧</Text>
+          <Text style={{color:'#fff',fontWeight:'600',marginTop:4,fontSize:13}}>Log Water</Text>
+          <Text style={{color:'#6366F1',fontSize:11,marginTop:2}}>+5 XP</Text>
+        </Pressable>
+        <Pressable onPress={()=>logActivity('breathing_completed','Breathing session')} style={{backgroundColor:'#1E293B',borderRadius:12,padding:14,borderWidth:1,borderColor:'#334155',alignItems:'center',width:'47%'}}>
+          <Text style={{fontSize:20}}>🌬️</Text>
+          <Text style={{color:'#fff',fontWeight:'600',marginTop:4,fontSize:13}}>Log Breathing</Text>
+          <Text style={{color:'#6366F1',fontSize:11,marginTop:2}}>+15 XP</Text>
+        </Pressable>
+      </View>
+
+      {/* Level Progress */}
+      <View style={[S.card,{marginTop:24}]}>
+        <View style={{flexDirection:'row',justifyContent:'space-between'}}>
+          <Text style={{color:'#94A3B8',fontSize:12}}>Level {points.level}</Text>
+          <Text style={{color:'#94A3B8',fontSize:12}}>Level {points.level + 1}</Text>
+        </View>
+        <View style={{height:8,backgroundColor:'#334155',borderRadius:4,marginTop:8}}>
+          <View style={{height:8,backgroundColor:'#6366F1',borderRadius:4,width:`${(points.total % 100)}%`}} />
+        </View>
+        <Text style={{color:'#64748B',fontSize:11,marginTop:6}}>{100 - (points.total % 100)} XP to next level</Text>
+      </View>
+
+      {/* Streak Info */}
+      {points.streak > 0 && (
+        <View style={{backgroundColor:'#34D39922',borderRadius:12,padding:16,marginTop:16,borderWidth:1,borderColor:'#34D39944'}}>
+          <Text style={{color:'#34D399',fontWeight:'700',fontSize:13}}>🔥 {points.streak}-Day Streak!</Text>
+          <Text style={{color:'#94A3B8',fontSize:12,marginTop:4}}>Keep it up! Bonus +50 XP every 7 days.</Text>
+        </View>
+      )}
+
+      {/* Recent Activity */}
+      <Text style={{color:'#fff',fontSize:18,fontWeight:'600',marginTop:28}}>Recent Activity</Text>
+      {activityLog.length === 0 && <Text style={{color:'#94A3B8',marginTop:12}}>No activities yet. Start logging!</Text>}
+      {activityLog.map((item,i) => (
+        <View key={i} style={[S.card,{marginTop:8,flexDirection:'row',alignItems:'center',justifyContent:'space-between'}]}>
+          <View style={{flex:1}}>
+            <Text style={{color:'#fff',fontSize:14}}>{item.description || item.activity_type.replace('_',' ')}</Text>
+            <Text style={{color:'#64748B',fontSize:11,marginTop:2}}>{new Date(item.logged_at).toLocaleDateString()}</Text>
+          </View>
+          <Text style={{color:'#6366F1',fontWeight:'bold'}}>+{item.points_earned}</Text>
+        </View>
+      ))}
+    </ScrollView>
+  );
+
   // --- HOME ---
   return (
     <View style={{flex:1,backgroundColor:'#0F172A'}}>
       <ScrollView contentContainerStyle={{padding:24,paddingTop:60,paddingBottom:100}}>
         <Text style={{color:'#fff',fontSize:28,fontWeight:'bold'}}>Welcome back</Text>
         <Text style={{color:'#94A3B8',marginTop:4}}>Your daily wellness summary</Text>
+
+        {/* Points Bar */}
+        <Pressable onPress={()=>{loadPoints();loadActivityLog();setScreen('activity');}} style={{backgroundColor:'#1E293B',borderRadius:16,padding:16,marginTop:20,borderWidth:1,borderColor:'#334155',flexDirection:'row',alignItems:'center',justifyContent:'space-between'}}>
+          <View style={{flexDirection:'row',alignItems:'center',gap:12}}>
+            <Text style={{fontSize:20}}>⭐</Text>
+            <View>
+              <Text style={{color:'#fff',fontWeight:'bold',fontSize:16}}>{points.total} XP</Text>
+              <Text style={{color:'#94A3B8',fontSize:11}}>Level {points.level} · {points.streak} day streak</Text>
+            </View>
+          </View>
+          <Text style={{color:'#6366F1',fontSize:13}}>Log →</Text>
+        </Pressable>
 
         {/* Readiness */}
         <View style={[S.card,{marginTop:24}]}>
