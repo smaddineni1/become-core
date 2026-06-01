@@ -345,6 +345,27 @@ export default function App() {
       <Pressable onPress={() => setScreen('register')} style={{marginTop:16,alignItems:'center'}}>
         <Text style={{color:'#6366F1'}}>Create Account</Text>
       </Pressable>
+      <View style={{marginTop:24}}>
+        <View style={{flexDirection:'row',alignItems:'center',marginBottom:16}}>
+          <View style={{flex:1,height:1,backgroundColor:'#334155'}} />
+          <Text style={{color:'#64748B',marginHorizontal:12,fontSize:12}}>or continue with</Text>
+          <View style={{flex:1,height:1,backgroundColor:'#334155'}} />
+        </View>
+        <Pressable onPress={async()=>{
+          const { error } = await supabase.auth.signInWithOAuth({ provider: 'google' });
+          if (error) Alert.alert('Error', error.message);
+        }} style={{backgroundColor:'#fff',borderRadius:12,padding:14,alignItems:'center',flexDirection:'row',justifyContent:'center',gap:10}}>
+          <Text style={{fontSize:18}}>G</Text>
+          <Text style={{color:'#1E293B',fontWeight:'600',fontSize:15}}>Continue with Google</Text>
+        </Pressable>
+        <Pressable onPress={async()=>{
+          const { error } = await supabase.auth.signInWithOAuth({ provider: 'apple' });
+          if (error) Alert.alert('Error', error.message);
+        }} style={{backgroundColor:'#000',borderRadius:12,padding:14,alignItems:'center',flexDirection:'row',justifyContent:'center',gap:10,marginTop:10,borderWidth:1,borderColor:'#334155'}}>
+          <Text style={{fontSize:18,color:'#fff'}}>🍎</Text>
+          <Text style={{color:'#fff',fontWeight:'600',fontSize:15}}>Continue with Apple</Text>
+        </Pressable>
+      </View>
     </KeyboardAvoidingView>
   );
 
@@ -362,6 +383,27 @@ export default function App() {
       <Pressable onPress={() => setScreen('login')} style={{marginTop:16,alignItems:'center'}}>
         <Text style={{color:'#6366F1'}}>Already have an account? Sign In</Text>
       </Pressable>
+      <View style={{marginTop:24}}>
+        <View style={{flexDirection:'row',alignItems:'center',marginBottom:16}}>
+          <View style={{flex:1,height:1,backgroundColor:'#334155'}} />
+          <Text style={{color:'#64748B',marginHorizontal:12,fontSize:12}}>or continue with</Text>
+          <View style={{flex:1,height:1,backgroundColor:'#334155'}} />
+        </View>
+        <Pressable onPress={async()=>{
+          const { error } = await supabase.auth.signInWithOAuth({ provider: 'google' });
+          if (error) Alert.alert('Error', error.message);
+        }} style={{backgroundColor:'#fff',borderRadius:12,padding:14,alignItems:'center',flexDirection:'row',justifyContent:'center',gap:10}}>
+          <Text style={{fontSize:18}}>G</Text>
+          <Text style={{color:'#1E293B',fontWeight:'600',fontSize:15}}>Continue with Google</Text>
+        </Pressable>
+        <Pressable onPress={async()=>{
+          const { error } = await supabase.auth.signInWithOAuth({ provider: 'apple' });
+          if (error) Alert.alert('Error', error.message);
+        }} style={{backgroundColor:'#000',borderRadius:12,padding:14,alignItems:'center',flexDirection:'row',justifyContent:'center',gap:10,marginTop:10,borderWidth:1,borderColor:'#334155'}}>
+          <Text style={{fontSize:18,color:'#fff'}}>🍎</Text>
+          <Text style={{color:'#fff',fontWeight:'600',fontSize:15}}>Continue with Apple</Text>
+        </Pressable>
+      </View>
     </KeyboardAvoidingView>
   );
 
