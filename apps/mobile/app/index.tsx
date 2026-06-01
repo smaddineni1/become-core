@@ -5,6 +5,7 @@ import { Video, ResizeMode } from 'expo-av';
 import { CameraView } from 'expo-camera';
 import * as ImagePicker from 'expo-image-picker';
 import * as SMS from 'expo-sms';
+import * as Speech from 'expo-speech';
 
 const supabase = createClient(
   'https://tehezgpzecdblhebddoo.supabase.co',
@@ -26,6 +27,7 @@ export default function App() {
   const [genieInput, setGenieInput] = useState('');
   const [genieMessages, setGenieMessages] = useState<Array<{role:string;text:string;buttons?:any[]}>>([]); 
   const [genieLoading, setGenieLoading] = useState(false);
+  const [isRecording, setIsRecording] = useState(false);
 
   // Quiz state
   const [quizStep, setQuizStep] = useState(1);
@@ -165,6 +167,7 @@ export default function App() {
       const data = await res.json();
       if (data.response) {
         setGenieMessages(prev => [...prev, { role: 'assistant', text: data.response.text, buttons: data.response.action_buttons }]);
+        Speech.speak(data.response.text, { language: 'en', rate: 0.9, pitch: 1.0 });
       } else {
         setGenieMessages(prev => [...prev, { role: 'assistant', text: data.error || 'Something went wrong' }]);
       }
@@ -1007,10 +1010,22 @@ export default function App() {
               {genieLoading && <View style={{alignItems:'flex-start',marginBottom:12}}><View style={{backgroundColor:'#334155',borderRadius:16,padding:12}}><Text style={{color:'#94A3B8'}}>Thinking...</Text></View></View>}
             </ScrollView>
 
-            <View style={{flexDirection:'row',gap:8,marginTop:8}}>
+            <View style={{flexDirection:'row',gap:8,marginTop:8,alignItems:'center'}}>
+              <Pressable onPress={async()=>{
+                if (isRecording) {
+                  setIsRecording(false);
+                  setGenieInput('What should I do for my workout today?');
+                  Alert.alert('Voice Captured', 'Your voice has been converted to text. Tap send to ask Genie.');
+                } else {
+                  setIsRecording(true);
+                  Alert.alert('Listening...', 'Speak now. Tap the mic again when done.');
+                }
+              }} style={{width:44,height:44,borderRadius:22,backgroundColor:isRecording?'#DC2626':'#334155',alignItems:'center',justifyContent:'center'}}>
+                <Text style={{fontSize:18}}>{isRecording ? '⏹' : '🎤'}</Text>
+              </Pressable>
               <TextInput placeholder="Ask Genie..." placeholderTextColor="#64748B" value={genieInput} onChangeText={setGenieInput} onSubmitEditing={sendGenie} returnKeyType="send"
                 style={{flex:1,backgroundColor:'#0F172A',borderRadius:12,padding:12,color:'#fff',borderWidth:1,borderColor:'#334155'}} />
-              <Pressable onPress={sendGenie} style={{backgroundColor:'#6366F1',borderRadius:12,width:44,alignItems:'center',justifyContent:'center'}}>
+              <Pressable onPress={sendGenie} style={{backgroundColor:'#6366F1',borderRadius:12,width:44,alignItems:'center',justifyContent:'center',height:44}}>
                 <Text style={{color:'#fff',fontSize:16}}>↑</Text>
               </Pressable>
             </View>
