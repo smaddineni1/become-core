@@ -13,7 +13,7 @@ const supabase = createClient(
 
 const BREATHING_VIDEO_URL = 'https://tehezgpzecdblhebddoo.supabase.co/storage/v1/object/public/videos/runway-agent-exhale-20260528-152325.mp4';
 
-type Screen = 'login' | 'register' | 'quiz' | 'scan' | 'home' | 'nutrition' | 'formcheck' | 'mindbody' | 'breathing' | 'activity' | 'challenges' | 'create_challenge' | 'genie' | 'camera_scan' | 'formcheck_session';
+type Screen = 'login' | 'register' | 'quiz' | 'scan' | 'home' | 'nutrition' | 'formcheck' | 'mindbody' | 'breathing' | 'activity' | 'challenges' | 'create_challenge' | 'genie' | 'camera_scan' | 'formcheck_session' | 'formcheck_select';
 
 export default function App() {
   const [screen, setScreen] = useState<Screen>('login');
@@ -64,6 +64,7 @@ export default function App() {
   const [formCheckReps, setFormCheckReps] = useState(0);
   const [formCheckTimer, setFormCheckTimer] = useState(0);
   const formCheckInterval = useRef<any>(null);
+  const [selectedExercise, setSelectedExercise] = useState('air_squat');
 
   // === FUNCTIONS DEFINED BEFORE useEffect ===
   const loadPoints = async () => {
@@ -122,8 +123,8 @@ export default function App() {
       age: parseInt(quizData.age), sex: quizData.sex, height_cm: parseFloat(quizData.heightCm),
       weight_kg: parseFloat(quizData.weightKg), fitness_goal: quizData.goal, activity_level: quizData.activity,
     }).eq('id', user.id);
+    setScanPhase('photo');
     setScreen('scan');
-    startScan();
   };
 
   // === SCAN ===
@@ -300,7 +301,11 @@ export default function App() {
   };
 
   // === FORM CHECK ===
-  const startFormCheck = async () => {
+  const startFormCheck = () => {
+    setScreen('formcheck_select');
+  };
+
+  const beginFormCheckSession = async () => {
     const hasPermission = await requestCameraPermission();
     if (!hasPermission) { Alert.alert('Permission Required', 'Camera access is needed for form check'); return; }
     setFormCheckActive(true);
@@ -321,7 +326,7 @@ export default function App() {
     if (user) {
       const avgScore = Math.floor(Math.random() * 10) + 85;
       await supabase.from('workout_sessions').insert({
-        user_id: user.id, exercise: 'air_squat', total_reps: formCheckReps,
+        user_id: user.id, exercise: selectedExercise, total_reps: formCheckReps,
         average_score: avgScore, duration_seconds: formCheckTimer, cues_detected: [],
       });
       await logActivity('workout_completed', `Form Check: ${formCheckReps} reps, score ${avgScore}`);
@@ -495,6 +500,37 @@ export default function App() {
     </View>
   );
 
+  // --- FORM CHECK SELECT ---
+  if (screen === 'formcheck_select') {
+    const exercises = [
+      { id: 'air_squat', name: 'Air Squat', icon: '🏋️', muscles: 'Quads, Glutes, Core', difficulty: 'Beginner' },
+      { id: 'push_up', name: 'Push-Up', icon: '💪', muscles: 'Chest, Triceps, Shoulders', difficulty: 'Beginner' },
+      { id: 'sit_up', name: 'Sit-Up', icon: '🔥', muscles: 'Abs, Hip Flexors', difficulty: 'Beginner' },
+      { id: 'kettlebell_swing', name: 'Kettlebell Swing', icon: '🔔', muscles: 'Glutes, Hamstrings, Core', difficulty: 'Intermediate' },
+    ];
+    return (
+      <ScrollView style={{flex:1,backgroundColor:'#0F172A'}} contentContainerStyle={{padding:24,paddingTop:60}}>
+        <Pressable onPress={()=>setScreen('home')}><Text style={{color:'#6366F1',marginBottom:16}}>← Back</Text></Pressable>
+        <Text style={{color:'#fff',fontSize:28,fontWeight:'bold'}}>Form Check</Text>
+        <Text style={{color:'#94A3B8',marginTop:4}}>Choose an exercise to analyze</Text>
+
+        {exercises.map(ex => (
+          <Pressable key={ex.id} onPress={()=>{setSelectedExercise(ex.id);beginFormCheckSession();}} style={[S.card,{marginTop:16,flexDirection:'row',alignItems:'center',gap:16}]}>
+            <View style={{width:56,height:56,borderRadius:14,backgroundColor:'#312E81',alignItems:'center',justifyContent:'center'}}>
+              <Text style={{fontSize:28}}>{ex.icon}</Text>
+            </View>
+            <View style={{flex:1}}>
+              <Text style={{color:'#fff',fontWeight:'700',fontSize:16}}>{ex.name}</Text>
+              <Text style={{color:'#94A3B8',fontSize:12,marginTop:2}}>{ex.muscles}</Text>
+              <Text style={{color:'#6366F1',fontSize:11,marginTop:2}}>{ex.difficulty}</Text>
+            </View>
+            <Text style={{color:'#6366F1',fontSize:18}}>▶</Text>
+          </Pressable>
+        ))}
+      </ScrollView>
+    );
+  }
+
   // --- FORM CHECK SESSION ---
   if (screen === 'formcheck_session') return (
     <View style={{flex:1,backgroundColor:'#0F172A'}}>
@@ -515,6 +551,10 @@ export default function App() {
 
       {/* Score Overlay */}
       <View style={{position:'absolute',top:50,left:20,right:20,flexDirection:'row',justifyContent:'space-between'}}>
+        <View style={{backgroundColor:'#0F172AE6',borderRadius:12,padding:12}}>
+          <Text style={{color:'#94A3B8',fontSize:10}}>EXERCISE</Text>
+          <Text style={{color:'#A5B4FC',fontSize:14,fontWeight:'bold'}}>{selectedExercise.replace(/_/g,' ').replace(/\b\w/g,c=>c.toUpperCase())}</Text>
+        </View>
         <View style={{backgroundColor:'#0F172AE6',borderRadius:12,padding:12}}>
           <Text style={{color:'#94A3B8',fontSize:10}}>REPS</Text>
           <Text style={{color:'#fff',fontSize:24,fontWeight:'bold'}}>{formCheckReps}</Text>
