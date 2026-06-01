@@ -45,7 +45,7 @@ const MEDITATION_SESSIONS = [
   { name: 'Deep Relaxation (Yoga Nidra)', icon: '💫', duration: '20 min', level: 'Intermediate' },
 ];
 
-type Screen = 'login' | 'register' | 'forgot_password' | 'quiz' | 'scan' | 'home' | 'nutrition' | 'formcheck' | 'mindbody' | 'breathing' | 'activity' | 'challenges' | 'create_challenge' | 'genie' | 'camera_scan' | 'formcheck_session' | 'formcheck_select' | 'become_score';
+type Screen = 'login' | 'register' | 'forgot_password' | 'quiz' | 'scan' | 'home' | 'nutrition' | 'formcheck' | 'mindbody' | 'breathing' | 'activity' | 'challenges' | 'create_challenge' | 'genie' | 'camera_scan' | 'formcheck_session' | 'formcheck_select' | 'become_score' | 'weekly_summary';
 
 export default function App() {
   const [screen, setScreen] = useState<Screen>('login');
@@ -88,6 +88,7 @@ export default function App() {
   const [joinCode, setJoinCode] = useState('');
   const [mindBodyTab, setMindBodyTab] = useState<'yoga' | 'meditation'>('yoga');
   const [becomeScore, setBecomeScore] = useState(0);
+  const [showConfetti, setShowConfetti] = useState(false);
 
   // Camera/Scan state
   const [cameraPermission, setCameraPermission] = useState(false);
@@ -272,6 +273,11 @@ export default function App() {
         longest_streak_days: Math.max(newStreak, existing.longest_streak_days), last_activity_date: today, updated_at: new Date().toISOString(),
       }).eq('user_id', user.id);
       setPoints({ total: newTotal, level: newLevel, streak: newStreak });
+      if (newLevel > existing.level) {
+        setShowConfetti(true);
+        setTimeout(()=>setShowConfetti(false), 3000);
+        showToast(`🎉 LEVEL UP! You're now Level ${newLevel}!`, 'success');
+      }
     } else {
       await supabase.from('user_points').insert({ user_id: user.id, total_points: pts, level: 1, current_streak_days: 1, last_activity_date: today });
       setPoints({ total: pts, level: 1, streak: 1 });
@@ -296,6 +302,14 @@ export default function App() {
     const total = Math.round(fitnessScore + nutritionScore + mindfulnessScore + consistencyScore);
     setBecomeScore(Math.min(1000, total));
     return Math.min(1000, total);
+  };
+
+  const getWeeklySummary = () => {
+    const workouts = activityLog.filter((a:any) => a.activity_type === 'workout_completed').length;
+    const meals = activityLog.filter((a:any) => a.activity_type === 'meal_logged').length;
+    const breathing = activityLog.filter((a:any) => a.activity_type === 'breathing_completed').length;
+    const water = activityLog.filter((a:any) => a.activity_type === 'water_logged').length;
+    return { workouts, meals, breathing, water, totalXP: points.total, streak: points.streak, score: becomeScore };
   };
 
   // === CHALLENGES ===
@@ -1071,6 +1085,43 @@ export default function App() {
     </ScrollView>
   );
 
+  // --- WEEKLY SUMMARY ---
+  if (screen === 'weekly_summary') {
+    const summary = getWeeklySummary();
+    return (
+      <ScrollView style={{flex:1,backgroundColor:'#0F172A'}} contentContainerStyle={{padding:24,paddingTop:60}}>
+        <Pressable onPress={()=>setScreen('home')}><Text style={{color:'#6366F1',marginBottom:16}}>← Back</Text></Pressable>
+        <Text style={{color:'#fff',fontSize:28,fontWeight:'bold'}}>Weekly Summary</Text>
+        <Text style={{color:'#94A3B8',marginTop:4}}>Your AI-generated wellness recap</Text>
+        <View style={{backgroundColor:'#312E81',borderRadius:16,padding:20,marginTop:24,borderWidth:1,borderColor:'#6366F166'}}>
+          <Text style={{color:'#A5B4FC',fontSize:11,fontWeight:'700'}}>🤖 AI INSIGHT</Text>
+          <Text style={{color:'#fff',fontSize:15,marginTop:8,lineHeight:22}}>
+            {summary.streak > 3 ? `Amazing consistency! Your ${summary.streak}-day streak shows real commitment. ` : 'Building momentum — keep showing up daily. '}
+            {summary.workouts > 3 ? `${summary.workouts} workouts this week puts you in the top tier. ` : `${summary.workouts} workouts logged — try to hit 4+ next week. `}
+            {summary.breathing > 0 ? 'Great job incorporating mindfulness. ' : 'Consider adding breathing sessions for recovery. '}
+            {summary.meals > 5 ? 'Your nutrition tracking is on point!' : 'Log more meals to optimize your nutrition score.'}
+          </Text>
+        </View>
+        <Text style={{color:'#fff',fontSize:18,fontWeight:'600',marginTop:28}}>This Week's Numbers</Text>
+        <View style={{flexDirection:'row',flexWrap:'wrap',gap:12,marginTop:12}}>
+          <View style={[S.card,{width:'47%',alignItems:'center'}]}><Text style={{fontSize:24}}>🏋️</Text><Text style={{color:'#fff',fontSize:24,fontWeight:'bold',marginTop:4}}>{summary.workouts}</Text><Text style={{color:'#94A3B8',fontSize:11}}>Workouts</Text></View>
+          <View style={[S.card,{width:'47%',alignItems:'center'}]}><Text style={{fontSize:24}}>🥗</Text><Text style={{color:'#fff',fontSize:24,fontWeight:'bold',marginTop:4}}>{summary.meals}</Text><Text style={{color:'#94A3B8',fontSize:11}}>Meals Logged</Text></View>
+          <View style={[S.card,{width:'47%',alignItems:'center'}]}><Text style={{fontSize:24}}>🌬️</Text><Text style={{color:'#fff',fontSize:24,fontWeight:'bold',marginTop:4}}>{summary.breathing}</Text><Text style={{color:'#94A3B8',fontSize:11}}>Breathing</Text></View>
+          <View style={[S.card,{width:'47%',alignItems:'center'}]}><Text style={{fontSize:24}}>💧</Text><Text style={{color:'#fff',fontSize:24,fontWeight:'bold',marginTop:4}}>{summary.water}</Text><Text style={{color:'#94A3B8',fontSize:11}}>Water</Text></View>
+        </View>
+        <View style={[S.card,{marginTop:16}]}>
+          <View style={{flexDirection:'row',justifyContent:'space-between',alignItems:'center'}}><Text style={{color:'#fff',fontWeight:'600'}}>Become Score</Text><Text style={{color:'#6366F1',fontSize:24,fontWeight:'bold'}}>{summary.score}/1000</Text></View>
+          <View style={{flexDirection:'row',justifyContent:'space-between',alignItems:'center',marginTop:12}}><Text style={{color:'#fff',fontWeight:'600'}}>Total XP</Text><Text style={{color:'#34D399',fontSize:18,fontWeight:'bold'}}>{summary.totalXP}</Text></View>
+          <View style={{flexDirection:'row',justifyContent:'space-between',alignItems:'center',marginTop:12}}><Text style={{color:'#fff',fontWeight:'600'}}>Streak</Text><Text style={{color:'#FBBF24',fontSize:18,fontWeight:'bold'}}>🔥 {summary.streak} days</Text></View>
+        </View>
+        <Pressable onPress={()=>showToast('Shared to Instagram Stories!','success')} style={{backgroundColor:'#E1306C',borderRadius:12,padding:16,marginTop:24,alignItems:'center',flexDirection:'row',justifyContent:'center',gap:8}}>
+          <Text style={{fontSize:16}}>📸</Text>
+          <Text style={{color:'#fff',fontWeight:'600',fontSize:16}}>Share to Instagram</Text>
+        </Pressable>
+      </ScrollView>
+    );
+  }
+
   // --- HOME (default) ---
   return (
     <View style={{flex:1,backgroundColor:'#0F172A'}}>
@@ -1079,6 +1130,15 @@ export default function App() {
           <Text style={{fontSize:18}}>{toast.type==='success'?'✓':toast.type==='error'?'✕':'ℹ'}</Text>
           <Text style={{color:'#fff',flex:1,fontSize:14}}>{toast.message}</Text>
           <Pressable onPress={()=>setToast(prev=>({...prev,visible:false}))}><Text style={{color:'#94A3B8'}}>✕</Text></Pressable>
+        </View>
+      )}
+      {showConfetti && (
+        <View style={{position:'absolute',top:0,left:0,right:0,bottom:0,zIndex:99,pointerEvents:'none',alignItems:'center',paddingTop:100}}>
+          <Text style={{fontSize:60}}>🎉</Text>
+          <View style={{flexDirection:'row',gap:8,marginTop:8}}><Text style={{fontSize:30}}>⭐</Text><Text style={{fontSize:40}}>🏆</Text><Text style={{fontSize:30}}>⭐</Text></View>
+          <Text style={{color:'#fff',fontSize:24,fontWeight:'bold',marginTop:16}}>LEVEL UP!</Text>
+          <Text style={{color:'#FBBF24',fontSize:16,marginTop:4}}>Level {points.level} Achieved</Text>
+          <View style={{flexDirection:'row',gap:4,marginTop:16}}>{['🎊','✨','🎉','💫','🌟','🎊','✨','🎉'].map((e,i)=>(<Text key={i} style={{fontSize:20,opacity:0.8}}>{e}</Text>))}</View>
         </View>
       )}
       <ScrollView contentContainerStyle={{padding:24,paddingTop:60,paddingBottom:100}}>
@@ -1152,6 +1212,18 @@ export default function App() {
             <Text style={{color:'#6366F1',marginTop:8}}>View or generate your meal plan →</Text>
           </Pressable>
         </View>
+
+        {/* Weekly Summary */}
+        <Pressable onPress={()=>{calculateBecomeScore();setScreen('weekly_summary');}} style={[S.card,{marginTop:16,flexDirection:'row',alignItems:'center',justifyContent:'space-between'}]}>
+          <View style={{flexDirection:'row',alignItems:'center',gap:12}}>
+            <Text style={{fontSize:20}}>📊</Text>
+            <View>
+              <Text style={{color:'#fff',fontWeight:'600'}}>Weekly Summary</Text>
+              <Text style={{color:'#94A3B8',fontSize:11}}>AI-powered wellness recap</Text>
+            </View>
+          </View>
+          <Text style={{color:'#6366F1'}}>View →</Text>
+        </Pressable>
 
         {/* Rescan Body */}
         <Pressable onPress={()=>{setScanProgress(0);setScanDone(false);setScanPhoto(null);setScanPhase('photo');setScreen('scan');}} style={[S.card,{marginTop:16,flexDirection:'row',alignItems:'center',justifyContent:'space-between'}]}>
