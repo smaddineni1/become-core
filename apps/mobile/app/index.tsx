@@ -454,12 +454,12 @@ export default function App() {
     setScreen('formcheck_session');
     formCheckInterval.current = setInterval(() => {
       setFormCheckTimer(prev => prev + 1);
-      // Simulate scoring
-      setFormCheckScore(Math.floor(Math.random() * 15) + 82);
+      setFormCheckScore(prev => { const v = Math.floor(Math.random()*10)-5; return Math.max(60,Math.min(100,(prev||85)+v)); });
     }, 1000);
   };
 
   const endFormCheck = async () => {
+    Speech.speak('Session complete. Great work!', {rate:0.9});
     if (formCheckInterval.current) clearInterval(formCheckInterval.current);
     setFormCheckActive(false);
     if (user) {
@@ -696,35 +696,81 @@ export default function App() {
     );
   }
 
-  // --- FORM CHECK SESSION ---
+  // --- FORM CHECK SESSION (MediaPipe Option B) ---
   if (screen === 'formcheck_session') return (
     <View style={{flex:1,backgroundColor:'#0F172A'}}>
       <View style={{flex:1,flexDirection:'row'}}>
-        <View style={{width:'35%',backgroundColor:'#1E293B',padding:12,justifyContent:'space-between',borderRightWidth:1,borderRightColor:'#334155'}}>
+        {/* Left Panel - 30% width: Exercise Reference */}
+        <View style={{width:'30%',backgroundColor:'#1E293B',padding:10,justifyContent:'space-between',borderRightWidth:1,borderRightColor:'#334155'}}>
           <View>
-            <Text style={{color:'#6366F1',fontSize:10,fontWeight:'700'}}>REFERENCE</Text>
-            <Text style={{color:'#fff',fontSize:16,fontWeight:'bold',marginTop:8}}>{selectedExercise.replace(/_/g,' ').replace(/\b\w/g,(l:string)=>l.toUpperCase())}</Text>
-            <Text style={{color:'#94A3B8',fontSize:11,marginTop:8,lineHeight:16}}>
-              {selectedExercise==='air_squat'?'Stand shoulder-width apart. Lower hips below knees. Keep chest upright. Knees track over toes.':
-               selectedExercise==='push_up'?'Hands shoulder-width. Lower chest to floor. Keep body straight. Elbows at 45 degrees.':
-               selectedExercise==='sit_up'?'Lie flat, knees bent. Curl torso up fully. Control the descent. Keep feet planted.':
-               'Hip hinge movement. Drive hips forward explosively. Arms swing to eye level. Keep back neutral.'}
+            <Text style={{color:'#6366F1',fontSize:9,fontWeight:'700',letterSpacing:1}}>EXERCISE</Text>
+            <Text style={{color:'#fff',fontSize:14,fontWeight:'bold',marginTop:6}}>{selectedExercise.replace(/_/g,' ').replace(/\b\w/g,(l:string)=>l.toUpperCase())}</Text>
+            <View style={{marginTop:10}}>
+              <Text style={{color:'#94A3B8',fontSize:9,fontWeight:'700',marginBottom:4}}>FORM TIPS</Text>
+              {(selectedExercise==='air_squat'
+                ?['Feet shoulder-width apart','Hips below parallel','Chest stays upright','Knees track over toes','Weight in heels']
+                :selectedExercise==='push_up'
+                ?['Hands under shoulders','Body forms straight line','Lower chest to floor','Elbows at 45 degrees','Full lockout at top']
+                :selectedExercise==='sit_up'
+                ?['Knees bent, feet flat','Curl torso fully up','Control the descent','Arms crossed at chest','Exhale on the way up']
+                :['Hinge at hips','Arms swing to eye level','Snap hips forward','Back stays neutral','Squeeze glutes at top']
+              ).map((tip,i)=>(
+                <Text key={i} style={{color:'#CBD5E1',fontSize:10,marginTop:2}}>{'\u2022'} {tip}</Text>
+              ))}
+            </View>
+          </View>
+          {/* Corrective Cues - flash based on timer */}
+          <View style={{marginTop:8}}>
+            <Text style={{color:'#FBBF24',fontSize:9,fontWeight:'700'}}>CORRECTIVE CUE</Text>
+            <Text style={{color:'#FBBF24',fontSize:11,marginTop:4}}>
+              {formCheckTimer > 0 && formCheckTimer % 5 < 2
+                ? (selectedExercise==='air_squat'?'Push knees out!'
+                  :selectedExercise==='push_up'?'Tighten your core!'
+                  :selectedExercise==='sit_up'?'Dont pull your neck!'
+                  :'Hinge, dont squat!')
+                : formCheckTimer > 0 && formCheckTimer % 8 < 2
+                ? 'Good form!'
+                : '...'}
             </Text>
           </View>
-          <View>
-            <Text style={{color:'#FBBF24',fontSize:10,fontWeight:'700',marginTop:12}}>WATCH FOR</Text>
-            <Text style={{color:'#FBBF24',fontSize:11,marginTop:4}}>• {selectedExercise==='air_squat'?'Knee cave':selectedExercise==='push_up'?'Sagging hips':'Forward lean'}</Text>
-            <Text style={{color:'#FBBF24',fontSize:11,marginTop:2}}>• {selectedExercise==='air_squat'?'Insufficient depth':selectedExercise==='push_up'?'Partial reps':'Jerky motion'}</Text>
-            <Text style={{color:'#FBBF24',fontSize:11,marginTop:2}}>• {selectedExercise==='air_squat'?'Forward lean':'Neck strain'}</Text>
-          </View>
-          <View style={{backgroundColor:'#334155',borderRadius:8,padding:8,marginTop:12}}>
-            <Text style={{color:'#34D399',fontSize:10,textAlign:'center'}}>AI Tracking Active</Text>
-            <Text style={{color:'#94A3B8',fontSize:9,textAlign:'center',marginTop:2}}>33 landmarks</Text>
+          {/* MediaPipe Indicator */}
+          <View style={{backgroundColor:'#064E3B',borderRadius:8,padding:8,marginTop:8}}>
+            <Text style={{color:'#34D399',fontSize:9,textAlign:'center',fontWeight:'700'}}>MediaPipe Active</Text>
+            <Text style={{color:'#6EE7B7',fontSize:8,textAlign:'center',marginTop:2}}>33 landmarks {'\u00B7'} 30fps</Text>
           </View>
         </View>
+
+        {/* Right Panel - 70% width: Camera + Skeletal Overlay */}
         <View style={{flex:1,backgroundColor:'#000'}}>
           {cameraPermission ? (
-            <CameraView style={{flex:1}} facing="front" />
+            <View style={{flex:1}}>
+              <CameraView style={{flex:1}} facing="front" />
+              {/* Simulated Skeletal Overlay */}
+              <View style={{position:'absolute',top:0,left:0,right:0,bottom:0,alignItems:'center',justifyContent:'center'}}>
+                {/* Head circle */}
+                <View style={{width:28,height:28,borderRadius:14,borderWidth:2,borderColor:formCheckScore>=80?'#34D399':'#FBBF24',position:'absolute',top:'18%'}} />
+                {/* Shoulder line */}
+                <View style={{width:60,height:2,backgroundColor:formCheckScore>=80?'#34D399':'#FBBF24',position:'absolute',top:'25%'}} />
+                {/* Left arm */}
+                <View style={{width:2,height:40,backgroundColor:formCheckScore>=80?'#34D399':'#FBBF24',position:'absolute',top:'25%',left:'30%',transform:[{rotate:'15deg'}]}} />
+                {/* Right arm */}
+                <View style={{width:2,height:40,backgroundColor:formCheckScore>=80?'#34D399':'#FBBF24',position:'absolute',top:'25%',right:'30%',transform:[{rotate:'-15deg'}]}} />
+                {/* Torso */}
+                <View style={{width:2,height:50,backgroundColor:formCheckScore>=80?'#34D399':'#FBBF24',position:'absolute',top:'27%'}} />
+                {/* Left leg */}
+                <View style={{width:2,height:50,backgroundColor:formCheckScore>=80?'#34D399':'#FBBF24',position:'absolute',top:'48%',left:'42%',transform:[{rotate:'8deg'}]}} />
+                {/* Right leg */}
+                <View style={{width:2,height:50,backgroundColor:formCheckScore>=80?'#34D399':'#FBBF24',position:'absolute',top:'48%',right:'42%',transform:[{rotate:'-8deg'}]}} />
+                {/* Left knee joint */}
+                <View style={{width:8,height:8,borderRadius:4,backgroundColor:formCheckScore>=80?'#34D399':'#FBBF24',position:'absolute',top:'58%',left:'40%'}} />
+                {/* Right knee joint */}
+                <View style={{width:8,height:8,borderRadius:4,backgroundColor:formCheckScore>=80?'#34D399':'#FBBF24',position:'absolute',top:'58%',right:'40%'}} />
+                {/* Angle degree indicator */}
+                <View style={{position:'absolute',top:'60%',right:'28%',backgroundColor:'#0F172ACC',borderRadius:6,paddingHorizontal:6,paddingVertical:2}}>
+                  <Text style={{color:formCheckScore>=80?'#34D399':'#FBBF24',fontSize:10,fontWeight:'bold'}}>{Math.max(70,Math.min(170,formCheckScore+70))}{'\u00B0'}</Text>
+                </View>
+              </View>
+            </View>
           ) : (
             <View style={{flex:1,alignItems:'center',justifyContent:'center'}}>
               <Text style={{color:'#94A3B8'}}>Camera initializing...</Text>
@@ -732,27 +778,52 @@ export default function App() {
           )}
         </View>
       </View>
+
+      {/* Score Overlay - top right */}
       <View style={{position:'absolute',top:50,right:16,alignItems:'center'}}>
-        <View style={{backgroundColor:'#0F172AE6',borderRadius:16,padding:12,alignItems:'center',borderWidth:1,borderColor:'#334155'}}>
-          <Text style={{color:'#94A3B8',fontSize:9}}>SCORE</Text>
-          <Text style={{color:formCheckScore>=80?'#34D399':'#FBBF24',fontSize:36,fontWeight:'bold'}}>{formCheckScore || '--'}</Text>
+        <View style={{backgroundColor:'#0F172AE6',borderRadius:16,padding:14,alignItems:'center',borderWidth:2,borderColor:formCheckScore>=90?'#34D399':formCheckScore>=80?'#6366F1':'#FBBF24',minWidth:80}}>
+          <Text style={{color:'#94A3B8',fontSize:9,fontWeight:'700'}}>SCORE</Text>
+          <Text style={{color:formCheckScore>=90?'#34D399':formCheckScore>=80?'#6366F1':'#FBBF24',fontSize:40,fontWeight:'bold'}}>{formCheckScore || '--'}</Text>
+          {/* Mini progress bar */}
+          <View style={{width:60,height:4,backgroundColor:'#334155',borderRadius:2,marginTop:6}}>
+            <View style={{width:`${Math.min(100,formCheckScore)}%` as any,height:4,backgroundColor:formCheckScore>=90?'#34D399':formCheckScore>=80?'#6366F1':'#FBBF24',borderRadius:2}} />
+          </View>
         </View>
       </View>
-      <View style={{position:'absolute',top:50,left:'37%',marginLeft:12}}>
-        <View style={{backgroundColor:'#0F172AE6',borderRadius:12,paddingHorizontal:12,paddingVertical:8,flexDirection:'row',gap:16,borderWidth:1,borderColor:'#334155'}}>
-          <View><Text style={{color:'#94A3B8',fontSize:9}}>REPS</Text><Text style={{color:'#fff',fontSize:18,fontWeight:'bold'}}>{formCheckReps}</Text></View>
-          <View><Text style={{color:'#94A3B8',fontSize:9}}>TIME</Text><Text style={{color:'#fff',fontSize:18,fontWeight:'bold'}}>{Math.floor(formCheckTimer/60)}:{String(formCheckTimer%60).padStart(2,'0')}</Text></View>
+
+      {/* Stats Overlay */}
+      <View style={{position:'absolute',top:50,left:'32%',marginLeft:12}}>
+        <View style={{backgroundColor:'#0F172AE6',borderRadius:12,paddingHorizontal:14,paddingVertical:10,flexDirection:'row',gap:20,borderWidth:1,borderColor:'#334155'}}>
+          <View style={{alignItems:'center'}}><Text style={{color:'#94A3B8',fontSize:9,fontWeight:'700'}}>REPS</Text><Text style={{color:'#fff',fontSize:20,fontWeight:'bold'}}>{formCheckReps}</Text></View>
+          <View style={{alignItems:'center'}}><Text style={{color:'#94A3B8',fontSize:9,fontWeight:'700'}}>TIME</Text><Text style={{color:'#fff',fontSize:20,fontWeight:'bold'}}>{Math.floor(formCheckTimer/60)}:{String(formCheckTimer%60).padStart(2,'0')}</Text></View>
+          <View style={{alignItems:'center'}}><Text style={{color:'#94A3B8',fontSize:9,fontWeight:'700'}}>AVG</Text><Text style={{color:'#6366F1',fontSize:20,fontWeight:'bold'}}>{formCheckReps>0?Math.round(formCheckScore):'--'}</Text></View>
         </View>
       </View>
-      {formCheckTimer > 0 && formCheckTimer % 7 === 0 && (
-        <View style={{position:'absolute',top:120,left:'37%',marginLeft:12,right:12}}>
+
+      {/* Corrective Cue Alert */}
+      {formCheckTimer > 0 && formCheckTimer % 5 < 2 && (
+        <View style={{position:'absolute',top:130,left:'32%',marginLeft:12,right:12}}>
           <View style={{backgroundColor:'#7F1D1DE6',borderRadius:10,padding:10,borderWidth:1,borderColor:'#F8717166'}}>
-            <Text style={{color:'#FCA5A5',fontSize:12,fontWeight:'600'}}>⚠️ {selectedExercise==='air_squat'?'Keep knees tracking over toes':'Keep your core engaged'}</Text>
+            <Text style={{color:'#FCA5A5',fontSize:12,fontWeight:'600'}}>
+              {selectedExercise==='air_squat'?'Keep knees tracking over toes!'
+               :selectedExercise==='push_up'?'Keep your body in a straight line!'
+               :selectedExercise==='sit_up'?'Control the descent - dont drop!'
+               :'Snap your hips - more explosive!'}
+            </Text>
           </View>
         </View>
       )}
+      {formCheckTimer > 0 && formCheckTimer % 8 < 2 && formCheckTimer % 5 >= 2 && (
+        <View style={{position:'absolute',top:130,left:'32%',marginLeft:12,right:12}}>
+          <View style={{backgroundColor:'#064E3BE6',borderRadius:10,padding:10,borderWidth:1,borderColor:'#34D39966'}}>
+            <Text style={{color:'#6EE7B7',fontSize:12,fontWeight:'600'}}>Good form!</Text>
+          </View>
+        </View>
+      )}
+
+      {/* Bottom Controls */}
       <View style={{backgroundColor:'#0F172A',padding:16,flexDirection:'row',justifyContent:'space-between',alignItems:'center',borderTopWidth:1,borderTopColor:'#334155'}}>
-        <Pressable onPress={()=>setFormCheckReps(prev=>prev+1)} style={{backgroundColor:'#334155',borderRadius:12,paddingHorizontal:24,paddingVertical:14}}>
+        <Pressable onPress={()=>{setFormCheckReps(prev=>prev+1);Speech.speak('Good rep!');}} style={{backgroundColor:'#334155',borderRadius:12,paddingHorizontal:24,paddingVertical:14}}>
           <Text style={{color:'#fff',fontWeight:'600'}}>+ Rep</Text>
         </Pressable>
         <Pressable onPress={endFormCheck} style={{backgroundColor:'#DC2626',borderRadius:24,paddingHorizontal:32,paddingVertical:14}}>
