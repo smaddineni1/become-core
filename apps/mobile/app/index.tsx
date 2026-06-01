@@ -34,6 +34,7 @@ export default function App() {
   // Scan state
   const [scanProgress, setScanProgress] = useState(0);
   const [scanDone, setScanDone] = useState(false);
+  const [scanPhase, setScanPhase] = useState<'photo' | 'scanning' | 'done'>('photo');
   const scanTimer = useRef<any>(null);
 
   // Nutrition state
@@ -127,12 +128,12 @@ export default function App() {
 
   // === SCAN ===
   const startScan = () => {
-    setScanProgress(0); setScanDone(false);
+    setScanProgress(0); setScanDone(false); setScanPhase('scanning');
     let p = 0;
     scanTimer.current = setInterval(() => {
       p += 1.67;
       setScanProgress(Math.min(100, p));
-      if (p >= 100) { clearInterval(scanTimer.current); setScanDone(true); }
+      if (p >= 100) { clearInterval(scanTimer.current); setScanDone(true); setScanPhase('done'); }
     }, 1000);
   };
 
@@ -142,6 +143,7 @@ export default function App() {
       user_id: user.id, provider: 'simulation', measurements: { bmi: 23.5, body_fat_percentage: 18.2 }, confidence: 0.85,
     });
     await supabase.from('user_profiles').update({ onboarding_completed_at: new Date().toISOString() }).eq('id', user.id);
+    setScanPhase('photo');
     setScreen('home');
   };
 
@@ -292,6 +294,7 @@ export default function App() {
         });
       }
       setScreen('scan');
+      setScanPhase('scanning');
       startScan();
     }
   };
@@ -415,7 +418,7 @@ export default function App() {
   // --- SCAN ---
   if (screen === 'scan') return (
     <View style={{flex:1,backgroundColor:'#0F172A',alignItems:'center',justifyContent:'center',padding:24}}>
-      {!scanDone && scanProgress === 0 && !scanPhoto ? (
+      {scanPhase === 'photo' && !scanPhoto ? (
         <>
           <Text style={{fontSize:48}}>📸</Text>
           <Text style={{color:'#fff',fontSize:24,fontWeight:'bold',marginTop:16}}>Body Scan Photo</Text>
@@ -427,7 +430,7 @@ export default function App() {
             <Text style={{color:'#6366F1'}}>Skip photo (use simulation)</Text>
           </Pressable>
         </>
-      ) : !scanDone ? (
+      ) : scanPhase === 'scanning' ? (
         <>
           {scanPhoto && <Text style={{color:'#34D399',fontSize:13,marginBottom:16}}>✓ Photo captured</Text>}
           <View style={{width:200,height:200,borderRadius:100,borderWidth:4,borderColor:'#6366F1',alignItems:'center',justifyContent:'center'}}>
@@ -455,15 +458,17 @@ export default function App() {
     <View style={{flex:1,backgroundColor:'#0F172A'}}>
       {/* Camera View */}
       <View style={{flex:1,backgroundColor:'#1E293B',alignItems:'center',justifyContent:'center'}}>
-        <View style={{width:'90%',height:'70%',backgroundColor:'#0F172A',borderRadius:16,borderWidth:2,borderColor:'#334155',alignItems:'center',justifyContent:'center'}}>
-          <Text style={{fontSize:48}}>📷</Text>
-          <Text style={{color:'#fff',fontWeight:'600',marginTop:8}}>Camera Active</Text>
-          <Text style={{color:'#94A3B8',fontSize:12,marginTop:4}}>MediaPipe Pose · 33 landmarks</Text>
-          <View style={{flexDirection:'row',alignItems:'center',gap:8,marginTop:12}}>
-            <View style={{width:8,height:8,borderRadius:4,backgroundColor:'#34D399'}} />
-            <Text style={{color:'#34D399',fontSize:12}}>Tracking</Text>
+        {cameraPermission ? (
+          <CameraView style={{width:'100%',height:'100%'}} facing="front" />
+        ) : (
+          <View style={{alignItems:'center',justifyContent:'center',flex:1}}>
+            <Text style={{fontSize:48}}>📷</Text>
+            <Text style={{color:'#fff',fontWeight:'600',marginTop:8}}>Camera Access Required</Text>
+            <Pressable onPress={requestCameraPermission} style={[S.btn,{marginTop:16}]}>
+              <Text style={S.btnText}>Grant Camera Access</Text>
+            </Pressable>
           </View>
-        </View>
+        )}
       </View>
 
       {/* Score Overlay */}
@@ -868,7 +873,7 @@ export default function App() {
         </View>
 
         {/* Rescan Body */}
-        <Pressable onPress={()=>{setScanProgress(0);setScanDone(false);setScanPhoto(null);setScreen('scan');}} style={[S.card,{marginTop:16,flexDirection:'row',alignItems:'center',justifyContent:'space-between'}]}>
+        <Pressable onPress={()=>{setScanProgress(0);setScanDone(false);setScanPhoto(null);setScanPhase('photo');setScreen('scan');}} style={[S.card,{marginTop:16,flexDirection:'row',alignItems:'center',justifyContent:'space-between'}]}>
           <View style={{flexDirection:'row',alignItems:'center',gap:12}}>
             <Text style={{fontSize:20}}>🧬</Text>
             <View>
