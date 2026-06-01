@@ -54,7 +54,7 @@ const WEARABLE_DEVICES = [
   { id: 'samsung_health', name: 'Samsung Health', icon: '💙', description: 'Heart Rate, Steps, Sleep', platform: 'android' },
 ];
 
-type Screen = 'login' | 'register' | 'forgot_password' | 'quiz' | 'scan' | 'home' | 'nutrition' | 'formcheck' | 'mindbody' | 'breathing' | 'activity' | 'challenges' | 'create_challenge' | 'genie' | 'camera_scan' | 'formcheck_session' | 'formcheck_select' | 'become_score' | 'weekly_summary' | 'wearables';
+type Screen = 'login' | 'register' | 'forgot_password' | 'quiz' | 'scan' | 'home' | 'nutrition' | 'formcheck' | 'mindbody' | 'breathing' | 'activity' | 'challenges' | 'create_challenge' | 'genie' | 'camera_scan' | 'formcheck_session' | 'formcheck_select' | 'become_score' | 'weekly_summary' | 'wearables' | 'leaderboard' | 'accountability' | 'referrals';
 
 export default function App() {
   const [screen, setScreen] = useState<Screen>('login');
@@ -113,6 +113,9 @@ export default function App() {
 
   const [connectedWearables, setConnectedWearables] = useState<string[]>([]);
   const [wearableData, setWearableData] = useState<{hrv:number|null,restingHR:number|null,steps:number|null,sleep:number|null}>({hrv:null,restingHR:null,steps:null,sleep:null});
+
+  const [accountabilityPartner, setAccountabilityPartner] = useState<string|null>(null);
+  const [referralCount, setReferralCount] = useState(0);
 
   const [toast, setToast] = useState<{visible:boolean;message:string;type:'success'|'error'|'info'}>({visible:false,message:'',type:'info'});
   const toastTimer = useRef<any>(null);
@@ -285,7 +288,7 @@ export default function App() {
         longest_streak_days: Math.max(newStreak, existing.longest_streak_days), last_activity_date: today, updated_at: new Date().toISOString(),
       }).eq('user_id', user.id);
       setPoints({ total: newTotal, level: newLevel, streak: newStreak });
-      if (newLevel > points.level) {
+      if (Math.floor(existing.total_points / 100) < Math.floor(newTotal / 100)) {
         setShowConfetti(true);
         setTimeout(()=>setShowConfetti(false), 4000);
         showToast(`🎉 LEVEL UP! You're now Level ${newLevel}!`, 'success');
@@ -1204,6 +1207,87 @@ export default function App() {
     </ScrollView>
   );
 
+  // --- LEADERBOARD ---
+  if (screen === 'leaderboard') return (
+    <ScrollView style={{flex:1,backgroundColor:'#0F172A'}} contentContainerStyle={{padding:24,paddingTop:60}}>
+      <Pressable onPress={()=>setScreen('home')}><Text style={{color:'#6366F1',marginBottom:16}}>← Back</Text></Pressable>
+      <Text style={{color:'#fff',fontSize:28,fontWeight:'bold'}}>Leaderboard</Text>
+      <Text style={{color:'#94A3B8',marginTop:4}}>Top performers this week</Text>
+      <View style={{backgroundColor:'#312E81',borderRadius:16,padding:16,marginTop:20,borderWidth:1,borderColor:'#6366F166',flexDirection:'row',alignItems:'center',justifyContent:'space-between'}}>
+        <View style={{flexDirection:'row',alignItems:'center',gap:12}}>
+          <View style={{width:36,height:36,borderRadius:18,backgroundColor:'#6366F1',alignItems:'center',justifyContent:'center'}}><Text style={{color:'#fff',fontWeight:'bold'}}>You</Text></View>
+          <View><Text style={{color:'#fff',fontWeight:'600'}}>Your Ranking</Text><Text style={{color:'#A5B4FC',fontSize:11}}>Level {points.level} · {points.streak} day streak</Text></View>
+        </View>
+        <Text style={{color:'#FBBF24',fontSize:20,fontWeight:'bold'}}>{points.total} XP</Text>
+      </View>
+      <Text style={{color:'#fff',fontSize:18,fontWeight:'600',marginTop:24}}>This Week's Top 10</Text>
+      {[{rank:1,name:'Sarah M.',xp:1250,level:13,streak:21,avatar:'🏆'},{rank:2,name:'James K.',xp:1100,level:11,streak:14,avatar:'🥈'},{rank:3,name:'Priya R.',xp:980,level:10,streak:18,avatar:'🥉'},{rank:4,name:'Mike T.',xp:870,level:9,streak:12,avatar:'💪'},{rank:5,name:'Emma L.',xp:750,level:8,streak:9,avatar:'⭐'},{rank:6,name:'David W.',xp:680,level:7,streak:7,avatar:'🔥'},{rank:7,name:'Lisa N.',xp:590,level:6,streak:11,avatar:'✨'},{rank:8,name:'Alex P.',xp:520,level:6,streak:5,avatar:'🌟'},{rank:9,name:'Jordan B.',xp:450,level:5,streak:8,avatar:'💫'},{rank:10,name:'Chris H.',xp:380,level:4,streak:4,avatar:'🎯'}].map((u,i) => (
+        <View key={i} style={[S.card,{marginTop:8,flexDirection:'row',alignItems:'center',justifyContent:'space-between'}]}>
+          <View style={{flexDirection:'row',alignItems:'center',gap:12}}>
+            <Text style={{color:i<3?'#FBBF24':'#64748B',fontWeight:'bold',width:20}}>{u.rank}</Text>
+            <Text style={{fontSize:18}}>{u.avatar}</Text>
+            <View><Text style={{color:'#fff',fontWeight:'500'}}>{u.name}</Text><Text style={{color:'#64748B',fontSize:10}}>Lv.{u.level} · 🔥{u.streak}d</Text></View>
+          </View>
+          <Text style={{color:'#6366F1',fontWeight:'bold'}}>{u.xp} XP</Text>
+        </View>
+      ))}
+    </ScrollView>
+  );
+
+  // --- ACCOUNTABILITY ---
+  if (screen === 'accountability') return (
+    <ScrollView style={{flex:1,backgroundColor:'#0F172A'}} contentContainerStyle={{padding:24,paddingTop:60}}>
+      <Pressable onPress={()=>setScreen('home')}><Text style={{color:'#6366F1',marginBottom:16}}>← Back</Text></Pressable>
+      <Text style={{color:'#fff',fontSize:28,fontWeight:'bold'}}>Accountability</Text>
+      <Text style={{color:'#94A3B8',marginTop:4}}>Partner up to stay on track</Text>
+      {!accountabilityPartner ? (
+        <View style={{marginTop:32}}>
+          <View style={[S.card,{alignItems:'center'}]}>
+            <Text style={{fontSize:48}}>🤝</Text>
+            <Text style={{color:'#fff',fontSize:18,fontWeight:'600',marginTop:12}}>Find a Partner</Text>
+            <Text style={{color:'#94A3B8',fontSize:13,textAlign:'center',marginTop:8}}>Pair up with a friend. Get notified if either misses a day.</Text>
+            <Pressable onPress={async()=>{const available=await SMS.isAvailableAsync();if(available){await SMS.sendSMSAsync([],'Be my accountability partner on Become! Download: https://become.app');showToast('Invite sent!','success');}else{showToast('SMS not available','error');}}} style={[S.btn,{marginTop:16,width:'100%'}]}><Text style={S.btnText}>Invite Partner via SMS</Text></Pressable>
+            <Pressable onPress={()=>{setAccountabilityPartner('Demo Partner');showToast('Partner connected!','success');}} style={{marginTop:12}}><Text style={{color:'#6366F1'}}>Demo: Connect a partner</Text></Pressable>
+          </View>
+        </View>
+      ) : (
+        <View style={{marginTop:24}}>
+          <View style={[S.card]}>
+            <View style={{flexDirection:'row',alignItems:'center',gap:14}}>
+              <View style={{width:50,height:50,borderRadius:25,backgroundColor:'#34D399',alignItems:'center',justifyContent:'center'}}><Text style={{color:'#fff',fontWeight:'bold'}}>DP</Text></View>
+              <View style={{flex:1}}><Text style={{color:'#fff',fontWeight:'600',fontSize:16}}>{accountabilityPartner}</Text><Text style={{color:'#34D399',fontSize:12,marginTop:2}}>✓ Active · 5 day streak together</Text></View>
+            </View>
+          </View>
+          <Pressable onPress={()=>{setAccountabilityPartner(null);showToast('Partner disconnected','info');}} style={{marginTop:16,alignItems:'center'}}><Text style={{color:'#F87171',fontSize:13}}>Remove Partner</Text></Pressable>
+        </View>
+      )}
+    </ScrollView>
+  );
+
+  // --- REFERRALS ---
+  if (screen === 'referrals') return (
+    <ScrollView style={{flex:1,backgroundColor:'#0F172A'}} contentContainerStyle={{padding:24,paddingTop:60}}>
+      <Pressable onPress={()=>setScreen('home')}><Text style={{color:'#6366F1',marginBottom:16}}>← Back</Text></Pressable>
+      <Text style={{color:'#fff',fontSize:28,fontWeight:'bold'}}>Refer Friends</Text>
+      <Text style={{color:'#94A3B8',marginTop:4}}>Invite 3 friends → get 1 month free Premium</Text>
+      <View style={[S.card,{marginTop:24,alignItems:'center'}]}>
+        <Text style={{color:'#6366F1',fontSize:48,fontWeight:'bold'}}>{referralCount}/3</Text>
+        <Text style={{color:'#94A3B8',fontSize:13,marginTop:4}}>Friends joined</Text>
+        <View style={{width:'100%',height:8,backgroundColor:'#334155',borderRadius:4,marginTop:16}}><View style={{height:8,backgroundColor:'#6366F1',borderRadius:4,width:`${(referralCount/3)*100}%`}} /></View>
+        <Text style={{color:referralCount>=3?'#34D399':'#64748B',fontSize:12,marginTop:8}}>{referralCount>=3?'🎉 You earned 1 month free!':`${3-referralCount} more to unlock`}</Text>
+      </View>
+      <Pressable onPress={async()=>{try{await Share.share({message:'Join me on Become — the AI wellness app! Download: https://become.app'});setReferralCount(prev=>Math.min(3,prev+1));showToast('Invite shared!','success');}catch(e){}}} style={[S.btn,{marginTop:16,flexDirection:'row',justifyContent:'center',gap:8}]}>
+        <Text style={{fontSize:16}}>📲</Text><Text style={S.btnText}>Share Invite Link</Text>
+      </Pressable>
+      <Text style={{color:'#fff',fontSize:18,fontWeight:'600',marginTop:28}}>Rewards</Text>
+      <View style={[S.card,{marginTop:12}]}>
+        <View style={{flexDirection:'row',alignItems:'center',gap:12}}><Text style={{fontSize:18}}>{referralCount>=1?'✅':'⬜'}</Text><View><Text style={{color:'#fff'}}>1 friend joins</Text><Text style={{color:'#94A3B8',fontSize:11}}>+100 bonus XP</Text></View></View>
+        <View style={{flexDirection:'row',alignItems:'center',gap:12,marginTop:12}}><Text style={{fontSize:18}}>{referralCount>=2?'✅':'⬜'}</Text><View><Text style={{color:'#fff'}}>2 friends join</Text><Text style={{color:'#94A3B8',fontSize:11}}>+250 XP + badge</Text></View></View>
+        <View style={{flexDirection:'row',alignItems:'center',gap:12,marginTop:12}}><Text style={{fontSize:18}}>{referralCount>=3?'✅':'⬜'}</Text><View><Text style={{color:'#fff'}}>3 friends join</Text><Text style={{color:'#94A3B8',fontSize:11}}>🏆 1 month FREE Premium</Text></View></View>
+      </View>
+    </ScrollView>
+  );
+
   // --- HOME (default) ---
   return (
     <View style={{flex:1,backgroundColor:'#0F172A'}}>
@@ -1215,7 +1299,7 @@ export default function App() {
         </View>
       )}
       {showConfetti && (
-        <View style={{position:'absolute',top:0,left:0,right:0,bottom:0,zIndex:99,pointerEvents:'none',alignItems:'center',paddingTop:100}}>
+        <View style={{position:'absolute',top:0,left:0,right:0,bottom:0,zIndex:9999,pointerEvents:'none',alignItems:'center',paddingTop:100}}>
           <Text style={{fontSize:60}}>🎉</Text>
           <View style={{flexDirection:'row',gap:8,marginTop:8}}><Text style={{fontSize:30}}>⭐</Text><Text style={{fontSize:40}}>🏆</Text><Text style={{fontSize:30}}>⭐</Text></View>
           <Text style={{color:'#fff',fontSize:24,fontWeight:'bold',marginTop:16}}>LEVEL UP!</Text>
@@ -1288,6 +1372,21 @@ export default function App() {
           <Pressable onPress={()=>setScreen('wearables')} style={[S.card,{flex:1,alignItems:'center'}]}>
             <Text style={{fontSize:24}}>⌚</Text>
             <Text style={{color:'#fff',fontWeight:'600',marginTop:4,fontSize:13}}>Wearables</Text>
+          </Pressable>
+        </View>
+
+        <View style={{flexDirection:'row',gap:12,marginTop:12}}>
+          <Pressable onPress={()=>setScreen('leaderboard')} style={[S.card,{flex:1,alignItems:'center'}]}>
+            <Text style={{fontSize:24}}>🏅</Text>
+            <Text style={{color:'#fff',fontWeight:'600',marginTop:4,fontSize:13}}>Leaderboard</Text>
+          </Pressable>
+          <Pressable onPress={()=>setScreen('accountability')} style={[S.card,{flex:1,alignItems:'center'}]}>
+            <Text style={{fontSize:24}}>🤝</Text>
+            <Text style={{color:'#fff',fontWeight:'600',marginTop:4,fontSize:13}}>Partners</Text>
+          </Pressable>
+          <Pressable onPress={()=>setScreen('referrals')} style={[S.card,{flex:1,alignItems:'center'}]}>
+            <Text style={{fontSize:24}}>🎁</Text>
+            <Text style={{color:'#fff',fontWeight:'600',marginTop:4,fontSize:13}}>Refer</Text>
           </Pressable>
         </View>
 
