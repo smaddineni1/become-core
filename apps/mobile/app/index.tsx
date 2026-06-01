@@ -1,13 +1,16 @@
-import { View, Text, TextInput, Pressable, ScrollView, Alert, KeyboardAvoidingView, Platform, Modal, FlatList } from 'react-native';
+import { View, Text, TextInput, Pressable, ScrollView, Alert, KeyboardAvoidingView, Platform, Modal, FlatList, ActivityIndicator } from 'react-native';
 import { useState, useEffect, useRef } from 'react';
 import { createClient } from '@supabase/supabase-js';
+import { Video, ResizeMode } from 'expo-av';
 
 const supabase = createClient(
   'https://tehezgpzecdblhebddoo.supabase.co',
   'sb_publishable_8ZGCicXame67Mn1TGcRyng_0jJ3sX-i'
 );
 
-type Screen = 'login' | 'register' | 'quiz' | 'scan' | 'home' | 'nutrition' | 'formcheck' | 'mindbody';
+const BREATHING_VIDEO_URL = 'https://tehezgpzecdblhebddoo.supabase.co/storage/v1/object/public/videos/runway-agent-exhale-20260528-152325.mp4';
+
+type Screen = 'login' | 'register' | 'quiz' | 'scan' | 'home' | 'nutrition' | 'formcheck' | 'mindbody' | 'breathing';
 
 export default function App() {
   const [screen, setScreen] = useState<Screen>('login');
@@ -300,6 +303,110 @@ export default function App() {
     </ScrollView>
   );
 
+  // --- MIND & BODY ---
+  if (screen === 'mindbody') return (
+    <ScrollView style={{flex:1,backgroundColor:'#0F172A'}} contentContainerStyle={{padding:24,paddingTop:60}}>
+      <Pressable onPress={()=>setScreen('home')}><Text style={{color:'#6366F1',marginBottom:16}}>← Back</Text></Pressable>
+      <Text style={{color:'#fff',fontSize:28,fontWeight:'bold'}}>Mind & Body</Text>
+      <Text style={{color:'#94A3B8',marginTop:4}}>Yoga, Meditation & Guided Breathing</Text>
+
+      {/* Recommended Session */}
+      <View style={{backgroundColor:'#064E3B33',borderRadius:16,padding:20,marginTop:24,borderWidth:1,borderColor:'#065F4644'}}>
+        <Text style={{color:'#34D399',fontSize:11,fontWeight:'700'}}>RECOMMENDED FOR YOU</Text>
+        <Text style={{color:'#fff',fontSize:18,fontWeight:'600',marginTop:8}}>Recovery Breathing</Text>
+        <Text style={{color:'#94A3B8',fontSize:13,marginTop:4}}>5 min · Gentle · Based on your readiness</Text>
+        <Pressable onPress={()=>setScreen('breathing')} style={{backgroundColor:'#34D399',borderRadius:12,padding:14,marginTop:16,alignItems:'center'}}>
+          <Text style={{color:'#0F172A',fontWeight:'700',fontSize:15}}>Start Breathing Session</Text>
+        </Pressable>
+      </View>
+
+      {/* Session Grid */}
+      <Text style={{color:'#fff',fontSize:18,fontWeight:'600',marginTop:32}}>Sessions</Text>
+      <Pressable onPress={()=>setScreen('breathing')} style={[S.card,{marginTop:12,flexDirection:'row',alignItems:'center',gap:16}]}>
+        <View style={{width:50,height:50,borderRadius:12,backgroundColor:'#312E81',alignItems:'center',justifyContent:'center'}}>
+          <Text style={{fontSize:22}}>🌬️</Text>
+        </View>
+        <View style={{flex:1}}>
+          <Text style={{color:'#fff',fontWeight:'600'}}>Guided Breathing</Text>
+          <Text style={{color:'#94A3B8',fontSize:12,marginTop:2}}>5 min · Gentle · Video</Text>
+        </View>
+        <Text style={{color:'#6366F1'}}>▶</Text>
+      </Pressable>
+
+      <View style={[S.card,{marginTop:12,flexDirection:'row',alignItems:'center',gap:16,opacity:0.5}]}>
+        <View style={{width:50,height:50,borderRadius:12,backgroundColor:'#312E81',alignItems:'center',justifyContent:'center'}}>
+          <Text style={{fontSize:22}}>🧘‍♀️</Text>
+        </View>
+        <View style={{flex:1}}>
+          <Text style={{color:'#fff',fontWeight:'600'}}>Morning Yoga Flow</Text>
+          <Text style={{color:'#94A3B8',fontSize:12,marginTop:2}}>20 min · Moderate · Coming soon</Text>
+        </View>
+      </View>
+
+      <View style={[S.card,{marginTop:12,flexDirection:'row',alignItems:'center',gap:16,opacity:0.5}]}>
+        <View style={{width:50,height:50,borderRadius:12,backgroundColor:'#312E81',alignItems:'center',justifyContent:'center'}}>
+          <Text style={{fontSize:22}}>🌙</Text>
+        </View>
+        <View style={{flex:1}}>
+          <Text style={{color:'#fff',fontWeight:'600'}}>Sleep Meditation</Text>
+          <Text style={{color:'#94A3B8',fontSize:12,marginTop:2}}>10 min · Gentle · Coming soon</Text>
+        </View>
+      </View>
+    </ScrollView>
+  );
+
+  // --- BREATHING PLAYER ---
+  if (screen === 'breathing') return (
+    <View style={{flex:1,backgroundColor:'#0F172A'}}>
+      {/* Video Player */}
+      <Video
+        source={{ uri: BREATHING_VIDEO_URL }}
+        style={{flex:1}}
+        resizeMode={ResizeMode.COVER}
+        shouldPlay={true}
+        isLooping={true}
+        isMuted={false}
+      />
+
+      {/* Overlay Controls */}
+      <View style={{position:'absolute',top:0,left:0,right:0,bottom:0}}>
+        {/* Top Bar */}
+        <View style={{flexDirection:'row',justifyContent:'space-between',alignItems:'center',paddingTop:50,paddingHorizontal:20}}>
+          <Pressable onPress={()=>setScreen('mindbody')} style={{width:40,height:40,borderRadius:20,backgroundColor:'#0F172ACC',alignItems:'center',justifyContent:'center'}}>
+            <Text style={{color:'#fff',fontSize:18}}>←</Text>
+          </Pressable>
+          <Text style={{color:'#fff',fontWeight:'600'}}>Recovery Breathing</Text>
+          <View style={{width:40}} />
+        </View>
+
+        {/* Bottom Info */}
+        <View style={{position:'absolute',bottom:0,left:0,right:0,backgroundColor:'#0F172AE6',padding:24,paddingBottom:40}}>
+          <Text style={{color:'#fff',fontSize:20,fontWeight:'bold'}}>5-Min Recovery Breathing</Text>
+          <Text style={{color:'#94A3B8',fontSize:14,marginTop:8}}>Follow the visual rhythm. Slow diaphragmatic breathing activates your parasympathetic nervous system for deep recovery.</Text>
+
+          <View style={{flexDirection:'row',gap:12,marginTop:16}}>
+            <View style={{backgroundColor:'#334155',borderRadius:8,paddingHorizontal:12,paddingVertical:6}}>
+              <Text style={{color:'#94A3B8',fontSize:11}}>Duration</Text>
+              <Text style={{color:'#fff',fontWeight:'600'}}>5:00</Text>
+            </View>
+            <View style={{backgroundColor:'#334155',borderRadius:8,paddingHorizontal:12,paddingVertical:6}}>
+              <Text style={{color:'#94A3B8',fontSize:11}}>Intensity</Text>
+              <Text style={{color:'#fff',fontWeight:'600'}}>Gentle</Text>
+            </View>
+            <View style={{backgroundColor:'#334155',borderRadius:8,paddingHorizontal:12,paddingVertical:6}}>
+              <Text style={{color:'#94A3B8',fontSize:11}}>Loop</Text>
+              <Text style={{color:'#34D399',fontWeight:'600'}}>On</Text>
+            </View>
+          </View>
+
+          <Pressable onPress={()=>setScreen('mindbody')} style={{backgroundColor:'#6366F1',borderRadius:12,padding:16,marginTop:20,alignItems:'center'}}>
+            <Text style={{color:'#fff',fontWeight:'600',fontSize:16}}>End Session</Text>
+          </Pressable>
+        </View>
+      </View>
+    </View>
+  );
+
   // --- HOME ---
   return (
     <View style={{flex:1,backgroundColor:'#0F172A'}}>
@@ -324,7 +431,7 @@ export default function App() {
             <Text style={{fontSize:24}}>🏋️</Text>
             <Text style={{color:'#fff',fontWeight:'600',marginTop:4,fontSize:13}}>Form Check</Text>
           </Pressable>
-          <Pressable onPress={()=>Alert.alert('Mind & Body','Breathing video player coming in next build!')} style={[S.card,{flex:1,alignItems:'center'}]}>
+          <Pressable onPress={()=>setScreen('mindbody')} style={[S.card,{flex:1,alignItems:'center'}]}>
             <Text style={{fontSize:24}}>🧘</Text>
             <Text style={{color:'#fff',fontWeight:'600',marginTop:4,fontSize:13}}>Mind & Body</Text>
           </Pressable>
