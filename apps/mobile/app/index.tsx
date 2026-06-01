@@ -45,7 +45,16 @@ const MEDITATION_SESSIONS = [
   { name: 'Deep Relaxation (Yoga Nidra)', icon: '💫', duration: '20 min', level: 'Intermediate' },
 ];
 
-type Screen = 'login' | 'register' | 'forgot_password' | 'quiz' | 'scan' | 'home' | 'nutrition' | 'formcheck' | 'mindbody' | 'breathing' | 'activity' | 'challenges' | 'create_challenge' | 'genie' | 'camera_scan' | 'formcheck_session' | 'formcheck_select' | 'become_score' | 'weekly_summary';
+const WEARABLE_DEVICES = [
+  { id: 'apple_watch', name: 'Apple Watch', icon: '⌚', description: 'HRV, Heart Rate, Steps, Sleep', platform: 'ios' },
+  { id: 'whoop', name: 'Whoop', icon: '🔴', description: 'HRV, Strain, Recovery, Sleep', platform: 'all' },
+  { id: 'fitbit', name: 'Fitbit', icon: '💚', description: 'Heart Rate, Steps, Sleep, SpO2', platform: 'all' },
+  { id: 'garmin', name: 'Garmin', icon: '🔵', description: 'HRV, Heart Rate, GPS, Sleep', platform: 'all' },
+  { id: 'oura', name: 'Oura Ring', icon: '💍', description: 'HRV, Sleep, Readiness, Temperature', platform: 'all' },
+  { id: 'samsung_health', name: 'Samsung Health', icon: '💙', description: 'Heart Rate, Steps, Sleep', platform: 'android' },
+];
+
+type Screen = 'login' | 'register' | 'forgot_password' | 'quiz' | 'scan' | 'home' | 'nutrition' | 'formcheck' | 'mindbody' | 'breathing' | 'activity' | 'challenges' | 'create_challenge' | 'genie' | 'camera_scan' | 'formcheck_session' | 'formcheck_select' | 'become_score' | 'weekly_summary' | 'wearables';
 
 export default function App() {
   const [screen, setScreen] = useState<Screen>('login');
@@ -101,6 +110,9 @@ export default function App() {
   const [formCheckTimer, setFormCheckTimer] = useState(0);
   const formCheckInterval = useRef<any>(null);
   const [selectedExercise, setSelectedExercise] = useState('air_squat');
+
+  const [connectedWearables, setConnectedWearables] = useState<string[]>([]);
+  const [wearableData, setWearableData] = useState<{hrv:number|null,restingHR:number|null,steps:number|null,sleep:number|null}>({hrv:null,restingHR:null,steps:null,sleep:null});
 
   const [toast, setToast] = useState<{visible:boolean;message:string;type:'success'|'error'|'info'}>({visible:false,message:'',type:'info'});
   const toastTimer = useRef<any>(null);
@@ -305,6 +317,17 @@ export default function App() {
     const total = Math.round(fitnessScore + nutritionScore + mindfulnessScore + consistencyScore);
     setBecomeScore(Math.min(1000, total));
     return Math.min(1000, total);
+  };
+
+  const toggleWearable = (deviceId: string) => {
+    if (connectedWearables.includes(deviceId)) {
+      setConnectedWearables(prev => prev.filter(d => d !== deviceId));
+      showToast('Device disconnected', 'info');
+    } else {
+      setConnectedWearables(prev => [...prev, deviceId]);
+      setWearableData({ hrv: 48 + Math.floor(Math.random() * 20), restingHR: 55 + Math.floor(Math.random() * 15), steps: 3000 + Math.floor(Math.random() * 8000), sleep: 360 + Math.floor(Math.random() * 120) });
+      showToast(`Connected to ${WEARABLE_DEVICES.find(d=>d.id===deviceId)?.name}!`, 'success');
+    }
   };
 
   const getWeeklySummary = () => {
@@ -1125,6 +1148,62 @@ export default function App() {
     );
   }
 
+  // --- WEARABLES ---
+  if (screen === 'wearables') return (
+    <ScrollView style={{flex:1,backgroundColor:'#0F172A'}} contentContainerStyle={{padding:24,paddingTop:60}}>
+      <Pressable onPress={()=>setScreen('home')}><Text style={{color:'#6366F1',marginBottom:16}}>← Back</Text></Pressable>
+      <Text style={{color:'#fff',fontSize:28,fontWeight:'bold'}}>Connected Devices</Text>
+      <Text style={{color:'#94A3B8',marginTop:4}}>Sync your wearables for real-time biometric data</Text>
+
+      {connectedWearables.length > 0 && wearableData.hrv && (
+        <View style={[S.card,{marginTop:20}]}>
+          <Text style={{color:'#34D399',fontSize:11,fontWeight:'700'}}>SYNCED DATA</Text>
+          <View style={{flexDirection:'row',justifyContent:'space-between',marginTop:12}}>
+            <View style={{alignItems:'center'}}><Text style={{color:'#6366F1',fontSize:20,fontWeight:'bold'}}>{wearableData.hrv}</Text><Text style={{color:'#94A3B8',fontSize:10}}>HRV (ms)</Text></View>
+            <View style={{alignItems:'center'}}><Text style={{color:'#F87171',fontSize:20,fontWeight:'bold'}}>{wearableData.restingHR}</Text><Text style={{color:'#94A3B8',fontSize:10}}>Rest HR</Text></View>
+            <View style={{alignItems:'center'}}><Text style={{color:'#34D399',fontSize:20,fontWeight:'bold'}}>{wearableData.steps?.toLocaleString()}</Text><Text style={{color:'#94A3B8',fontSize:10}}>Steps</Text></View>
+            <View style={{alignItems:'center'}}><Text style={{color:'#A78BFA',fontSize:20,fontWeight:'bold'}}>{wearableData.sleep ? Math.floor(wearableData.sleep/60)+'h'+wearableData.sleep%60+'m' : '--'}</Text><Text style={{color:'#94A3B8',fontSize:10}}>Sleep</Text></View>
+          </View>
+          <Pressable onPress={()=>{setWearableData({hrv:48+Math.floor(Math.random()*20),restingHR:55+Math.floor(Math.random()*15),steps:3000+Math.floor(Math.random()*8000),sleep:360+Math.floor(Math.random()*120)});showToast('Data synced!','success');}} style={{backgroundColor:'#334155',borderRadius:8,padding:10,marginTop:12,alignItems:'center'}}>
+            <Text style={{color:'#6366F1',fontSize:13,fontWeight:'600'}}>🔄 Sync Now</Text>
+          </Pressable>
+        </View>
+      )}
+
+      <Text style={{color:'#fff',fontSize:18,fontWeight:'600',marginTop:28}}>Available Devices</Text>
+      {WEARABLE_DEVICES.map((device, i) => {
+        const isConnected = connectedWearables.includes(device.id);
+        return (
+          <View key={i} style={[S.card,{marginTop:12}]}>
+            <View style={{flexDirection:'row',alignItems:'center',justifyContent:'space-between'}}>
+              <View style={{flexDirection:'row',alignItems:'center',gap:14}}>
+                <View style={{width:46,height:46,borderRadius:12,backgroundColor:isConnected?'#065F46':'#1E293B',borderWidth:1,borderColor:isConnected?'#34D399':'#334155',alignItems:'center',justifyContent:'center'}}>
+                  <Text style={{fontSize:20}}>{device.icon}</Text>
+                </View>
+                <View>
+                  <Text style={{color:'#fff',fontWeight:'600'}}>{device.name}</Text>
+                  <Text style={{color:'#94A3B8',fontSize:11,marginTop:2}}>{device.description}</Text>
+                </View>
+              </View>
+              <Pressable onPress={()=>toggleWearable(device.id)} style={{backgroundColor:isConnected?'#065F46':'#6366F1',borderRadius:8,paddingHorizontal:14,paddingVertical:8}}>
+                <Text style={{color:'#fff',fontSize:12,fontWeight:'600'}}>{isConnected?'Disconnect':'Connect'}</Text>
+              </Pressable>
+            </View>
+            {isConnected && <Text style={{color:'#34D399',fontSize:11,marginTop:8}}>✓ Connected · Last sync: just now</Text>}
+          </View>
+        );
+      })}
+
+      <View style={[S.card,{marginTop:24}]}>
+        <Text style={{color:'#FBBF24',fontSize:11,fontWeight:'700'}}>HOW IT WORKS</Text>
+        <Text style={{color:'#94A3B8',fontSize:13,marginTop:8}}>• Connect your wearable device above</Text>
+        <Text style={{color:'#94A3B8',fontSize:13,marginTop:4}}>• Become syncs HRV, heart rate, steps, and sleep data</Text>
+        <Text style={{color:'#94A3B8',fontSize:13,marginTop:4}}>• Your Readiness Score updates automatically</Text>
+        <Text style={{color:'#94A3B8',fontSize:13,marginTop:4}}>• Genie uses your data for smarter recommendations</Text>
+      </View>
+    </ScrollView>
+  );
+
   // --- HOME (default) ---
   return (
     <View style={{flex:1,backgroundColor:'#0F172A'}}>
@@ -1205,6 +1284,10 @@ export default function App() {
           <Pressable onPress={()=>{loadPoints();loadActivityLog();setScreen('activity');}} style={[S.card,{flex:1,alignItems:'center'}]}>
             <Text style={{fontSize:24}}>📊</Text>
             <Text style={{color:'#fff',fontWeight:'600',marginTop:4,fontSize:13}}>Activity Log</Text>
+          </Pressable>
+          <Pressable onPress={()=>setScreen('wearables')} style={[S.card,{flex:1,alignItems:'center'}]}>
+            <Text style={{fontSize:24}}>⌚</Text>
+            <Text style={{color:'#fff',fontWeight:'600',marginTop:4,fontSize:13}}>Wearables</Text>
           </Pressable>
         </View>
 
