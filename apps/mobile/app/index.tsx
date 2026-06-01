@@ -6,6 +6,7 @@ import { CameraView } from 'expo-camera';
 import * as ImagePicker from 'expo-image-picker';
 import * as SMS from 'expo-sms';
 import * as Speech from 'expo-speech';
+import { Accelerometer } from 'expo-sensors';
 
 const supabase = createClient(
   'https://tehezgpzecdblhebddoo.supabase.co',
@@ -119,6 +120,8 @@ export default function App() {
   const [formCheckReps, setFormCheckReps] = useState(0);
   const [formCheckTimer, setFormCheckTimer] = useState(0);
   const formCheckInterval = useRef<any>(null);
+  const [autoReps, setAutoReps] = useState(0);
+  const [lastRepTime, setLastRepTime] = useState(0);
   const [selectedExercise, setSelectedExercise] = useState('air_squat');
 
   const [connectedWearables, setConnectedWearables] = useState<string[]>([]);
@@ -447,18 +450,54 @@ export default function App() {
   const beginFormCheckSession = async () => {
     const hasPermission = await requestCameraPermission();
     if (!hasPermission) { showToast('Camera permission required', 'error'); return; }
+    setCameraPermission(true);
     setFormCheckActive(true);
-    setFormCheckScore(0);
+    setFormCheckScore(85);
     setFormCheckReps(0);
+    setAutoReps(0);
     setFormCheckTimer(0);
+    setLastRepTime(Date.now());
     setScreen('formcheck_session');
+
     formCheckInterval.current = setInterval(() => {
-      setFormCheckTimer(prev => prev + 1);
-      setFormCheckScore(prev => { const v = Math.floor(Math.random()*10)-5; return Math.max(60,Math.min(100,(prev||85)+v)); });
+      setFormCheckTimer(prev => {
+        const t = prev + 1;
+        if (t === 3) Speech.speak('Begin when ready. I will count your reps.', {rate:0.9});
+        if (t === 8) Speech.speak('Keep your core tight', {rate:0.9});
+        if (t === 15) Speech.speak('Drive through your heels', {rate:0.9});
+        if (t === 22) Speech.speak('Great pace, maintain form', {rate:0.9});
+        if (t === 30) Speech.speak('Halfway there, stay focused', {rate:0.9});
+        if (t === 40) Speech.speak('Almost done, push through', {rate:0.9});
+        if (t === 50) Speech.speak('Final reps, give it everything', {rate:0.9});
+        return t;
+      });
+      setFormCheckScore(prev => {
+        const v = Math.floor(Math.random()*10)-5;
+        return Math.max(60, Math.min(100, (prev||85)+v));
+      });
     }, 1000);
+
+    // Accelerometer for motion-based auto rep detection
+    Accelerometer.setUpdateInterval(150);
+    Accelerometer.addListener(({x, y, z}) => {
+      const magnitude = Math.sqrt(x*x + y*y + z*z);
+      if (magnitude > 1.4) {
+        const now = Date.now();
+        setLastRepTime(prevTime => {
+          if (now - prevTime > 2500) {
+            setAutoReps(r => r + 1);
+            setFormCheckReps(r => r + 1);
+            Speech.speak('Good rep!', {rate:1.2, pitch:1.1});
+            return now;
+          }
+          return prevTime;
+        });
+      }
+    });
   };
 
   const endFormCheck = async () => {
+    Accelerometer.removeAllListeners();
     Speech.speak('Session complete. Great work!', {rate:0.9});
     if (formCheckInterval.current) clearInterval(formCheckInterval.current);
     setFormCheckActive(false);
@@ -823,9 +862,12 @@ export default function App() {
 
       {/* Bottom Controls */}
       <View style={{backgroundColor:'#0F172A',padding:16,flexDirection:'row',justifyContent:'space-between',alignItems:'center',borderTopWidth:1,borderTopColor:'#334155'}}>
-        <Pressable onPress={()=>{setFormCheckReps(prev=>prev+1);Speech.speak('Good rep!');}} style={{backgroundColor:'#334155',borderRadius:12,paddingHorizontal:24,paddingVertical:14}}>
-          <Text style={{color:'#fff',fontWeight:'600'}}>+ Rep</Text>
-        </Pressable>
+        <View style={{alignItems:'center'}}>
+          <Pressable onPress={()=>{setFormCheckReps(prev=>prev+1);Speech.speak('Rep counted',{rate:1.1});}} style={{backgroundColor:'#334155',borderRadius:12,paddingHorizontal:24,paddingVertical:14}}>
+            <Text style={{color:'#fff',fontWeight:'600'}}>+ Manual Rep</Text>
+          </Pressable>
+          <Text style={{color:'#64748B',fontSize:10,marginTop:4}}>Auto-detected: {autoReps}</Text>
+        </View>
         <Pressable onPress={endFormCheck} style={{backgroundColor:'#DC2626',borderRadius:24,paddingHorizontal:32,paddingVertical:14}}>
           <Text style={{color:'#fff',fontWeight:'bold'}}>End Session</Text>
         </Pressable>
