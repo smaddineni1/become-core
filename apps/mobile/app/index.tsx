@@ -2,6 +2,7 @@ import { View, Text, TextInput, Pressable, ScrollView, Alert, KeyboardAvoidingVi
 import { useState, useEffect, useRef } from 'react';
 import { createClient } from '@supabase/supabase-js';
 import { Video, ResizeMode } from 'expo-av';
+import * as SMS from 'expo-sms';
 
 const supabase = createClient(
   'https://tehezgpzecdblhebddoo.supabase.co',
@@ -10,7 +11,7 @@ const supabase = createClient(
 
 const BREATHING_VIDEO_URL = 'https://tehezgpzecdblhebddoo.supabase.co/storage/v1/object/public/videos/runway-agent-exhale-20260528-152325.mp4';
 
-type Screen = 'login' | 'register' | 'quiz' | 'scan' | 'home' | 'nutrition' | 'formcheck' | 'mindbody' | 'breathing' | 'activity';
+type Screen = 'login' | 'register' | 'quiz' | 'scan' | 'home' | 'nutrition' | 'formcheck' | 'mindbody' | 'breathing' | 'activity' | 'challenges' | 'create_challenge' | 'genie';
 
 export default function App() {
   const [screen, setScreen] = useState<Screen>('login');
@@ -21,7 +22,7 @@ export default function App() {
   const [user, setUser] = useState<any>(null);
   const [genieOpen, setGenieOpen] = useState(false);
   const [genieInput, setGenieInput] = useState('');
-  const [genieMessages, setGenieMessages] = useState<Array<{role:string;text:string;buttons?:any[]}>>([]);
+  const [genieMessages, setGenieMessages] = useState<Array<{role:string;text:string;buttons?:any[]}>>([]); 
   const [genieLoading, setGenieLoading] = useState(false);
 
   // Quiz state
@@ -40,6 +41,36 @@ export default function App() {
   // Points/Gamification state
   const [points, setPoints] = useState({ total: 0, level: 1, streak: 0 });
   const [activityLog, setActivityLog] = useState<any[]>([]);
+
+  // Challenge state
+  const [challenges, setChallenges] = useState<any[]>([]);
+  const [myChallenges, setMyChallenges] = useState<any[]>([]);
+  const [challengeTitle, setChallengeTitle] = useState('');
+  const [challengeType, setChallengeType] = useState('squat');
+  const [challengeTarget, setChallengeTarget] = useState('');
+  const [challengeDays, setChallengeDays] = useState('');
+  const [joinCode, setJoinCode] = useState('');
+
+  // === FUNCTIONS DEFINED BEFORE useEffect ===
+  const loadPoints = async () => {
+    if (!user) return;
+    const { data } = await supabase.from('user_points').select('*').eq('user_id', user.id).single();
+    if (data) setPoints({ total: data.total_points, level: data.level, streak: data.current_streak_days });
+  };
+
+  const loadActivityLog = async () => {
+    if (!user) return;
+    const { data } = await supabase.from('activity_log').select('*').eq('user_id', user.id).order('logged_at', { ascending: false }).limit(20);
+    if (data) setActivityLog(data);
+  };
+
+  const loadChallenges = async () => {
+    if (!user) return;
+    const { data: pub } = await supabase.from('challenges').select('*').eq('is_public', true).order('created_at', { ascending: false }).limit(20);
+    if (pub) setChallenges(pub);
+    const { data: mine } = await supabase.from('challenge_participants').select('*, challenges(*)').eq('user_id', user.id);
+    if (mine) setMyChallenges(mine);
+  };
 
   // Check session on mount
   useEffect(() => {
@@ -147,24 +178,11 @@ export default function App() {
   // === GAMIFICATION ===
   const POINTS_MAP: Record<string,number> = { meal_logged: 10, workout_completed: 25, water_logged: 5, breathing_completed: 15, hrv_logged: 10, streak_bonus: 50 };
 
-  const loadPoints = async () => {
-    if (!user) return;
-    const { data } = await supabase.from('user_points').select('*').eq('user_id', user.id).single();
-    if (data) setPoints({ total: data.total_points, level: data.level, streak: data.current_streak_days });
-  };
-
-  const loadActivityLog = async () => {
-    if (!user) return;
-    const { data } = await supabase.from('activity_log').select('*').eq('user_id', user.id).order('logged_at', { ascending: false }).limit(20);
-    if (data) setActivityLog(data);
-  };
-
   const logActivity = async (type: string, description: string) => {
     if (!user) return;
     const pts = POINTS_MAP[type] || 10;
     await supabase.from('activity_log').insert({ user_id: user.id, activity_type: type, description, points_earned: pts });
 
-    // Update user points
     const { data: existing } = await supabase.from('user_points').select('*').eq('user_id', user.id).single();
     const today = new Date().toISOString().split('T')[0];
 
@@ -184,7 +202,6 @@ export default function App() {
       setPoints({ total: pts, level: 1, streak: 1 });
     }
 
-    // Update daily points
     const { data: dailyExisting } = await supabase.from('daily_points').select('*').eq('user_id', user.id).eq('points_date', today).single();
     if (dailyExisting) {
       await supabase.from('daily_points').update({ points_earned: dailyExisting.points_earned + pts, activities_count: dailyExisting.activities_count + 1 }).eq('id', dailyExisting.id);
@@ -194,6 +211,44 @@ export default function App() {
 
     await loadActivityLog();
     Alert.alert('Points Earned!', `+${pts} XP for ${description}`);
+  };
+
+  // === CHALLENGES ===
+  const createChallenge = async () => {
+    if (!user || !challengeTitle || !challengeTarget || !challengeDays) return;
+    const code = Math.random().toString(36).substring(2, 8).toUpperCase();
+    const endDate = new Date(Date.now() + parseInt(challengeDays) * 86400000).toISOString();
+    const { data, error } = await supabase.from('challenges').insert({
+      creator_id: user.id, title: challengeTitle, challenge_type: challengeType,
+      target_value: parseInt(challengeTarget), duration_days: parseInt(challengeDays),
+      invite_code: code, is_public: true, start_date: new Date().toISOString(), end_date: endDate,
+    }).select().single();
+    if (error) { Alert.alert('Error', error.message); return; }
+    if (data) {
+      await supabase.from('challenge_participants').insert({ challenge_id: data.id, user_id: user.id, current_progress: 0 });
+      Alert.alert('Challenge Created!', `Invite code: ${code}`);
+      setChallengeTitle(''); setChallengeTarget(''); setChallengeDays('');
+      await loadChallenges();
+      setScreen('challenges');
+    }
+  };
+
+  const joinChallenge = async () => {
+    if (!user || !joinCode.trim()) return;
+    const { data: ch } = await supabase.from('challenges').select('*').eq('invite_code', joinCode.trim().toUpperCase()).single();
+    if (!ch) { Alert.alert('Error', 'Challenge not found'); return; }
+    const { error } = await supabase.from('challenge_participants').insert({ challenge_id: ch.id, user_id: user.id, current_progress: 0 });
+    if (error) { Alert.alert('Error', error.message); return; }
+    Alert.alert('Joined!', `You joined: ${ch.title}`);
+    setJoinCode('');
+    await loadChallenges();
+  };
+
+  const inviteToChallenge = async (challenge: any) => {
+    const available = await SMS.isAvailableAsync();
+    if (!available) { Alert.alert('SMS not available', 'SMS is not available on this device'); return; }
+    const message = `Join my Become challenge! ${challenge.challenges?.title || challenge.title}. Use code: ${challenge.challenges?.invite_code || challenge.invite_code}`;
+    await SMS.sendSMSAsync([], message);
   };
 
   // ===================== SCREENS =====================
@@ -292,7 +347,7 @@ export default function App() {
         <Text style={{color:'#fff',fontSize:20,fontWeight:'bold',marginTop:24}}>Scanning...</Text>
         <Text style={{color:'#94A3B8',marginTop:8,textAlign:'center'}}>Creating your Digital Twin biometric profile</Text>
       </>) : (<>
-        <Text style={{fontSize:48}}>✓</Text>
+        <Text style={{fontSize:48,color:'#34D399'}}>✓</Text>
         <Text style={{color:'#fff',fontSize:24,fontWeight:'bold',marginTop:16}}>Scan Complete!</Text>
         <Text style={{color:'#94A3B8',marginTop:8,textAlign:'center'}}>243 body measurements mapped</Text>
         <Pressable onPress={finishScan} style={[S.btn,{marginTop:32,width:'100%'}]}>
@@ -366,7 +421,6 @@ export default function App() {
       <Text style={{color:'#fff',fontSize:28,fontWeight:'bold'}}>Mind & Body</Text>
       <Text style={{color:'#94A3B8',marginTop:4}}>Yoga, Meditation & Guided Breathing</Text>
 
-      {/* Recommended Session */}
       <View style={{backgroundColor:'#064E3B33',borderRadius:16,padding:20,marginTop:24,borderWidth:1,borderColor:'#065F4644'}}>
         <Text style={{color:'#34D399',fontSize:11,fontWeight:'700'}}>RECOMMENDED FOR YOU</Text>
         <Text style={{color:'#fff',fontSize:18,fontWeight:'600',marginTop:8}}>Recovery Breathing</Text>
@@ -376,7 +430,6 @@ export default function App() {
         </Pressable>
       </View>
 
-      {/* Session Grid */}
       <Text style={{color:'#fff',fontSize:18,fontWeight:'600',marginTop:32}}>Sessions</Text>
       <Pressable onPress={()=>setScreen('breathing')} style={[S.card,{marginTop:12,flexDirection:'row',alignItems:'center',gap:16}]}>
         <View style={{width:50,height:50,borderRadius:12,backgroundColor:'#312E81',alignItems:'center',justifyContent:'center'}}>
@@ -414,7 +467,6 @@ export default function App() {
   // --- BREATHING PLAYER ---
   if (screen === 'breathing') return (
     <View style={{flex:1,backgroundColor:'#0F172A'}}>
-      {/* Video Player */}
       <Video
         source={{ uri: BREATHING_VIDEO_URL }}
         style={{flex:1}}
@@ -423,10 +475,7 @@ export default function App() {
         isLooping={true}
         isMuted={false}
       />
-
-      {/* Overlay Controls */}
       <View style={{position:'absolute',top:0,left:0,right:0,bottom:0}}>
-        {/* Top Bar */}
         <View style={{flexDirection:'row',justifyContent:'space-between',alignItems:'center',paddingTop:50,paddingHorizontal:20}}>
           <Pressable onPress={()=>setScreen('mindbody')} style={{width:40,height:40,borderRadius:20,backgroundColor:'#0F172ACC',alignItems:'center',justifyContent:'center'}}>
             <Text style={{color:'#fff',fontSize:18}}>←</Text>
@@ -434,12 +483,9 @@ export default function App() {
           <Text style={{color:'#fff',fontWeight:'600'}}>Recovery Breathing</Text>
           <View style={{width:40}} />
         </View>
-
-        {/* Bottom Info */}
         <View style={{position:'absolute',bottom:0,left:0,right:0,backgroundColor:'#0F172AE6',padding:24,paddingBottom:40}}>
           <Text style={{color:'#fff',fontSize:20,fontWeight:'bold'}}>5-Min Recovery Breathing</Text>
           <Text style={{color:'#94A3B8',fontSize:14,marginTop:8}}>Follow the visual rhythm. Slow diaphragmatic breathing activates your parasympathetic nervous system for deep recovery.</Text>
-
           <View style={{flexDirection:'row',gap:12,marginTop:16}}>
             <View style={{backgroundColor:'#334155',borderRadius:8,paddingHorizontal:12,paddingVertical:6}}>
               <Text style={{color:'#94A3B8',fontSize:11}}>Duration</Text>
@@ -454,7 +500,6 @@ export default function App() {
               <Text style={{color:'#34D399',fontWeight:'600'}}>On</Text>
             </View>
           </View>
-
           <Pressable onPress={()=>setScreen('mindbody')} style={{backgroundColor:'#6366F1',borderRadius:12,padding:16,marginTop:20,alignItems:'center'}}>
             <Text style={{color:'#fff',fontWeight:'600',fontSize:16}}>End Session</Text>
           </Pressable>
@@ -469,7 +514,6 @@ export default function App() {
       <Pressable onPress={()=>setScreen('home')}><Text style={{color:'#6366F1',marginBottom:16}}>← Back</Text></Pressable>
       <Text style={{color:'#fff',fontSize:28,fontWeight:'bold'}}>Activity & Points</Text>
 
-      {/* Points Summary */}
       <View style={{flexDirection:'row',gap:12,marginTop:20}}>
         <View style={[S.card,{flex:1,alignItems:'center'}]}>
           <Text style={{color:'#6366F1',fontSize:28,fontWeight:'bold'}}>{points.total}</Text>
@@ -485,7 +529,6 @@ export default function App() {
         </View>
       </View>
 
-      {/* Quick Log Buttons */}
       <Text style={{color:'#fff',fontSize:18,fontWeight:'600',marginTop:28}}>Log Activity</Text>
       <View style={{flexDirection:'row',flexWrap:'wrap',gap:10,marginTop:12}}>
         <Pressable onPress={()=>logActivity('meal_logged','Healthy meal')} style={{backgroundColor:'#1E293B',borderRadius:12,padding:14,borderWidth:1,borderColor:'#334155',alignItems:'center',width:'47%'}}>
@@ -510,19 +553,17 @@ export default function App() {
         </Pressable>
       </View>
 
-      {/* Level Progress */}
       <View style={[S.card,{marginTop:24}]}>
         <View style={{flexDirection:'row',justifyContent:'space-between'}}>
           <Text style={{color:'#94A3B8',fontSize:12}}>Level {points.level}</Text>
           <Text style={{color:'#94A3B8',fontSize:12}}>Level {points.level + 1}</Text>
         </View>
         <View style={{height:8,backgroundColor:'#334155',borderRadius:4,marginTop:8}}>
-          <View style={{height:8,backgroundColor:'#6366F1',borderRadius:4,width:`${(points.total % 100)}%`}} />
+          <View style={{height:8,backgroundColor:'#6366F1',borderRadius:4,width:`${points.total % 100}%`}} />
         </View>
         <Text style={{color:'#64748B',fontSize:11,marginTop:6}}>{100 - (points.total % 100)} XP to next level</Text>
       </View>
 
-      {/* Streak Info */}
       {points.streak > 0 && (
         <View style={{backgroundColor:'#34D39922',borderRadius:12,padding:16,marginTop:16,borderWidth:1,borderColor:'#34D39944'}}>
           <Text style={{color:'#34D399',fontWeight:'700',fontSize:13}}>🔥 {points.streak}-Day Streak!</Text>
@@ -530,7 +571,6 @@ export default function App() {
         </View>
       )}
 
-      {/* Recent Activity */}
       <Text style={{color:'#fff',fontSize:18,fontWeight:'600',marginTop:28}}>Recent Activity</Text>
       {activityLog.length === 0 && <Text style={{color:'#94A3B8',marginTop:12}}>No activities yet. Start logging!</Text>}
       {activityLog.map((item,i) => (
@@ -545,7 +585,87 @@ export default function App() {
     </ScrollView>
   );
 
-  // --- HOME ---
+  // --- CHALLENGES ---
+  if (screen === 'challenges') return (
+    <ScrollView style={{flex:1,backgroundColor:'#0F172A'}} contentContainerStyle={{padding:24,paddingTop:60}}>
+      <Pressable onPress={()=>setScreen('home')}><Text style={{color:'#6366F1',marginBottom:16}}>← Back</Text></Pressable>
+      <Text style={{color:'#fff',fontSize:28,fontWeight:'bold'}}>Challenges</Text>
+      <Text style={{color:'#94A3B8',marginTop:4}}>Compete with friends and community</Text>
+
+      {/* Join by Code */}
+      <View style={[S.card,{marginTop:20}]}>
+        <Text style={{color:'#fff',fontWeight:'600',marginBottom:8}}>Join by Invite Code</Text>
+        <View style={{flexDirection:'row',gap:8}}>
+          <TextInput placeholder="Enter code" placeholderTextColor="#64748B" value={joinCode} onChangeText={setJoinCode} autoCapitalize="characters" style={[S.input,{flex:1,marginTop:0}]} />
+          <Pressable onPress={joinChallenge} style={{backgroundColor:'#6366F1',borderRadius:12,paddingHorizontal:20,alignItems:'center',justifyContent:'center'}}>
+            <Text style={{color:'#fff',fontWeight:'600'}}>Join</Text>
+          </Pressable>
+        </View>
+      </View>
+
+      {/* Create Challenge */}
+      <Pressable onPress={()=>setScreen('create_challenge')} style={[S.btn,{marginTop:16}]}>
+        <Text style={S.btnText}>Create Challenge</Text>
+      </Pressable>
+
+      {/* My Challenges */}
+      <Text style={{color:'#fff',fontSize:18,fontWeight:'600',marginTop:28}}>My Challenges</Text>
+      {myChallenges.length === 0 && <Text style={{color:'#94A3B8',marginTop:8}}>No challenges yet. Join or create one!</Text>}
+      {myChallenges.map((item,i) => (
+        <View key={i} style={[S.card,{marginTop:12}]}>
+          <Text style={{color:'#fff',fontWeight:'600',fontSize:16}}>{item.challenges?.title || 'Challenge'}</Text>
+          <Text style={{color:'#94A3B8',fontSize:12,marginTop:4}}>{item.challenges?.challenge_type} · Target: {item.challenges?.target_value} · {item.challenges?.duration_days} days</Text>
+          <View style={{height:6,backgroundColor:'#334155',borderRadius:3,marginTop:12}}>
+            <View style={{height:6,backgroundColor:'#6366F1',borderRadius:3,width:`${Math.min(100, (item.current_progress / (item.challenges?.target_value || 1)) * 100)}%`}} />
+          </View>
+          <Text style={{color:'#64748B',fontSize:11,marginTop:4}}>{item.current_progress} / {item.challenges?.target_value || 0}</Text>
+          <Pressable onPress={()=>inviteToChallenge(item)} style={{backgroundColor:'#1E293B',borderRadius:8,padding:10,marginTop:12,alignItems:'center',borderWidth:1,borderColor:'#334155'}}>
+            <Text style={{color:'#6366F1',fontSize:13}}>Invite via SMS</Text>
+          </Pressable>
+        </View>
+      ))}
+
+      {/* Discover Public Challenges */}
+      <Text style={{color:'#fff',fontSize:18,fontWeight:'600',marginTop:28}}>Discover</Text>
+      {challenges.length === 0 && <Text style={{color:'#94A3B8',marginTop:8}}>No public challenges available.</Text>}
+      {challenges.map((ch,i) => (
+        <View key={i} style={[S.card,{marginTop:12}]}>
+          <Text style={{color:'#fff',fontWeight:'600'}}>{ch.title}</Text>
+          <Text style={{color:'#94A3B8',fontSize:12,marginTop:4}}>{ch.challenge_type} · Target: {ch.target_value} · {ch.duration_days} days</Text>
+          <Text style={{color:'#64748B',fontSize:11,marginTop:4}}>Code: {ch.invite_code}</Text>
+        </View>
+      ))}
+    </ScrollView>
+  );
+
+  // --- CREATE CHALLENGE ---
+  if (screen === 'create_challenge') return (
+    <ScrollView style={{flex:1,backgroundColor:'#0F172A'}} contentContainerStyle={{padding:24,paddingTop:60}}>
+      <Pressable onPress={()=>setScreen('challenges')}><Text style={{color:'#6366F1',marginBottom:16}}>← Back</Text></Pressable>
+      <Text style={{color:'#fff',fontSize:28,fontWeight:'bold'}}>Create Challenge</Text>
+      <Text style={{color:'#94A3B8',marginTop:4}}>Set up a new challenge for friends</Text>
+
+      <TextInput placeholder="Challenge Title" placeholderTextColor="#64748B" value={challengeTitle} onChangeText={setChallengeTitle} style={[S.input,{marginTop:24}]} />
+
+      <Text style={{color:'#94A3B8',marginTop:16,marginBottom:8}}>Type</Text>
+      <View style={{flexDirection:'row',flexWrap:'wrap',gap:8}}>
+        {['squat','pushup','situp','kettlebell','breathing','steps','water'].map(t => (
+          <Pressable key={t} onPress={()=>setChallengeType(t)} style={{backgroundColor:challengeType===t?'#6366F133':'#1E293B',borderRadius:8,paddingHorizontal:14,paddingVertical:8,borderWidth:1,borderColor:challengeType===t?'#6366F1':'#334155'}}>
+            <Text style={{color:challengeType===t?'#A5B4FC':'#94A3B8',fontSize:13,textTransform:'capitalize'}}>{t}</Text>
+          </Pressable>
+        ))}
+      </View>
+
+      <TextInput placeholder="Target Number (e.g. 100)" placeholderTextColor="#64748B" value={challengeTarget} onChangeText={setChallengeTarget} keyboardType="number-pad" style={[S.input,{marginTop:16}]} />
+      <TextInput placeholder="Duration (days)" placeholderTextColor="#64748B" value={challengeDays} onChangeText={setChallengeDays} keyboardType="number-pad" style={[S.input,{marginTop:12}]} />
+
+      <Pressable onPress={createChallenge} style={[S.btn,{marginTop:24}]}>
+        <Text style={S.btnText}>Create & Share</Text>
+      </Pressable>
+    </ScrollView>
+  );
+
+  // --- HOME (default) ---
   return (
     <View style={{flex:1,backgroundColor:'#0F172A'}}>
       <ScrollView contentContainerStyle={{padding:24,paddingTop:60,paddingBottom:100}}>
@@ -584,6 +704,17 @@ export default function App() {
           <Pressable onPress={()=>setScreen('mindbody')} style={[S.card,{flex:1,alignItems:'center'}]}>
             <Text style={{fontSize:24}}>🧘</Text>
             <Text style={{color:'#fff',fontWeight:'600',marginTop:4,fontSize:13}}>Mind & Body</Text>
+          </Pressable>
+        </View>
+
+        <View style={{flexDirection:'row',gap:12,marginTop:12}}>
+          <Pressable onPress={()=>{loadChallenges();setScreen('challenges');}} style={[S.card,{flex:1,alignItems:'center'}]}>
+            <Text style={{fontSize:24}}>🏆</Text>
+            <Text style={{color:'#fff',fontWeight:'600',marginTop:4,fontSize:13}}>Challenges</Text>
+          </Pressable>
+          <Pressable onPress={()=>{loadPoints();loadActivityLog();setScreen('activity');}} style={[S.card,{flex:1,alignItems:'center'}]}>
+            <Text style={{fontSize:24}}>📊</Text>
+            <Text style={{color:'#fff',fontWeight:'600',marginTop:4,fontSize:13}}>Activity Log</Text>
           </Pressable>
         </View>
 
