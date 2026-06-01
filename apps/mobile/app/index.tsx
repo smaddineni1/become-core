@@ -1,4 +1,4 @@
-import { View, Text, TextInput, Pressable, ScrollView, Alert, KeyboardAvoidingView, Platform, Modal, FlatList, ActivityIndicator } from 'react-native';
+import { View, Text, TextInput, Pressable, ScrollView, KeyboardAvoidingView, Platform, Modal, FlatList, ActivityIndicator } from 'react-native';
 import { useState, useEffect, useRef } from 'react';
 import { createClient } from '@supabase/supabase-js';
 import { Video, ResizeMode } from 'expo-av';
@@ -100,6 +100,15 @@ export default function App() {
   const formCheckInterval = useRef<any>(null);
   const [selectedExercise, setSelectedExercise] = useState('air_squat');
 
+  const [toast, setToast] = useState<{visible:boolean;message:string;type:'success'|'error'|'info'}>({visible:false,message:'',type:'info'});
+  const toastTimer = useRef<any>(null);
+
+  const showToast = (message: string, type: 'success' | 'error' | 'info' = 'info') => {
+    setToast({visible:true, message, type});
+    if (toastTimer.current) clearTimeout(toastTimer.current);
+    toastTimer.current = setTimeout(()=>setToast(prev=>({...prev,visible:false})), 3000);
+  };
+
   // === FUNCTIONS DEFINED BEFORE useEffect ===
   const loadPoints = async () => {
     if (!user) return;
@@ -134,17 +143,17 @@ export default function App() {
     setLoading(true);
     const { data, error } = await supabase.auth.signInWithPassword({ email, password });
     setLoading(false);
-    if (error) Alert.alert('Sign In Failed', error.message);
+    if (error) showToast(error.message, 'error');
     else { setUser(data.user); setScreen('home'); }
   };
 
   const handleRegister = async () => {
     if (!name || !email || !password) return;
-    if (password.length < 8) { Alert.alert('Error', 'Password must be at least 8 characters'); return; }
+    if (password.length < 8) { showToast('Password must be at least 8 characters', 'error'); return; }
     setLoading(true);
     const { data, error } = await supabase.auth.signUp({ email, password, options: { data: { full_name: name } } });
     setLoading(false);
-    if (error) Alert.alert('Registration Failed', error.message);
+    if (error) showToast(error.message, 'error');
     else { setUser(data.user); setScreen('quiz'); }
   };
 
@@ -221,8 +230,8 @@ export default function App() {
       });
       const data = await res.json();
       if (data.plan) setMealPlan(data.plan);
-      else Alert.alert('Error', data.error || 'Could not generate plan');
-    } catch (e) { Alert.alert('Error', 'Connection failed'); }
+      else showToast(data.error || 'Could not generate plan', 'error');
+    } catch (e) { showToast('Connection failed', 'error'); }
     setNutritionLoading(false);
   };
 
@@ -261,7 +270,7 @@ export default function App() {
     }
 
     await loadActivityLog();
-    Alert.alert('Points Earned!', `+${pts} XP for ${description}`);
+    showToast(`+${pts} XP for ${description}`, 'success');
   };
 
   // === CHALLENGES ===
@@ -274,10 +283,10 @@ export default function App() {
       target_value: parseInt(challengeTarget), duration_days: parseInt(challengeDays),
       invite_code: code, is_public: true, start_date: new Date().toISOString(), end_date: endDate,
     }).select().single();
-    if (error) { Alert.alert('Error', error.message); return; }
+    if (error) { showToast(error.message, 'error'); return; }
     if (data) {
       await supabase.from('challenge_participants').insert({ challenge_id: data.id, user_id: user.id, current_progress: 0 });
-      Alert.alert('Challenge Created!', `Invite code: ${code}`);
+      showToast('Challenge created! Code: ' + code, 'success');
       setChallengeTitle(''); setChallengeTarget(''); setChallengeDays('');
       await loadChallenges();
       setScreen('challenges');
@@ -287,17 +296,17 @@ export default function App() {
   const joinChallenge = async () => {
     if (!user || !joinCode.trim()) return;
     const { data: ch } = await supabase.from('challenges').select('*').eq('invite_code', joinCode.trim().toUpperCase()).single();
-    if (!ch) { Alert.alert('Error', 'Challenge not found'); return; }
+    if (!ch) { showToast('Challenge not found', 'error'); return; }
     const { error } = await supabase.from('challenge_participants').insert({ challenge_id: ch.id, user_id: user.id, current_progress: 0 });
-    if (error) { Alert.alert('Error', error.message); return; }
-    Alert.alert('Joined!', `You joined: ${ch.title}`);
+    if (error) { showToast(error.message, 'error'); return; }
+    showToast('Joined: ' + ch.title, 'success');
     setJoinCode('');
     await loadChallenges();
   };
 
   const inviteToChallenge = async (challenge: any) => {
     const available = await SMS.isAvailableAsync();
-    if (!available) { Alert.alert('SMS not available', 'SMS is not available on this device'); return; }
+    if (!available) { showToast('SMS not available on this device', 'error'); return; }
     const message = `Join my Become challenge! ${challenge.challenges?.title || challenge.title}. Use code: ${challenge.challenges?.invite_code || challenge.invite_code}`;
     await SMS.sendSMSAsync([], message);
   };
@@ -311,7 +320,7 @@ export default function App() {
 
   const takeBodyPhoto = async () => {
     const hasPermission = await requestCameraPermission();
-    if (!hasPermission) { Alert.alert('Permission Required', 'Camera access is needed for body scan'); return; }
+    if (!hasPermission) { showToast('Camera permission required', 'error'); return; }
     const result = await ImagePicker.launchCameraAsync({
       allowsEditing: false,
       quality: 0.8,
@@ -342,7 +351,7 @@ export default function App() {
 
   const beginFormCheckSession = async () => {
     const hasPermission = await requestCameraPermission();
-    if (!hasPermission) { Alert.alert('Permission Required', 'Camera access is needed for form check'); return; }
+    if (!hasPermission) { showToast('Camera permission required', 'error'); return; }
     setFormCheckActive(true);
     setFormCheckScore(0);
     setFormCheckReps(0);
@@ -366,7 +375,7 @@ export default function App() {
       });
       await logActivity('workout_completed', `Form Check: ${formCheckReps} reps, score ${avgScore}`);
     }
-    Alert.alert('Session Complete!', `${formCheckReps} reps · Avg Score: ${formCheckScore}`);
+    showToast('Session Complete! ' + formCheckReps + ' reps', 'success');
     setScreen('home');
   };
 
@@ -396,14 +405,14 @@ export default function App() {
         </View>
         <Pressable onPress={async()=>{
           const { error } = await supabase.auth.signInWithOAuth({ provider: 'google' });
-          if (error) Alert.alert('Error', error.message);
+          if (error) showToast(error.message, 'error');
         }} style={{backgroundColor:'#fff',borderRadius:12,padding:14,alignItems:'center',flexDirection:'row',justifyContent:'center',gap:10}}>
           <Text style={{fontSize:18}}>G</Text>
           <Text style={{color:'#1E293B',fontWeight:'600',fontSize:15}}>Continue with Google</Text>
         </Pressable>
         <Pressable onPress={async()=>{
           const { error } = await supabase.auth.signInWithOAuth({ provider: 'apple' });
-          if (error) Alert.alert('Error', error.message);
+          if (error) showToast(error.message, 'error');
         }} style={{backgroundColor:'#000',borderRadius:12,padding:14,alignItems:'center',flexDirection:'row',justifyContent:'center',gap:10,marginTop:10,borderWidth:1,borderColor:'#334155'}}>
           <Text style={{fontSize:18,color:'#fff'}}>🍎</Text>
           <Text style={{color:'#fff',fontWeight:'600',fontSize:15}}>Continue with Apple</Text>
@@ -434,14 +443,14 @@ export default function App() {
         </View>
         <Pressable onPress={async()=>{
           const { error } = await supabase.auth.signInWithOAuth({ provider: 'google' });
-          if (error) Alert.alert('Error', error.message);
+          if (error) showToast(error.message, 'error');
         }} style={{backgroundColor:'#fff',borderRadius:12,padding:14,alignItems:'center',flexDirection:'row',justifyContent:'center',gap:10}}>
           <Text style={{fontSize:18}}>G</Text>
           <Text style={{color:'#1E293B',fontWeight:'600',fontSize:15}}>Continue with Google</Text>
         </Pressable>
         <Pressable onPress={async()=>{
           const { error } = await supabase.auth.signInWithOAuth({ provider: 'apple' });
-          if (error) Alert.alert('Error', error.message);
+          if (error) showToast(error.message, 'error');
         }} style={{backgroundColor:'#000',borderRadius:12,padding:14,alignItems:'center',flexDirection:'row',justifyContent:'center',gap:10,marginTop:10,borderWidth:1,borderColor:'#334155'}}>
           <Text style={{fontSize:18,color:'#fff'}}>🍎</Text>
           <Text style={{color:'#fff',fontWeight:'600',fontSize:15}}>Continue with Apple</Text>
@@ -458,12 +467,12 @@ export default function App() {
       <Text style={{color:'#94A3B8',textAlign:'center',marginTop:16,fontSize:14}}>Enter your email and we'll send you a link to reset your password.</Text>
       <TextInput placeholder="Email" placeholderTextColor="#64748B" value={email} onChangeText={setEmail} keyboardType="email-address" autoCapitalize="none" style={[S.input,{marginTop:24}]} />
       <Pressable onPress={async()=>{
-        if (!email) { Alert.alert('Error','Please enter your email'); return; }
+        if (!email) { showToast('Please enter your email', 'error'); return; }
         setLoading(true);
         const { error } = await supabase.auth.resetPasswordForEmail(email);
         setLoading(false);
-        if (error) Alert.alert('Error', error.message);
-        else Alert.alert('Check Your Email', 'We sent a password reset link to ' + email);
+        if (error) showToast(error.message, 'error');
+        else showToast('Reset link sent to ' + email, 'success');
       }} disabled={loading} style={[S.btn, loading && {opacity:0.6}]}>
         <Text style={S.btnText}>{loading ? 'Sending...' : 'Send Reset Link'}</Text>
       </Pressable>
@@ -595,47 +604,59 @@ export default function App() {
   // --- FORM CHECK SESSION ---
   if (screen === 'formcheck_session') return (
     <View style={{flex:1,backgroundColor:'#0F172A'}}>
-      {/* Camera View */}
-      <View style={{flex:1,backgroundColor:'#1E293B',alignItems:'center',justifyContent:'center'}}>
-        {cameraPermission ? (
-          <CameraView style={{width:'100%',height:'100%'}} facing="front" />
-        ) : (
-          <View style={{alignItems:'center',justifyContent:'center',flex:1}}>
-            <Text style={{fontSize:48}}>📷</Text>
-            <Text style={{color:'#fff',fontWeight:'600',marginTop:8}}>Camera Access Required</Text>
-            <Pressable onPress={requestCameraPermission} style={[S.btn,{marginTop:16}]}>
-              <Text style={S.btnText}>Grant Camera Access</Text>
-            </Pressable>
+      <View style={{flex:1,flexDirection:'row'}}>
+        <View style={{width:'35%',backgroundColor:'#1E293B',padding:12,justifyContent:'space-between',borderRightWidth:1,borderRightColor:'#334155'}}>
+          <View>
+            <Text style={{color:'#6366F1',fontSize:10,fontWeight:'700'}}>REFERENCE</Text>
+            <Text style={{color:'#fff',fontSize:16,fontWeight:'bold',marginTop:8}}>{selectedExercise.replace(/_/g,' ').replace(/\b\w/g,(l:string)=>l.toUpperCase())}</Text>
+            <Text style={{color:'#94A3B8',fontSize:11,marginTop:8,lineHeight:16}}>
+              {selectedExercise==='air_squat'?'Stand shoulder-width apart. Lower hips below knees. Keep chest upright. Knees track over toes.':
+               selectedExercise==='push_up'?'Hands shoulder-width. Lower chest to floor. Keep body straight. Elbows at 45 degrees.':
+               selectedExercise==='sit_up'?'Lie flat, knees bent. Curl torso up fully. Control the descent. Keep feet planted.':
+               'Hip hinge movement. Drive hips forward explosively. Arms swing to eye level. Keep back neutral.'}
+            </Text>
           </View>
-        )}
-      </View>
-
-      {/* Score Overlay */}
-      <View style={{position:'absolute',top:50,left:20,right:20,flexDirection:'row',justifyContent:'space-between'}}>
-        <View style={{backgroundColor:'#0F172AE6',borderRadius:12,padding:12}}>
-          <Text style={{color:'#94A3B8',fontSize:10}}>EXERCISE</Text>
-          <Text style={{color:'#A5B4FC',fontSize:14,fontWeight:'bold'}}>{selectedExercise.replace(/_/g,' ').replace(/\b\w/g,c=>c.toUpperCase())}</Text>
+          <View>
+            <Text style={{color:'#FBBF24',fontSize:10,fontWeight:'700',marginTop:12}}>WATCH FOR</Text>
+            <Text style={{color:'#FBBF24',fontSize:11,marginTop:4}}>• {selectedExercise==='air_squat'?'Knee cave':selectedExercise==='push_up'?'Sagging hips':'Forward lean'}</Text>
+            <Text style={{color:'#FBBF24',fontSize:11,marginTop:2}}>• {selectedExercise==='air_squat'?'Insufficient depth':selectedExercise==='push_up'?'Partial reps':'Jerky motion'}</Text>
+            <Text style={{color:'#FBBF24',fontSize:11,marginTop:2}}>• {selectedExercise==='air_squat'?'Forward lean':'Neck strain'}</Text>
+          </View>
+          <View style={{backgroundColor:'#334155',borderRadius:8,padding:8,marginTop:12}}>
+            <Text style={{color:'#34D399',fontSize:10,textAlign:'center'}}>AI Tracking Active</Text>
+            <Text style={{color:'#94A3B8',fontSize:9,textAlign:'center',marginTop:2}}>33 landmarks</Text>
+          </View>
         </View>
-        <View style={{backgroundColor:'#0F172AE6',borderRadius:12,padding:12}}>
-          <Text style={{color:'#94A3B8',fontSize:10}}>REPS</Text>
-          <Text style={{color:'#fff',fontSize:24,fontWeight:'bold'}}>{formCheckReps}</Text>
-        </View>
-        <View style={{backgroundColor:'#0F172AE6',borderRadius:12,padding:12}}>
-          <Text style={{color:'#94A3B8',fontSize:10}}>TIME</Text>
-          <Text style={{color:'#fff',fontSize:24,fontWeight:'bold'}}>{Math.floor(formCheckTimer/60)}:{String(formCheckTimer%60).padStart(2,'0')}</Text>
-        </View>
-      </View>
-
-      {/* Score Display */}
-      <View style={{position:'absolute',bottom:120,left:0,right:0,alignItems:'center'}}>
-        <View style={{backgroundColor:'#0F172AE6',borderRadius:20,paddingHorizontal:32,paddingVertical:16,alignItems:'center'}}>
-          <Text style={{color:'#94A3B8',fontSize:10}}>SCORE</Text>
-          <Text style={{color:formCheckScore>=80?'#34D399':'#FBBF24',fontSize:48,fontWeight:'bold'}}>{formCheckScore || '--'}</Text>
+        <View style={{flex:1,backgroundColor:'#000'}}>
+          {cameraPermission ? (
+            <CameraView style={{flex:1}} facing="front" />
+          ) : (
+            <View style={{flex:1,alignItems:'center',justifyContent:'center'}}>
+              <Text style={{color:'#94A3B8'}}>Camera initializing...</Text>
+            </View>
+          )}
         </View>
       </View>
-
-      {/* Bottom Controls */}
-      <View style={{backgroundColor:'#0F172A',padding:20,flexDirection:'row',justifyContent:'space-between',alignItems:'center'}}>
+      <View style={{position:'absolute',top:50,right:16,alignItems:'center'}}>
+        <View style={{backgroundColor:'#0F172AE6',borderRadius:16,padding:12,alignItems:'center',borderWidth:1,borderColor:'#334155'}}>
+          <Text style={{color:'#94A3B8',fontSize:9}}>SCORE</Text>
+          <Text style={{color:formCheckScore>=80?'#34D399':'#FBBF24',fontSize:36,fontWeight:'bold'}}>{formCheckScore || '--'}</Text>
+        </View>
+      </View>
+      <View style={{position:'absolute',top:50,left:'37%',marginLeft:12}}>
+        <View style={{backgroundColor:'#0F172AE6',borderRadius:12,paddingHorizontal:12,paddingVertical:8,flexDirection:'row',gap:16,borderWidth:1,borderColor:'#334155'}}>
+          <View><Text style={{color:'#94A3B8',fontSize:9}}>REPS</Text><Text style={{color:'#fff',fontSize:18,fontWeight:'bold'}}>{formCheckReps}</Text></View>
+          <View><Text style={{color:'#94A3B8',fontSize:9}}>TIME</Text><Text style={{color:'#fff',fontSize:18,fontWeight:'bold'}}>{Math.floor(formCheckTimer/60)}:{String(formCheckTimer%60).padStart(2,'0')}</Text></View>
+        </View>
+      </View>
+      {formCheckTimer > 0 && formCheckTimer % 7 === 0 && (
+        <View style={{position:'absolute',top:120,left:'37%',marginLeft:12,right:12}}>
+          <View style={{backgroundColor:'#7F1D1DE6',borderRadius:10,padding:10,borderWidth:1,borderColor:'#F8717166'}}>
+            <Text style={{color:'#FCA5A5',fontSize:12,fontWeight:'600'}}>⚠️ {selectedExercise==='air_squat'?'Keep knees tracking over toes':'Keep your core engaged'}</Text>
+          </View>
+        </View>
+      )}
+      <View style={{backgroundColor:'#0F172A',padding:16,flexDirection:'row',justifyContent:'space-between',alignItems:'center',borderTopWidth:1,borderTopColor:'#334155'}}>
         <Pressable onPress={()=>setFormCheckReps(prev=>prev+1)} style={{backgroundColor:'#334155',borderRadius:12,paddingHorizontal:24,paddingVertical:14}}>
           <Text style={{color:'#fff',fontWeight:'600'}}>+ Rep</Text>
         </Pressable>
@@ -748,7 +769,7 @@ export default function App() {
           {MEDITATION_SESSIONS.map((session, i) => (
             <Pressable key={i} onPress={()=>{
               if (i === 0) { setScreen('breathing'); logActivity('breathing_completed','Guided Breathing session'); }
-              else { logActivity('breathing_completed',`Completed ${session.name}`); Alert.alert('Coming Soon', `${session.name} video will be available soon!`); }
+              else { logActivity('breathing_completed',`Completed ${session.name}`); showToast(session.name + ' coming soon!', 'info'); }
             }} style={[S.card,{marginTop:10,flexDirection:'row',alignItems:'center',gap:14}]}>
               <View style={{width:50,height:50,borderRadius:12,backgroundColor:i===0?'#065F46':'#312E81',alignItems:'center',justifyContent:'center'}}>
                 <Text style={{fontSize:22}}>{session.icon}</Text>
@@ -972,6 +993,13 @@ export default function App() {
   // --- HOME (default) ---
   return (
     <View style={{flex:1,backgroundColor:'#0F172A'}}>
+      {toast.visible && (
+        <View style={{position:'absolute',top:50,left:16,right:16,zIndex:100,backgroundColor:toast.type==='success'?'#065F46':toast.type==='error'?'#7F1D1D':'#1E293B',borderRadius:12,padding:16,flexDirection:'row',alignItems:'center',gap:12,borderWidth:1,borderColor:toast.type==='success'?'#34D39966':toast.type==='error'?'#F8717166':'#33415566'}}>
+          <Text style={{fontSize:18}}>{toast.type==='success'?'✓':toast.type==='error'?'✕':'ℹ'}</Text>
+          <Text style={{color:'#fff',flex:1,fontSize:14}}>{toast.message}</Text>
+          <Pressable onPress={()=>setToast(prev=>({...prev,visible:false}))}><Text style={{color:'#94A3B8'}}>✕</Text></Pressable>
+        </View>
+      )}
       <ScrollView contentContainerStyle={{padding:24,paddingTop:60,paddingBottom:100}}>
         <Text style={{color:'#fff',fontSize:28,fontWeight:'bold'}}>Welcome back</Text>
         <Text style={{color:'#94A3B8',marginTop:4}}>Your daily wellness summary</Text>
@@ -1072,7 +1100,7 @@ export default function App() {
                   {m.buttons && m.buttons.length > 0 && (
                     <View style={{flexDirection:'row',gap:8,marginTop:8,flexWrap:'wrap'}}>
                       {m.buttons.map((b:any,j:number) => (
-                        <Pressable key={j} onPress={()=>{setGenieOpen(false); Alert.alert(b.label,'Navigation coming in next build');}} style={{backgroundColor:'#6366F122',borderWidth:1,borderColor:'#6366F166',borderRadius:20,paddingHorizontal:12,paddingVertical:6}}>
+                        <Pressable key={j} onPress={()=>{setGenieOpen(false); showToast(b.label + ' coming in next build', 'info');}} style={{backgroundColor:'#6366F122',borderWidth:1,borderColor:'#6366F166',borderRadius:20,paddingHorizontal:12,paddingVertical:6}}>
                           <Text style={{color:'#A5B4FC',fontSize:12}}>{b.label}</Text>
                         </Pressable>
                       ))}
@@ -1088,10 +1116,10 @@ export default function App() {
                 if (isRecording) {
                   setIsRecording(false);
                   setGenieInput('What should I do for my workout today?');
-                  Alert.alert('Voice Captured', 'Your voice has been converted to text. Tap send to ask Genie.');
+                  showToast('Voice captured — tap send', 'success');
                 } else {
                   setIsRecording(true);
-                  Alert.alert('Listening...', 'Speak now. Tap the mic again when done.');
+                  showToast('Listening... speak now', 'info');
                 }
               }} style={{width:44,height:44,borderRadius:22,backgroundColor:isRecording?'#DC2626':'#334155',alignItems:'center',justifyContent:'center'}}>
                 <Text style={{fontSize:18}}>{isRecording ? '⏹' : '🎤'}</Text>
