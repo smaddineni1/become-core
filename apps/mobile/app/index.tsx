@@ -14,6 +14,37 @@ const supabase = createClient(
 
 const BREATHING_VIDEO_URL = 'https://tehezgpzecdblhebddoo.supabase.co/storage/v1/object/public/videos/runway-agent-exhale-20260528-152325.mp4';
 
+const YOGA_ASANAS = [
+  { name: 'Sun Salutation (Surya Namaskar)', icon: '☀️', duration: '10 min', level: 'Beginner' },
+  { name: 'Warrior I (Virabhadrasana I)', icon: '⚔️', duration: '5 min', level: 'Beginner' },
+  { name: 'Warrior II (Virabhadrasana II)', icon: '🗡️', duration: '5 min', level: 'Beginner' },
+  { name: 'Tree Pose (Vrksasana)', icon: '🌳', duration: '3 min', level: 'Beginner' },
+  { name: 'Downward Dog (Adho Mukha)', icon: '🐕', duration: '3 min', level: 'Beginner' },
+  { name: 'Cobra Pose (Bhujangasana)', icon: '🐍', duration: '3 min', level: 'Beginner' },
+  { name: 'Child\'s Pose (Balasana)', icon: '🧒', duration: '3 min', level: 'Beginner' },
+  { name: 'Triangle Pose (Trikonasana)', icon: '📐', duration: '5 min', level: 'Intermediate' },
+  { name: 'Bridge Pose (Setu Bandhasana)', icon: '🌉', duration: '5 min', level: 'Intermediate' },
+  { name: 'Pigeon Pose (Kapotasana)', icon: '🕊️', duration: '5 min', level: 'Intermediate' },
+  { name: 'Cat-Cow (Marjaryasana)', icon: '🐱', duration: '3 min', level: 'Beginner' },
+  { name: 'Chair Pose (Utkatasana)', icon: '🪑', duration: '3 min', level: 'Intermediate' },
+  { name: 'Plank Pose (Phalakasana)', icon: '🪵', duration: '3 min', level: 'Beginner' },
+  { name: 'Corpse Pose (Savasana)', icon: '🧘', duration: '10 min', level: 'Beginner' },
+  { name: 'Half Moon (Ardha Chandrasana)', icon: '🌙', duration: '5 min', level: 'Advanced' },
+];
+
+const MEDITATION_SESSIONS = [
+  { name: 'Guided Breathing', icon: '🌬️', duration: '5 min', level: 'Beginner' },
+  { name: 'Body Scan Meditation', icon: '🧘', duration: '10 min', level: 'Beginner' },
+  { name: 'Loving Kindness (Metta)', icon: '💗', duration: '10 min', level: 'Beginner' },
+  { name: 'Mindful Focus', icon: '🎯', duration: '5 min', level: 'Beginner' },
+  { name: 'Stress Relief', icon: '🌊', duration: '10 min', level: 'Beginner' },
+  { name: 'Sleep Meditation', icon: '🌙', duration: '20 min', level: 'Beginner' },
+  { name: 'Morning Calm', icon: '☀️', duration: '5 min', level: 'Beginner' },
+  { name: 'Anxiety Release', icon: '🦋', duration: '10 min', level: 'Intermediate' },
+  { name: 'Gratitude Practice', icon: '🙏', duration: '5 min', level: 'Beginner' },
+  { name: 'Deep Relaxation (Yoga Nidra)', icon: '💫', duration: '20 min', level: 'Intermediate' },
+];
+
 type Screen = 'login' | 'register' | 'forgot_password' | 'quiz' | 'scan' | 'home' | 'nutrition' | 'formcheck' | 'mindbody' | 'breathing' | 'activity' | 'challenges' | 'create_challenge' | 'genie' | 'camera_scan' | 'formcheck_session' | 'formcheck_select';
 
 export default function App() {
@@ -55,6 +86,7 @@ export default function App() {
   const [challengeTarget, setChallengeTarget] = useState('');
   const [challengeDays, setChallengeDays] = useState('');
   const [joinCode, setJoinCode] = useState('');
+  const [mindBodyTab, setMindBodyTab] = useState<'yoga' | 'meditation'>('yoga');
 
   // Camera/Scan state
   const [cameraPermission, setCameraPermission] = useState(false);
@@ -676,48 +708,63 @@ export default function App() {
     <ScrollView style={{flex:1,backgroundColor:'#0F172A'}} contentContainerStyle={{padding:24,paddingTop:60}}>
       <Pressable onPress={()=>setScreen('home')}><Text style={{color:'#6366F1',marginBottom:16}}>← Back</Text></Pressable>
       <Text style={{color:'#fff',fontSize:28,fontWeight:'bold'}}>Mind & Body</Text>
-      <Text style={{color:'#94A3B8',marginTop:4}}>Yoga, Meditation & Guided Breathing</Text>
 
-      <View style={{backgroundColor:'#064E3B33',borderRadius:16,padding:20,marginTop:24,borderWidth:1,borderColor:'#065F4644'}}>
-        <Text style={{color:'#34D399',fontSize:11,fontWeight:'700'}}>RECOMMENDED FOR YOU</Text>
-        <Text style={{color:'#fff',fontSize:18,fontWeight:'600',marginTop:8}}>Recovery Breathing</Text>
-        <Text style={{color:'#94A3B8',fontSize:13,marginTop:4}}>5 min · Gentle · Based on your readiness</Text>
-        <Pressable onPress={()=>setScreen('breathing')} style={{backgroundColor:'#34D399',borderRadius:12,padding:14,marginTop:16,alignItems:'center'}}>
-          <Text style={{color:'#0F172A',fontWeight:'700',fontSize:15}}>Start Breathing Session</Text>
+      {/* Tab Toggle */}
+      <View style={{flexDirection:'row',backgroundColor:'#1E293B',borderRadius:12,padding:4,marginTop:20,borderWidth:1,borderColor:'#334155'}}>
+        <Pressable onPress={()=>setMindBodyTab('yoga')} style={{flex:1,paddingVertical:10,borderRadius:8,alignItems:'center',backgroundColor:mindBodyTab==='yoga'?'#6366F1':'transparent'}}>
+          <Text style={{color:mindBodyTab==='yoga'?'#fff':'#94A3B8',fontWeight:'600'}}>🧘‍♀️ Yoga</Text>
+        </Pressable>
+        <Pressable onPress={()=>setMindBodyTab('meditation')} style={{flex:1,paddingVertical:10,borderRadius:8,alignItems:'center',backgroundColor:mindBodyTab==='meditation'?'#6366F1':'transparent'}}>
+          <Text style={{color:mindBodyTab==='meditation'?'#fff':'#94A3B8',fontWeight:'600'}}>🧘 Meditation</Text>
         </Pressable>
       </View>
 
-      <Text style={{color:'#fff',fontSize:18,fontWeight:'600',marginTop:32}}>Sessions</Text>
-      <Pressable onPress={()=>setScreen('breathing')} style={[S.card,{marginTop:12,flexDirection:'row',alignItems:'center',gap:16}]}>
-        <View style={{width:50,height:50,borderRadius:12,backgroundColor:'#312E81',alignItems:'center',justifyContent:'center'}}>
-          <Text style={{fontSize:22}}>🌬️</Text>
+      {/* YOGA TAB */}
+      {mindBodyTab === 'yoga' && (
+        <View style={{marginTop:20}}>
+          <Text style={{color:'#94A3B8',fontSize:13,marginBottom:16}}>Master these asanas to build strength, flexibility, and inner peace</Text>
+          {YOGA_ASANAS.map((asana, i) => (
+            <Pressable key={i} onPress={()=>{logActivity('workout_completed',`Completed ${asana.name}`);}} style={[S.card,{marginTop:10,flexDirection:'row',alignItems:'center',gap:14}]}>
+              <View style={{width:50,height:50,borderRadius:12,backgroundColor:'#312E81',alignItems:'center',justifyContent:'center'}}>
+                <Text style={{fontSize:22}}>{asana.icon}</Text>
+              </View>
+              <View style={{flex:1}}>
+                <Text style={{color:'#fff',fontWeight:'600'}}>{asana.name}</Text>
+                <Text style={{color:'#94A3B8',fontSize:11,marginTop:2}}>{asana.duration} · {asana.level}</Text>
+              </View>
+              <View style={{alignItems:'flex-end'}}>
+                <Text style={{color:'#6366F1',fontSize:11,fontWeight:'600'}}>+25 XP</Text>
+                <Text style={{color:'#64748B',fontSize:10}}>▶ Play</Text>
+              </View>
+            </Pressable>
+          ))}
         </View>
-        <View style={{flex:1}}>
-          <Text style={{color:'#fff',fontWeight:'600'}}>Guided Breathing</Text>
-          <Text style={{color:'#94A3B8',fontSize:12,marginTop:2}}>5 min · Gentle · Video</Text>
-        </View>
-        <Text style={{color:'#6366F1'}}>▶</Text>
-      </Pressable>
+      )}
 
-      <View style={[S.card,{marginTop:12,flexDirection:'row',alignItems:'center',gap:16,opacity:0.5}]}>
-        <View style={{width:50,height:50,borderRadius:12,backgroundColor:'#312E81',alignItems:'center',justifyContent:'center'}}>
-          <Text style={{fontSize:22}}>🧘‍♀️</Text>
+      {/* MEDITATION TAB */}
+      {mindBodyTab === 'meditation' && (
+        <View style={{marginTop:20}}>
+          <Text style={{color:'#94A3B8',fontSize:13,marginBottom:16}}>Calm the mind, reduce stress, and find inner stillness</Text>
+          {MEDITATION_SESSIONS.map((session, i) => (
+            <Pressable key={i} onPress={()=>{
+              if (i === 0) { setScreen('breathing'); logActivity('breathing_completed','Guided Breathing session'); }
+              else { logActivity('breathing_completed',`Completed ${session.name}`); Alert.alert('Coming Soon', `${session.name} video will be available soon!`); }
+            }} style={[S.card,{marginTop:10,flexDirection:'row',alignItems:'center',gap:14}]}>
+              <View style={{width:50,height:50,borderRadius:12,backgroundColor:i===0?'#065F46':'#312E81',alignItems:'center',justifyContent:'center'}}>
+                <Text style={{fontSize:22}}>{session.icon}</Text>
+              </View>
+              <View style={{flex:1}}>
+                <Text style={{color:'#fff',fontWeight:'600'}}>{session.name}</Text>
+                <Text style={{color:'#94A3B8',fontSize:11,marginTop:2}}>{session.duration} · {session.level}</Text>
+              </View>
+              <View style={{alignItems:'flex-end'}}>
+                <Text style={{color:'#34D399',fontSize:11,fontWeight:'600'}}>+15 XP</Text>
+                <Text style={{color:i===0?'#34D399':'#64748B',fontSize:10}}>{i===0?'▶ Ready':'Coming Soon'}</Text>
+              </View>
+            </Pressable>
+          ))}
         </View>
-        <View style={{flex:1}}>
-          <Text style={{color:'#fff',fontWeight:'600'}}>Morning Yoga Flow</Text>
-          <Text style={{color:'#94A3B8',fontSize:12,marginTop:2}}>20 min · Moderate · Coming soon</Text>
-        </View>
-      </View>
-
-      <View style={[S.card,{marginTop:12,flexDirection:'row',alignItems:'center',gap:16,opacity:0.5}]}>
-        <View style={{width:50,height:50,borderRadius:12,backgroundColor:'#312E81',alignItems:'center',justifyContent:'center'}}>
-          <Text style={{fontSize:22}}>🌙</Text>
-        </View>
-        <View style={{flex:1}}>
-          <Text style={{color:'#fff',fontWeight:'600'}}>Sleep Meditation</Text>
-          <Text style={{color:'#94A3B8',fontSize:12,marginTop:2}}>10 min · Gentle · Coming soon</Text>
-        </View>
-      </View>
+      )}
     </ScrollView>
   );
 
