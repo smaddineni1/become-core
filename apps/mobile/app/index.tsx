@@ -1,4 +1,4 @@
-import { View, Text, TextInput, Pressable, ScrollView, KeyboardAvoidingView, Platform, Modal, FlatList, ActivityIndicator } from 'react-native';
+import { View, Text, TextInput, Pressable, ScrollView, KeyboardAvoidingView, Platform, Modal, FlatList, ActivityIndicator, Share } from 'react-native';
 import { useState, useEffect, useRef } from 'react';
 import { createClient } from '@supabase/supabase-js';
 import { Video, ResizeMode } from 'expo-av';
@@ -273,14 +273,17 @@ export default function App() {
         longest_streak_days: Math.max(newStreak, existing.longest_streak_days), last_activity_date: today, updated_at: new Date().toISOString(),
       }).eq('user_id', user.id);
       setPoints({ total: newTotal, level: newLevel, streak: newStreak });
-      if (newLevel > existing.level) {
+      if (newLevel > points.level) {
         setShowConfetti(true);
-        setTimeout(()=>setShowConfetti(false), 3000);
+        setTimeout(()=>setShowConfetti(false), 4000);
         showToast(`🎉 LEVEL UP! You're now Level ${newLevel}!`, 'success');
       }
     } else {
       await supabase.from('user_points').insert({ user_id: user.id, total_points: pts, level: 1, current_streak_days: 1, last_activity_date: today });
       setPoints({ total: pts, level: 1, streak: 1 });
+      setShowConfetti(true);
+      setTimeout(()=>setShowConfetti(false), 4000);
+      showToast('🎉 Welcome! You earned your first XP!', 'success');
     }
 
     const { data: dailyExisting } = await supabase.from('daily_points').select('*').eq('user_id', user.id).eq('points_date', today).single();
@@ -1071,7 +1074,7 @@ export default function App() {
         <View style={[S.card,{marginTop:8}]}><View style={{flexDirection:'row',justifyContent:'space-between'}}><Text style={{color:'#fff'}}>🧘 Mindfulness</Text><Text style={{color:'#A78BFA',fontWeight:'bold'}}>{Math.round(Math.min(200,activityLog.filter((a:any)=>a.activity_type==='breathing_completed').length*40))}/200</Text></View><View style={{height:4,backgroundColor:'#334155',borderRadius:2,marginTop:8}}><View style={{height:4,backgroundColor:'#A78BFA',borderRadius:2,width:`${Math.min(100,activityLog.filter((a:any)=>a.activity_type==='breathing_completed').length*20)}%`}} /></View></View>
         <View style={[S.card,{marginTop:8}]}><View style={{flexDirection:'row',justifyContent:'space-between'}}><Text style={{color:'#fff'}}>🔥 Consistency</Text><Text style={{color:'#FBBF24',fontWeight:'bold'}}>{Math.round(Math.min(250,points.streak*35))}/250</Text></View><View style={{height:4,backgroundColor:'#334155',borderRadius:2,marginTop:8}}><View style={{height:4,backgroundColor:'#FBBF24',borderRadius:2,width:`${Math.min(100,points.streak*14)}%`}} /></View></View>
       </View>
-      <Pressable onPress={()=>showToast('Share feature coming soon!','info')} style={{backgroundColor:'#6366F1',borderRadius:12,padding:16,marginTop:24,alignItems:'center',flexDirection:'row',justifyContent:'center',gap:8}}>
+      <Pressable onPress={async()=>{try{await Share.share({message:`My Become Score is ${becomeScore}/1000! 💪\n\nTrack your wellness with Become!\nhttps://become.app`});}catch(e){showToast('Could not open share','error');}}} style={{backgroundColor:'#6366F1',borderRadius:12,padding:16,marginTop:24,alignItems:'center',flexDirection:'row',justifyContent:'center',gap:8}}>
         <Text style={{fontSize:16}}>📤</Text>
         <Text style={{color:'#fff',fontWeight:'600',fontSize:16}}>Share My Score</Text>
       </Pressable>
@@ -1114,7 +1117,7 @@ export default function App() {
           <View style={{flexDirection:'row',justifyContent:'space-between',alignItems:'center',marginTop:12}}><Text style={{color:'#fff',fontWeight:'600'}}>Total XP</Text><Text style={{color:'#34D399',fontSize:18,fontWeight:'bold'}}>{summary.totalXP}</Text></View>
           <View style={{flexDirection:'row',justifyContent:'space-between',alignItems:'center',marginTop:12}}><Text style={{color:'#fff',fontWeight:'600'}}>Streak</Text><Text style={{color:'#FBBF24',fontSize:18,fontWeight:'bold'}}>🔥 {summary.streak} days</Text></View>
         </View>
-        <Pressable onPress={()=>showToast('Shared to Instagram Stories!','success')} style={{backgroundColor:'#E1306C',borderRadius:12,padding:16,marginTop:24,alignItems:'center',flexDirection:'row',justifyContent:'center',gap:8}}>
+        <Pressable onPress={async()=>{try{await Share.share({message:`🏆 My Become Score: ${becomeScore}/1000!\n\n💪 ${getWeeklySummary().workouts} workouts\n🥗 ${getWeeklySummary().meals} meals tracked\n🔥 ${points.streak}-day streak\n\nJoin me on Become!\nhttps://become.app`});}catch(e){showToast('Could not open share','error');}}} style={{backgroundColor:'#E1306C',borderRadius:12,padding:16,marginTop:24,alignItems:'center',flexDirection:'row',justifyContent:'center',gap:8}}>
           <Text style={{fontSize:16}}>📸</Text>
           <Text style={{color:'#fff',fontWeight:'600',fontSize:16}}>Share to Instagram</Text>
         </Pressable>
