@@ -14,7 +14,7 @@ const supabase = createClient(
 
 const BREATHING_VIDEO_URL = 'https://tehezgpzecdblhebddoo.supabase.co/storage/v1/object/public/videos/runway-agent-exhale-20260528-152325.mp4';
 
-type Screen = 'login' | 'register' | 'quiz' | 'scan' | 'home' | 'nutrition' | 'formcheck' | 'mindbody' | 'breathing' | 'activity' | 'challenges' | 'create_challenge' | 'genie' | 'camera_scan' | 'formcheck_session' | 'formcheck_select';
+type Screen = 'login' | 'register' | 'forgot_password' | 'quiz' | 'scan' | 'home' | 'nutrition' | 'formcheck' | 'mindbody' | 'breathing' | 'activity' | 'challenges' | 'create_challenge' | 'genie' | 'camera_scan' | 'formcheck_session' | 'formcheck_select';
 
 export default function App() {
   const [screen, setScreen] = useState<Screen>('login');
@@ -353,6 +353,9 @@ export default function App() {
       <Pressable onPress={() => setScreen('register')} style={{marginTop:16,alignItems:'center'}}>
         <Text style={{color:'#6366F1'}}>Create Account</Text>
       </Pressable>
+      <Pressable onPress={() => setScreen('forgot_password')} style={{marginTop:12,alignItems:'center'}}>
+        <Text style={{color:'#94A3B8',fontSize:13}}>Forgot Password?</Text>
+      </Pressable>
       <View style={{marginTop:24}}>
         <View style={{flexDirection:'row',alignItems:'center',marginBottom:16}}>
           <View style={{flex:1,height:1,backgroundColor:'#334155'}} />
@@ -412,6 +415,29 @@ export default function App() {
           <Text style={{color:'#fff',fontWeight:'600',fontSize:15}}>Continue with Apple</Text>
         </Pressable>
       </View>
+    </KeyboardAvoidingView>
+  );
+
+  // --- FORGOT PASSWORD ---
+  if (screen === 'forgot_password') return (
+    <KeyboardAvoidingView behavior={Platform.OS === 'ios' ? 'padding' : 'height'} style={S.container}>
+      <Text style={S.logo}>Become</Text>
+      <Text style={S.subtitle}>Reset your password</Text>
+      <Text style={{color:'#94A3B8',textAlign:'center',marginTop:16,fontSize:14}}>Enter your email and we'll send you a link to reset your password.</Text>
+      <TextInput placeholder="Email" placeholderTextColor="#64748B" value={email} onChangeText={setEmail} keyboardType="email-address" autoCapitalize="none" style={[S.input,{marginTop:24}]} />
+      <Pressable onPress={async()=>{
+        if (!email) { Alert.alert('Error','Please enter your email'); return; }
+        setLoading(true);
+        const { error } = await supabase.auth.resetPasswordForEmail(email);
+        setLoading(false);
+        if (error) Alert.alert('Error', error.message);
+        else Alert.alert('Check Your Email', 'We sent a password reset link to ' + email);
+      }} disabled={loading} style={[S.btn, loading && {opacity:0.6}]}>
+        <Text style={S.btnText}>{loading ? 'Sending...' : 'Send Reset Link'}</Text>
+      </Pressable>
+      <Pressable onPress={() => setScreen('login')} style={{marginTop:16,alignItems:'center'}}>
+        <Text style={{color:'#6366F1'}}>Back to Sign In</Text>
+      </Pressable>
     </KeyboardAvoidingView>
   );
 
