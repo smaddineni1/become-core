@@ -54,7 +54,17 @@ const WEARABLE_DEVICES = [
   { id: 'samsung_health', name: 'Samsung Health', icon: '💙', description: 'Heart Rate, Steps, Sleep', platform: 'android' },
 ];
 
-type Screen = 'login' | 'register' | 'forgot_password' | 'quiz' | 'scan' | 'home' | 'nutrition' | 'formcheck' | 'mindbody' | 'breathing' | 'activity' | 'challenges' | 'create_challenge' | 'genie' | 'camera_scan' | 'formcheck_session' | 'formcheck_select' | 'become_score' | 'weekly_summary' | 'wearables' | 'leaderboard' | 'accountability' | 'referrals';
+const AVATAR_OPTIONS = ['💪','🧘','🏋️','🌟','🔥','⚡','🦁','🐺','🦅','🎯','👑','💎'];
+const SMART_NOTIFICATIONS = [
+  { id: 'hrv_drop', title: 'HRV Drop Alert', desc: 'Notify when HRV drops >20% below baseline', icon: '❤️' },
+  { id: 'streak_reminder', title: 'Streak Reminder', desc: 'Remind at 8 PM if no activity logged today', icon: '🔥' },
+  { id: 'meal_plan_ready', title: 'Meal Plan Ready', desc: 'Notify when daily meal plan is generated', icon: '🥗' },
+  { id: 'challenge_update', title: 'Challenge Updates', desc: 'When friends complete reps in your challenge', icon: '🏆' },
+  { id: 'recovery_suggestion', title: 'Recovery Suggestion', desc: 'Suggest breathing when stress detected', icon: '🌬️' },
+  { id: 'weekly_summary', title: 'Weekly Summary', desc: 'Send your AI summary every Sunday', icon: '📊' },
+];
+
+type Screen = 'login' | 'register' | 'forgot_password' | 'quiz' | 'scan' | 'home' | 'nutrition' | 'formcheck' | 'mindbody' | 'breathing' | 'activity' | 'challenges' | 'create_challenge' | 'genie' | 'camera_scan' | 'formcheck_session' | 'formcheck_select' | 'become_score' | 'weekly_summary' | 'wearables' | 'leaderboard' | 'accountability' | 'referrals' | 'notifications_settings' | 'progress_photos' | 'profile';
 
 export default function App() {
   const [screen, setScreen] = useState<Screen>('login');
@@ -116,6 +126,11 @@ export default function App() {
 
   const [accountabilityPartner, setAccountabilityPartner] = useState<string|null>(null);
   const [referralCount, setReferralCount] = useState(0);
+
+  const [darkMode, setDarkMode] = useState(true);
+  const [notificationsEnabled, setNotificationsEnabled] = useState(true);
+  const [progressPhotos, setProgressPhotos] = useState<Array<{uri:string;date:string}>>([]);
+  const [avatarEmoji, setAvatarEmoji] = useState('💪');
 
   const [toast, setToast] = useState<{visible:boolean;message:string;type:'success'|'error'|'info'}>({visible:false,message:'',type:'info'});
   const toastTimer = useRef<any>(null);
@@ -330,6 +345,16 @@ export default function App() {
       setConnectedWearables(prev => [...prev, deviceId]);
       setWearableData({ hrv: 48 + Math.floor(Math.random() * 20), restingHR: 55 + Math.floor(Math.random() * 15), steps: 3000 + Math.floor(Math.random() * 8000), sleep: 360 + Math.floor(Math.random() * 120) });
       showToast(`Connected to ${WEARABLE_DEVICES.find(d=>d.id===deviceId)?.name}!`, 'success');
+    }
+  };
+
+  const takeProgressPhoto = async () => {
+    const hasPermission = await requestCameraPermission();
+    if (!hasPermission) { showToast('Camera permission required', 'error'); return; }
+    const result = await ImagePicker.launchCameraAsync({ allowsEditing: false, quality: 0.8 });
+    if (!result.canceled && result.assets[0]) {
+      setProgressPhotos(prev => [...prev, { uri: result.assets[0]!.uri, date: new Date().toISOString().split('T')[0] }]);
+      showToast('Progress photo saved!', 'success');
     }
   };
 
@@ -1288,6 +1313,169 @@ export default function App() {
     </ScrollView>
   );
 
+  // --- PROFILE ---
+  if (screen === 'profile') return (
+    <ScrollView style={{flex:1,backgroundColor:'#0F172A'}} contentContainerStyle={{padding:24,paddingTop:60}}>
+      <Pressable onPress={()=>setScreen('home')}><Text style={{color:'#6366F1',marginBottom:16}}>← Back</Text></Pressable>
+      <Text style={{color:'#fff',fontSize:28,fontWeight:'bold'}}>Profile & Settings</Text>
+
+      {/* Avatar Picker */}
+      <View style={[S.card,{marginTop:24}]}>
+        <Text style={{color:'#64748B',fontSize:11,fontWeight:'600',marginBottom:12}}>YOUR AVATAR</Text>
+        <View style={{alignItems:'center',marginBottom:16}}>
+          <Text style={{fontSize:64}}>{avatarEmoji}</Text>
+        </View>
+        <View style={{flexDirection:'row',flexWrap:'wrap',gap:12,justifyContent:'center'}}>
+          {AVATAR_OPTIONS.map((emoji) => (
+            <Pressable key={emoji} onPress={()=>{setAvatarEmoji(emoji);showToast('Avatar updated!','success');}} style={{width:44,height:44,borderRadius:22,backgroundColor:avatarEmoji===emoji?'#6366F133':'#334155',alignItems:'center',justifyContent:'center',borderWidth:avatarEmoji===emoji?2:0,borderColor:'#6366F1'}}>
+              <Text style={{fontSize:22}}>{emoji}</Text>
+            </Pressable>
+          ))}
+        </View>
+      </View>
+
+      {/* Dark Mode Toggle */}
+      <View style={[S.card,{marginTop:16,flexDirection:'row',alignItems:'center',justifyContent:'space-between'}]}>
+        <View style={{flexDirection:'row',alignItems:'center',gap:12}}>
+          <Text style={{fontSize:20}}>🌙</Text>
+          <View>
+            <Text style={{color:'#fff',fontWeight:'600'}}>Dark Mode</Text>
+            <Text style={{color:'#94A3B8',fontSize:11}}>Reduce eye strain at night</Text>
+          </View>
+        </View>
+        <Pressable onPress={()=>setDarkMode(!darkMode)} style={{width:52,height:28,borderRadius:14,backgroundColor:darkMode?'#6366F1':'#334155',justifyContent:'center',paddingHorizontal:2}}>
+          <View style={{width:24,height:24,borderRadius:12,backgroundColor:'#fff',alignSelf:darkMode?'flex-end':'flex-start'}} />
+        </Pressable>
+      </View>
+
+      {/* Notifications Link */}
+      <Pressable onPress={()=>setScreen('notifications_settings')} style={[S.card,{marginTop:16,flexDirection:'row',alignItems:'center',justifyContent:'space-between'}]}>
+        <View style={{flexDirection:'row',alignItems:'center',gap:12}}>
+          <Text style={{fontSize:20}}>🔔</Text>
+          <View>
+            <Text style={{color:'#fff',fontWeight:'600'}}>Smart Notifications</Text>
+            <Text style={{color:'#94A3B8',fontSize:11}}>Configure alerts & reminders</Text>
+          </View>
+        </View>
+        <Text style={{color:'#6366F1'}}>→</Text>
+      </Pressable>
+
+      {/* Progress Photos Link */}
+      <Pressable onPress={()=>setScreen('progress_photos')} style={[S.card,{marginTop:16,flexDirection:'row',alignItems:'center',justifyContent:'space-between'}]}>
+        <View style={{flexDirection:'row',alignItems:'center',gap:12}}>
+          <Text style={{fontSize:20}}>📸</Text>
+          <View>
+            <Text style={{color:'#fff',fontWeight:'600'}}>Progress Photos</Text>
+            <Text style={{color:'#94A3B8',fontSize:11}}>{progressPhotos.length} photos saved</Text>
+          </View>
+        </View>
+        <Text style={{color:'#6366F1'}}>→</Text>
+      </Pressable>
+
+      {/* Sign Out */}
+      <Pressable onPress={handleSignOut} style={{marginTop:40,alignItems:'center',backgroundColor:'#1E293B',borderRadius:12,padding:16,borderWidth:1,borderColor:'#F8717133'}}>
+        <Text style={{color:'#F87171',fontWeight:'600'}}>Sign Out</Text>
+      </Pressable>
+    </ScrollView>
+  );
+
+  // --- NOTIFICATIONS SETTINGS ---
+  if (screen === 'notifications_settings') return (
+    <ScrollView style={{flex:1,backgroundColor:'#0F172A'}} contentContainerStyle={{padding:24,paddingTop:60}}>
+      <Pressable onPress={()=>setScreen('profile')}><Text style={{color:'#6366F1',marginBottom:16}}>← Back</Text></Pressable>
+      <Text style={{color:'#fff',fontSize:28,fontWeight:'bold'}}>Smart Notifications</Text>
+      <Text style={{color:'#94A3B8',marginTop:4}}>AI-powered alerts that matter</Text>
+
+      {/* Global Toggle */}
+      <View style={[S.card,{marginTop:24,flexDirection:'row',alignItems:'center',justifyContent:'space-between'}]}>
+        <View style={{flexDirection:'row',alignItems:'center',gap:12}}>
+          <Text style={{fontSize:20}}>🔔</Text>
+          <Text style={{color:'#fff',fontWeight:'600'}}>Notifications Enabled</Text>
+        </View>
+        <Pressable onPress={()=>setNotificationsEnabled(!notificationsEnabled)} style={{width:52,height:28,borderRadius:14,backgroundColor:notificationsEnabled?'#6366F1':'#334155',justifyContent:'center',paddingHorizontal:2}}>
+          <View style={{width:24,height:24,borderRadius:12,backgroundColor:'#fff',alignSelf:notificationsEnabled?'flex-end':'flex-start'}} />
+        </Pressable>
+      </View>
+
+      {/* Smart Notification Types */}
+      {SMART_NOTIFICATIONS.map((notif) => (
+        <View key={notif.id} style={[S.card,{marginTop:12,flexDirection:'row',alignItems:'center',justifyContent:'space-between'}]}>
+          <View style={{flexDirection:'row',alignItems:'center',gap:12,flex:1}}>
+            <Text style={{fontSize:20}}>{notif.icon}</Text>
+            <View style={{flex:1}}>
+              <Text style={{color:'#fff',fontWeight:'600'}}>{notif.title}</Text>
+              <Text style={{color:'#94A3B8',fontSize:11}}>{notif.desc}</Text>
+            </View>
+          </View>
+          <Pressable onPress={()=>showToast(`${notif.title} toggled`,'info')} style={{width:44,height:28,borderRadius:14,backgroundColor:notificationsEnabled?'#6366F1':'#334155',justifyContent:'center',paddingHorizontal:2}}>
+            <View style={{width:24,height:24,borderRadius:12,backgroundColor:'#fff',alignSelf:'flex-end'}} />
+          </Pressable>
+        </View>
+      ))}
+
+      {/* Predicted Recovery Card */}
+      <View style={[S.card,{marginTop:24,borderColor:'#6366F133'}]}>
+        <View style={{flexDirection:'row',alignItems:'center',gap:12}}>
+          <Text style={{fontSize:24}}>🔮</Text>
+          <View style={{flex:1}}>
+            <Text style={{color:'#6366F1',fontWeight:'600',fontSize:16}}>Predicted Recovery</Text>
+            <Text style={{color:'#fff',marginTop:4}}>You'll be fully recovered by Wednesday</Text>
+            <Text style={{color:'#94A3B8',fontSize:11,marginTop:4}}>Based on HRV trends, sleep quality, and training load</Text>
+          </View>
+        </View>
+      </View>
+    </ScrollView>
+  );
+
+  // --- PROGRESS PHOTOS ---
+  if (screen === 'progress_photos') return (
+    <ScrollView style={{flex:1,backgroundColor:'#0F172A'}} contentContainerStyle={{padding:24,paddingTop:60}}>
+      <Pressable onPress={()=>setScreen('profile')}><Text style={{color:'#6366F1',marginBottom:16}}>← Back</Text></Pressable>
+      <Text style={{color:'#fff',fontSize:28,fontWeight:'bold'}}>Progress Photos</Text>
+      <Text style={{color:'#94A3B8',marginTop:4}}>Track your visual transformation</Text>
+
+      {/* Take Photo Button */}
+      <Pressable onPress={takeProgressPhoto} style={[S.btn,{marginTop:24,flexDirection:'row',justifyContent:'center',gap:8}]}>
+        <Text style={{fontSize:16}}>📷</Text><Text style={S.btnText}>Take Progress Photo</Text>
+      </Pressable>
+
+      {/* Nutrition Insight Card */}
+      <View style={[S.card,{marginTop:24,borderColor:'#F59E0B33'}]}>
+        <View style={{flexDirection:'row',alignItems:'center',gap:12}}>
+          <Text style={{fontSize:24}}>🥬</Text>
+          <View style={{flex:1}}>
+            <Text style={{color:'#F59E0B',fontWeight:'600',fontSize:14}}>Nutrition Insight</Text>
+            <Text style={{color:'#fff',marginTop:4}}>You've been low on iron-rich foods this week</Text>
+            <Text style={{color:'#94A3B8',fontSize:11,marginTop:4}}>Try adding spinach, lentils, or red meat to your meals</Text>
+          </View>
+        </View>
+      </View>
+
+      {/* Photo Gallery */}
+      {progressPhotos.length > 0 ? (
+        <View style={{marginTop:24}}>
+          <Text style={{color:'#fff',fontSize:18,fontWeight:'600',marginBottom:12}}>Your Photos</Text>
+          {progressPhotos.map((photo, index) => (
+            <View key={index} style={[S.card,{marginBottom:12,flexDirection:'row',alignItems:'center',gap:16}]}>
+              <View style={{width:60,height:60,borderRadius:12,backgroundColor:'#334155',alignItems:'center',justifyContent:'center'}}>
+                <Text style={{fontSize:24}}>📸</Text>
+              </View>
+              <View>
+                <Text style={{color:'#fff',fontWeight:'600'}}>Photo {index + 1}</Text>
+                <Text style={{color:'#94A3B8',fontSize:12}}>{photo.date}</Text>
+              </View>
+            </View>
+          ))}
+        </View>
+      ) : (
+        <View style={[S.card,{marginTop:24,alignItems:'center'}]}>
+          <Text style={{fontSize:40}}>📷</Text>
+          <Text style={{color:'#94A3B8',marginTop:8,textAlign:'center'}}>No photos yet. Take your first progress photo to start tracking your transformation!</Text>
+        </View>
+      )}
+    </ScrollView>
+  );
+
   // --- HOME (default) ---
   return (
     <View style={{flex:1,backgroundColor:'#0F172A'}}>
@@ -1422,9 +1610,18 @@ export default function App() {
           <Text style={{color:'#6366F1'}}>Rescan →</Text>
         </Pressable>
 
-        {/* Sign Out */}
-        <Pressable onPress={handleSignOut} style={{marginTop:32,alignItems:'center'}}>
-          <Text style={{color:'#F87171'}}>Sign Out</Text>
+        {/* Profile & Settings */}
+        <Pressable onPress={()=>setScreen('profile')} style={[S.card,{marginTop:32,flexDirection:'row',alignItems:'center',justifyContent:'space-between'}]}>
+          <View style={{flexDirection:'row',alignItems:'center',gap:12}}>
+            <View style={{width:44,height:44,borderRadius:22,backgroundColor:'#6366F133',alignItems:'center',justifyContent:'center'}}>
+              <Text style={{fontSize:22}}>{avatarEmoji}</Text>
+            </View>
+            <View>
+              <Text style={{color:'#fff',fontWeight:'600'}}>Profile & Settings</Text>
+              <Text style={{color:'#94A3B8',fontSize:11}}>Avatar, notifications, photos</Text>
+            </View>
+          </View>
+          <Text style={{color:'#6366F1'}}>→</Text>
         </Pressable>
       </ScrollView>
 
