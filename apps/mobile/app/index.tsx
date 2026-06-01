@@ -288,6 +288,8 @@ export default function App() {
 
   const logActivity = async (type: string, description: string) => {
     if (!user) return;
+    let leveledUp = false;
+    let firstTime = false;
     const pts = POINTS_MAP[type] || 10;
     await supabase.from('activity_log').insert({ user_id: user.id, activity_type: type, description, points_earned: pts });
 
@@ -306,12 +308,12 @@ export default function App() {
       }).eq('user_id', user.id);
       setPoints({ total: newTotal, level: newLevel, streak: newStreak });
       if (Math.floor(existing.total_points / 100) < Math.floor(newTotal / 100)) {
-        showToast(`🎉🎊✨ LEVEL UP! Level ${newLevel} achieved! +50 bonus XP! 🏆⭐💫`, 'success');
+        leveledUp = true;
       }
     } else {
       await supabase.from('user_points').insert({ user_id: user.id, total_points: pts, level: 1, current_streak_days: 1, last_activity_date: today });
       setPoints({ total: pts, level: 1, streak: 1 });
-      showToast('🎉🎊✨ Welcome to Become! First XP earned! 💪⭐🔥', 'success');
+      firstTime = true;
     }
 
     const { data: dailyExisting } = await supabase.from('daily_points').select('*').eq('user_id', user.id).eq('points_date', today).single();
@@ -322,7 +324,13 @@ export default function App() {
     }
 
     await loadActivityLog();
-    showToast(`+${pts} XP for ${description}`, 'success');
+    if (leveledUp) {
+      showToast(`🎉🎊✨ LEVEL UP! Level ${Math.floor((existing?.total_points || 0 + pts) / 100) + 1} achieved! 🏆⭐💫`, 'success');
+    } else if (firstTime) {
+      showToast('🎉🎊✨ Welcome to Become! First XP earned! 💪⭐🔥', 'success');
+    } else {
+      showToast(`+${pts} XP for ${description}`, 'success');
+    }
   };
 
   const calculateBecomeScore = () => {
@@ -476,10 +484,10 @@ export default function App() {
     Accelerometer.setUpdateInterval(150);
     Accelerometer.addListener(({x, y, z}) => {
       const magnitude = Math.sqrt(x*x + y*y + z*z);
-      if (magnitude > 1.4) {
+      if (magnitude > 1.15) {
         const now = Date.now();
         setLastRepTime(prevTime => {
-          if (now - prevTime > 2500) {
+          if (now - prevTime > 1800) {
             setAutoReps(r => r + 1);
             setFormCheckReps(r => r + 1);
             Speech.speak('Good rep!', {rate:1.2, pitch:1.1});
@@ -712,6 +720,11 @@ export default function App() {
         <Pressable onPress={()=>setScreen('home')}><Text style={{color:'#6366F1',marginBottom:16}}>← Back</Text></Pressable>
         <Text style={{color:'#fff',fontSize:28,fontWeight:'bold'}}>Form Check</Text>
         <Text style={{color:'#94A3B8',marginTop:4}}>Choose an exercise to analyze</Text>
+
+        <View style={{backgroundColor:'#1E293B',borderRadius:12,padding:16,marginTop:16,borderWidth:1,borderColor:'#334155'}}>
+          <Text style={{color:'#FBBF24',fontSize:11,fontWeight:'700'}}>📱 PHONE PLACEMENT</Text>
+          <Text style={{color:'#94A3B8',fontSize:13,marginTop:8,lineHeight:20}}>• Place phone on a shelf or table at chest height{'\n'}• Position 6-8 feet away, front camera facing you{'\n'}• Ensure your full body is visible in frame{'\n'}• Good lighting helps accuracy{'\n'}• Phone detects movement for auto rep counting</Text>
+        </View>
 
         {exercises.map(ex => (
           <Pressable key={ex.id} onPress={()=>{setSelectedExercise(ex.id);beginFormCheckSession();}} style={[S.card,{marginTop:16,flexDirection:'row',alignItems:'center',gap:16}]}>
