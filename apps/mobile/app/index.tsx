@@ -45,7 +45,7 @@ const MEDITATION_SESSIONS = [
   { name: 'Deep Relaxation (Yoga Nidra)', icon: '💫', duration: '20 min', level: 'Intermediate' },
 ];
 
-type Screen = 'login' | 'register' | 'forgot_password' | 'quiz' | 'scan' | 'home' | 'nutrition' | 'formcheck' | 'mindbody' | 'breathing' | 'activity' | 'challenges' | 'create_challenge' | 'genie' | 'camera_scan' | 'formcheck_session' | 'formcheck_select';
+type Screen = 'login' | 'register' | 'forgot_password' | 'quiz' | 'scan' | 'home' | 'nutrition' | 'formcheck' | 'mindbody' | 'breathing' | 'activity' | 'challenges' | 'create_challenge' | 'genie' | 'camera_scan' | 'formcheck_session' | 'formcheck_select' | 'become_score';
 
 export default function App() {
   const [screen, setScreen] = useState<Screen>('login');
@@ -87,6 +87,7 @@ export default function App() {
   const [challengeDays, setChallengeDays] = useState('');
   const [joinCode, setJoinCode] = useState('');
   const [mindBodyTab, setMindBodyTab] = useState<'yoga' | 'meditation'>('yoga');
+  const [becomeScore, setBecomeScore] = useState(0);
 
   // Camera/Scan state
   const [cameraPermission, setCameraPermission] = useState(false);
@@ -285,6 +286,16 @@ export default function App() {
 
     await loadActivityLog();
     showToast(`+${pts} XP for ${description}`, 'success');
+  };
+
+  const calculateBecomeScore = () => {
+    const fitnessScore = Math.min(300, points.total * 0.3);
+    const nutritionScore = mealPlan ? 250 : 0;
+    const mindfulnessScore = Math.min(200, activityLog.filter((a:any) => a.activity_type === 'breathing_completed').length * 40);
+    const consistencyScore = Math.min(250, points.streak * 35);
+    const total = Math.round(fitnessScore + nutritionScore + mindfulnessScore + consistencyScore);
+    setBecomeScore(Math.min(1000, total));
+    return Math.min(1000, total);
   };
 
   // === CHALLENGES ===
@@ -912,6 +923,25 @@ export default function App() {
         </View>
       )}
 
+      {/* Streak Heatmap */}
+      <Text style={{color:'#fff',fontSize:18,fontWeight:'600',marginTop:28}}>This Week</Text>
+      <View style={{flexDirection:'row',gap:6,marginTop:12}}>
+        {['Mon','Tue','Wed','Thu','Fri','Sat','Sun'].map((day,i) => {
+          const today = new Date().getDay();
+          const isToday = i === (today === 0 ? 6 : today - 1);
+          const isPast = i < (today === 0 ? 6 : today - 1);
+          const hasActivity = isPast || (isToday && points.streak > 0);
+          return (
+            <View key={day} style={{flex:1,alignItems:'center'}}>
+              <View style={{width:36,height:36,borderRadius:8,backgroundColor:hasActivity?'#6366F1':isToday?'#334155':'#1E293B',borderWidth:isToday?2:0,borderColor:'#6366F1',alignItems:'center',justifyContent:'center'}}>
+                <Text style={{color:hasActivity?'#fff':'#64748B',fontSize:10,fontWeight:'600'}}>{hasActivity?'✓':''}</Text>
+              </View>
+              <Text style={{color:isToday?'#fff':'#64748B',fontSize:9,marginTop:4}}>{day}</Text>
+            </View>
+          );
+        })}
+      </View>
+
       <Text style={{color:'#fff',fontSize:18,fontWeight:'600',marginTop:28}}>Recent Activity</Text>
       {activityLog.length === 0 && <Text style={{color:'#94A3B8',marginTop:12}}>No activities yet. Start logging!</Text>}
       {activityLog.map((item,i) => (
@@ -1007,6 +1037,40 @@ export default function App() {
     </ScrollView>
   );
 
+  // --- BECOME SCORE ---
+  if (screen === 'become_score') return (
+    <ScrollView style={{flex:1,backgroundColor:'#0F172A'}} contentContainerStyle={{padding:24,paddingTop:60}}>
+      <Pressable onPress={()=>setScreen('home')}><Text style={{color:'#6366F1',marginBottom:16}}>← Back</Text></Pressable>
+      <Text style={{color:'#fff',fontSize:28,fontWeight:'bold'}}>Your Become Score</Text>
+      <Text style={{color:'#94A3B8',marginTop:4}}>Holistic wellness metric</Text>
+      <View style={{alignItems:'center',marginTop:32}}>
+        <View style={{width:180,height:180,borderRadius:90,borderWidth:6,borderColor:becomeScore>=700?'#34D399':becomeScore>=400?'#6366F1':'#FBBF24',alignItems:'center',justifyContent:'center',backgroundColor:'#1E293B'}}>
+          <Text style={{color:becomeScore>=700?'#34D399':becomeScore>=400?'#6366F1':'#FBBF24',fontSize:52,fontWeight:'bold'}}>{becomeScore}</Text>
+          <Text style={{color:'#94A3B8',fontSize:12}}>/ 1000</Text>
+        </View>
+        <Text style={{color:'#fff',fontSize:18,fontWeight:'600',marginTop:16}}>{becomeScore>=700?'Elite':becomeScore>=500?'Strong':becomeScore>=300?'Growing':'Starting'}</Text>
+      </View>
+      <View style={{marginTop:32}}>
+        <Text style={{color:'#fff',fontSize:16,fontWeight:'600',marginBottom:16}}>Score Breakdown</Text>
+        <View style={[S.card,{marginTop:8}]}><View style={{flexDirection:'row',justifyContent:'space-between'}}><Text style={{color:'#fff'}}>💪 Fitness</Text><Text style={{color:'#6366F1',fontWeight:'bold'}}>{Math.round(Math.min(300,points.total*0.3))}/300</Text></View><View style={{height:4,backgroundColor:'#334155',borderRadius:2,marginTop:8}}><View style={{height:4,backgroundColor:'#6366F1',borderRadius:2,width:`${Math.min(100,(points.total*0.3)/300*100)}%`}} /></View></View>
+        <View style={[S.card,{marginTop:8}]}><View style={{flexDirection:'row',justifyContent:'space-between'}}><Text style={{color:'#fff'}}>🥗 Nutrition</Text><Text style={{color:'#34D399',fontWeight:'bold'}}>{mealPlan?250:0}/250</Text></View><View style={{height:4,backgroundColor:'#334155',borderRadius:2,marginTop:8}}><View style={{height:4,backgroundColor:'#34D399',borderRadius:2,width:`${mealPlan?100:0}%`}} /></View></View>
+        <View style={[S.card,{marginTop:8}]}><View style={{flexDirection:'row',justifyContent:'space-between'}}><Text style={{color:'#fff'}}>🧘 Mindfulness</Text><Text style={{color:'#A78BFA',fontWeight:'bold'}}>{Math.round(Math.min(200,activityLog.filter((a:any)=>a.activity_type==='breathing_completed').length*40))}/200</Text></View><View style={{height:4,backgroundColor:'#334155',borderRadius:2,marginTop:8}}><View style={{height:4,backgroundColor:'#A78BFA',borderRadius:2,width:`${Math.min(100,activityLog.filter((a:any)=>a.activity_type==='breathing_completed').length*20)}%`}} /></View></View>
+        <View style={[S.card,{marginTop:8}]}><View style={{flexDirection:'row',justifyContent:'space-between'}}><Text style={{color:'#fff'}}>🔥 Consistency</Text><Text style={{color:'#FBBF24',fontWeight:'bold'}}>{Math.round(Math.min(250,points.streak*35))}/250</Text></View><View style={{height:4,backgroundColor:'#334155',borderRadius:2,marginTop:8}}><View style={{height:4,backgroundColor:'#FBBF24',borderRadius:2,width:`${Math.min(100,points.streak*14)}%`}} /></View></View>
+      </View>
+      <Pressable onPress={()=>showToast('Share feature coming soon!','info')} style={{backgroundColor:'#6366F1',borderRadius:12,padding:16,marginTop:24,alignItems:'center',flexDirection:'row',justifyContent:'center',gap:8}}>
+        <Text style={{fontSize:16}}>📤</Text>
+        <Text style={{color:'#fff',fontWeight:'600',fontSize:16}}>Share My Score</Text>
+      </Pressable>
+      <View style={[S.card,{marginTop:16}]}>
+        <Text style={{color:'#FBBF24',fontSize:11,fontWeight:'700'}}>HOW TO IMPROVE</Text>
+        <Text style={{color:'#94A3B8',fontSize:13,marginTop:8}}>• Complete daily workouts (+fitness)</Text>
+        <Text style={{color:'#94A3B8',fontSize:13,marginTop:4}}>• Generate and follow meal plans (+nutrition)</Text>
+        <Text style={{color:'#94A3B8',fontSize:13,marginTop:4}}>• Do breathing/meditation sessions (+mindfulness)</Text>
+        <Text style={{color:'#94A3B8',fontSize:13,marginTop:4}}>• Log activities every day (+consistency streak)</Text>
+      </View>
+    </ScrollView>
+  );
+
   // --- HOME (default) ---
   return (
     <View style={{flex:1,backgroundColor:'#0F172A'}}>
@@ -1031,6 +1095,20 @@ export default function App() {
             </View>
           </View>
           <Text style={{color:'#6366F1',fontSize:13}}>Log →</Text>
+        </Pressable>
+
+        {/* Become Score */}
+        <Pressable onPress={()=>{calculateBecomeScore();setScreen('become_score');}} style={[S.card,{marginTop:16}]}>
+          <View style={{flexDirection:'row',justifyContent:'space-between',alignItems:'center'}}>
+            <View>
+              <Text style={{color:'#64748B',fontSize:11,fontWeight:'600'}}>BECOME SCORE</Text>
+              <Text style={{color:'#6366F1',fontSize:36,fontWeight:'bold',marginTop:4}}>{becomeScore}</Text>
+            </View>
+            <View style={{width:60,height:60,borderRadius:30,borderWidth:3,borderColor:'#6366F1',alignItems:'center',justifyContent:'center'}}>
+              <Text style={{color:'#6366F1',fontSize:11,fontWeight:'bold'}}>/1000</Text>
+            </View>
+          </View>
+          <Text style={{color:'#94A3B8',fontSize:11,marginTop:8}}>Tap to see full breakdown →</Text>
         </Pressable>
 
         {/* Readiness */}
