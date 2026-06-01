@@ -108,7 +108,6 @@ export default function App() {
   const [joinCode, setJoinCode] = useState('');
   const [mindBodyTab, setMindBodyTab] = useState<'yoga' | 'meditation'>('yoga');
   const [becomeScore, setBecomeScore] = useState(0);
-  const [showConfetti, setShowConfetti] = useState(false);
 
   // Camera/Scan state
   const [cameraPermission, setCameraPermission] = useState(false);
@@ -307,16 +306,12 @@ export default function App() {
       }).eq('user_id', user.id);
       setPoints({ total: newTotal, level: newLevel, streak: newStreak });
       if (Math.floor(existing.total_points / 100) < Math.floor(newTotal / 100)) {
-        setShowConfetti(true);
-        setTimeout(()=>setShowConfetti(false), 4000);
-        showToast(`🎉 LEVEL UP! You're now Level ${newLevel}!`, 'success');
+        showToast(`🎉🎊✨ LEVEL UP! Level ${newLevel} achieved! +50 bonus XP! 🏆⭐💫`, 'success');
       }
     } else {
       await supabase.from('user_points').insert({ user_id: user.id, total_points: pts, level: 1, current_streak_days: 1, last_activity_date: today });
       setPoints({ total: pts, level: 1, streak: 1 });
-      setShowConfetti(true);
-      setTimeout(()=>setShowConfetti(false), 4000);
-      showToast('🎉 Welcome! You earned your first XP!', 'success');
+      showToast('🎉🎊✨ Welcome to Become! First XP earned! 💪⭐🔥', 'success');
     }
 
     const { data: dailyExisting } = await supabase.from('daily_points').select('*').eq('user_id', user.id).eq('points_date', today).single();
@@ -1597,15 +1592,6 @@ export default function App() {
           <Text style={{fontSize:18}}>{toast.type==='success'?'✓':toast.type==='error'?'✕':'ℹ'}</Text>
           <Text style={{color:'#fff',flex:1,fontSize:14}}>{toast.message}</Text>
           <Pressable onPress={()=>setToast(prev=>({...prev,visible:false}))}><Text style={{color:'#94A3B8'}}>✕</Text></Pressable>
-        </View>
-      )}
-      {showConfetti && (
-        <View style={{position:'absolute',top:0,left:0,right:0,bottom:0,zIndex:9999,pointerEvents:'none',alignItems:'center',paddingTop:100}}>
-          <Text style={{fontSize:60}}>🎉</Text>
-          <View style={{flexDirection:'row',gap:8,marginTop:8}}><Text style={{fontSize:30}}>⭐</Text><Text style={{fontSize:40}}>🏆</Text><Text style={{fontSize:30}}>⭐</Text></View>
-          <Text style={{color:'#fff',fontSize:24,fontWeight:'bold',marginTop:16}}>LEVEL UP!</Text>
-          <Text style={{color:'#FBBF24',fontSize:16,marginTop:4}}>Level {points.level} Achieved</Text>
-          <View style={{flexDirection:'row',gap:4,marginTop:16}}>{['🎊','✨','🎉','💫','🌟','🎊','✨','🎉'].map((e,i)=>(<Text key={i} style={{fontSize:20,opacity:0.8}}>{e}</Text>))}</View>
         </View>
       )}
       <ScrollView contentContainerStyle={{padding:24,paddingTop:60,paddingBottom:100}}>
