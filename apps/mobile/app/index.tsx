@@ -126,8 +126,22 @@ export default function App() {
     if (!user) return;
     const { data: pub } = await supabase.from('challenges').select('*').eq('is_public', true).order('created_at', { ascending: false }).limit(20);
     if (pub) setChallenges(pub);
-    const { data: mine } = await supabase.from('challenge_participants').select('*, challenges(*)').eq('user_id', user.id);
-    if (mine) setMyChallenges(mine);
+    
+    // Get my participations
+    const { data: myParts } = await supabase.from('challenge_participants').select('*').eq('user_id', user.id);
+    if (myParts && myParts.length > 0) {
+      const challengeIds = myParts.map((p: any) => p.challenge_id);
+      const { data: myChallengeData } = await supabase.from('challenges').select('*').in('id', challengeIds);
+      if (myChallengeData) {
+        const merged = myParts.map((p: any) => ({
+          ...p,
+          challenge: myChallengeData.find((c: any) => c.id === p.challenge_id) || null,
+        }));
+        setMyChallenges(merged);
+      }
+    } else {
+      setMyChallenges([]);
+    }
   };
 
   // Check session on mount
@@ -304,10 +318,12 @@ export default function App() {
     await loadChallenges();
   };
 
-  const inviteToChallenge = async (challenge: any) => {
+  const inviteToChallenge = async (item: any) => {
+    const title = item.challenge?.title || item.title || 'Become Challenge';
+    const code = item.challenge?.invite_code || item.invite_code || '';
     const available = await SMS.isAvailableAsync();
     if (!available) { showToast('SMS not available on this device', 'error'); return; }
-    const message = `Join my Become challenge! ${challenge.challenges?.title || challenge.title}. Use code: ${challenge.challenges?.invite_code || challenge.invite_code}`;
+    const message = `Hey! Join my "${title}" challenge on Become! 💪\n\nUse invite code: ${code}\n\nDownload: https://become.app`;
     await SMS.sendSMSAsync([], message);
   };
 
@@ -938,14 +954,15 @@ export default function App() {
       {myChallenges.length === 0 && <Text style={{color:'#94A3B8',marginTop:8}}>No challenges yet. Join or create one!</Text>}
       {myChallenges.map((item,i) => (
         <View key={i} style={[S.card,{marginTop:12}]}>
-          <Text style={{color:'#fff',fontWeight:'600',fontSize:16}}>{item.challenges?.title || 'Challenge'}</Text>
-          <Text style={{color:'#94A3B8',fontSize:12,marginTop:4}}>{item.challenges?.challenge_type} · Target: {item.challenges?.target_value} · {item.challenges?.duration_days} days</Text>
+          <Text style={{color:'#fff',fontWeight:'600',fontSize:16}}>{item.challenge?.title || 'Challenge'}</Text>
+          <Text style={{color:'#94A3B8',fontSize:12,marginTop:4}}>{item.challenge?.challenge_type || ''} · Target: {item.challenge?.target_value || 0} · {item.challenge?.duration_days || 7} days</Text>
+          <Text style={{color:'#64748B',fontSize:11,marginTop:4}}>Invite Code: <Text style={{color:'#6366F1',fontWeight:'bold'}}>{item.challenge?.invite_code || ''}</Text></Text>
           <View style={{height:6,backgroundColor:'#334155',borderRadius:3,marginTop:12}}>
-            <View style={{height:6,backgroundColor:'#6366F1',borderRadius:3,width:`${Math.min(100, (item.current_progress / (item.challenges?.target_value || 1)) * 100)}%`}} />
+            <View style={{height:6,backgroundColor:'#6366F1',borderRadius:3,width:`${Math.min(100, (item.current_progress / (item.challenge?.target_value || 1)) * 100)}%`}} />
           </View>
-          <Text style={{color:'#64748B',fontSize:11,marginTop:4}}>{item.current_progress} / {item.challenges?.target_value || 0}</Text>
-          <Pressable onPress={()=>inviteToChallenge(item)} style={{backgroundColor:'#1E293B',borderRadius:8,padding:10,marginTop:12,alignItems:'center',borderWidth:1,borderColor:'#334155'}}>
-            <Text style={{color:'#6366F1',fontSize:13}}>Invite via SMS</Text>
+          <Text style={{color:'#64748B',fontSize:11,marginTop:4}}>{item.current_progress} / {item.challenge?.target_value || 0}</Text>
+          <Pressable onPress={()=>inviteToChallenge(item)} style={{backgroundColor:'#6366F1',borderRadius:10,padding:12,marginTop:12,alignItems:'center'}}>
+            <Text style={{color:'#fff',fontWeight:'600',fontSize:14}}>📲 Invite Friends via SMS</Text>
           </Pressable>
         </View>
       ))}
